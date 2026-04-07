@@ -1,0 +1,51 @@
+[
+  {
+    "_id": "69cac1bf7da979f651f4031a",
+    "name": "Master Admin",
+    "email": "admin@workforce.com",
+    "role": "admin",
+    "status": "active"
+  },
+  {
+    "_id": "69cac1bf7da979f651f40322",
+    "name": "Agent Maria",
+    "email": "maria@referral.com",
+    "role": "agent",
+    "status": "active"
+  },
+  {
+    "_id": "69cbb2c5737d681d2b55a786",
+    "name": "Agila",
+    "email": "agila@gmail.com",
+    "role": "team_leader",
+    "status": "active"
+  },
+  {
+    "_id": "69cbb632737d681d2b55ab12",
+    "name": "pooja",
+    "email": "pooja@gmail.com",
+    "role": "employee",
+    "status": "active"
+  },
+  {
+    "_id": "69cc07803cb1e38290c4852a",
+    "name": "Sabari",
+    "email": "sabari@gmail.com",
+    "role": "employee",
+    "status": "active"
+  },
+  {
+    "_id": "69ccb91f3cb1e38290c4ac6f",
+    "name": "Vaideeswari",
+    "email": "vaideeswari@gmail.com",
+    "role": "employee",
+    "status": "active"
+  },
+  {
+    "_id": "69ccba763cb1e38290c4ad97",
+    "name": "test Agent",
+    "email": "agent@gmail.com",
+    "role": "agent",
+    "status": "active"
+  }
+]

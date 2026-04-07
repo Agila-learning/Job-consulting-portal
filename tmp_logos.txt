@@ -1,0 +1,3 @@
+C:\FORGE_INDIA_CONNECT\FIC_WorkForce_Engine\frontend\node_modules\date-fns\docs\logo.svg
+C:\FORGE_INDIA_CONNECT\FIC_WorkForce_Engine\frontend\node_modules\date-fns\docs\logotype.svg
+C:\FORGE_INDIA_CONNECT\FIC_WorkForce_Engine\frontend\node_modules\zod-to-json-schema\.github\CR_logotype-full-color.png
