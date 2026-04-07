@@ -151,7 +151,7 @@ const AgentApprovals = () => {
             </div>
 
             {/* Main Data View */}
-            <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+            <div className="bg-card/95 dark:bg-slate-900 border border-border/40 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
                 <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
                     <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
                         <div className="p-2 bg-amber-500/10 text-amber-600 rounded-xl">

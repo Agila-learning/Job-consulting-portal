@@ -483,12 +483,22 @@ const ReferralQueue = () => {
                             </DialogTitle>
                         </DialogHeader>
                     </div>
-                    <div className="p-8">
-                        <p className="text-xs text-muted-foreground font-medium mb-4">You are adding a candidate directly to the universal pipeline. This entity will be unassigned by default.</p>
-                        {/* Placeholder for form - reusing JobManagement logic if needed, but keeping it simple for now */}
-                        <div className="flex flex-col items-center justify-center py-10 bg-secondary/20 rounded-3xl border border-dashed border-border/40">
-                             <Zap size={32} className="text-primary/40 mb-3" />
-                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Redirecting to Orchestration Terminal...</p>
+                    <div className="p-10 space-y-8">
+                        <div className="flex flex-col items-center justify-center py-16 bg-primary/5 rounded-[2.5rem] border-2 border-dashed border-primary/20 text-center">
+                            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-6 shadow-xl shadow-primary/5">
+                                <UserPlus size={40} />
+                            </div>
+                            <h3 className="text-xl font-black text-foreground uppercase tracking-tight mb-2">Initialize Onboarding</h3>
+                            <p className="text-xs text-muted-foreground font-medium max-w-[280px] leading-relaxed mb-8">Ready to add a new candidate to the universal recruitment pipeline?</p>
+                            
+                            <Button 
+                                onClick={() => window.location.href = '/admin/jobs'}
+                                className="h-14 px-10 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105"
+                            >
+                                Open Job Inventory Center
+                            </Button>
+                            
+                            <p className="text-[10px] font-bold text-muted-foreground/40 mt-6 uppercase tracking-widest">Select a job node to begin referral</p>
                         </div>
                     </div>
                 </DialogContent>
@@ -665,7 +675,7 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
     const themeColor = stConfig.theme === 'rose' ? 'border-l-rose-500' : 
                       stConfig.theme === 'emerald' ? 'border-l-emerald-500' : 
                       stConfig.theme === 'amber' ? 'border-l-amber-500' : 
-                      stConfig.theme === 'primary' ? 'border-l-primary' : 'border-l-transparent';
+                      stConfig.theme === 'primary' ? 'border-l-primary' : 'border-l-border';
 
     const getFullUrl = (url) => {
         if (!url) return null;
@@ -674,14 +684,14 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
     };
 
     return (
-        <div className={`animate-card group w-full bg-card/85 backdrop-blur-2xl border border-border/40 hover:border-primary/40 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all relative text-left border-l-4 ${themeColor} duration-500`}>
+        <div className={`animate-card group w-full bg-card/95 dark:bg-slate-900 border border-border/40 hover:border-primary/40 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all relative text-left border-l-[6px] ${themeColor} duration-500`}>
             
             {/* Top Layout: Fluid Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start lg:items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start lg:items-center">
                 
                 {/* 1. Identity Segment (Avatar + Main Info) */}
-                <div className="col-span-12 lg:col-span-4 flex items-center gap-6">
-                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 border border-border/20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${activeTab === 'placements' ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl shadow-emerald-500/20' : 'bg-secondary/40 text-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/20'}`}>
+                <div className="col-span-12 lg:col-span-5 flex items-center gap-6">
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 border border-border/20 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 ${activeTab === 'placements' ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl shadow-emerald-500/20' : 'bg-secondary/60 text-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/20'}`}>
                         {row.candidateName.charAt(0)}
                     </div>
                     <div className="space-y-1.5 min-w-0 flex-1">
@@ -729,8 +739,8 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                 </div>
 
                 {/* 2. Employment Segment (Job + Company) */}
-                <div className="col-span-12 lg:col-span-4 space-y-4">
-                    <div className="space-y-1.5">
+                <div className="col-span-12 lg:col-span-4 space-y-3">
+                    <div className="space-y-1">
                         <p className="text-xs font-black text-foreground flex items-center gap-2 leading-tight">
                             <Briefcase size={14} className="text-primary/40 shrink-0" /> 
                             <span className="truncate">{row.job?.jobTitle}</span>
@@ -747,7 +757,7 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                 </div>
 
                 {/* 3. Status & Action Segment */}
-                <div className="col-span-12 lg:col-span-4 flex flex-col md:flex-row items-start lg:items-center justify-between gap-6 border-t lg:border-0 border-border/10 pt-6 lg:pt-0">
+                <div className="col-span-12 lg:col-span-3 flex flex-row items-center justify-between lg:justify-end gap-6 border-t lg:border-0 border-border/10 pt-6 lg:pt-0">
                     <div className="space-y-3 w-full md:w-auto">
                          <Badge variant="outline" className={`h-8 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm border flex items-center gap-2 w-fit ${stConfig.color}`}>
                             {stConfig.icon} {row.status}
@@ -776,7 +786,7 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                             <DropdownMenuTrigger asChild>
                                 <Button 
                                     variant="ghost" 
-                                    className="h-12 w-12 rounded-[1.3rem] bg-secondary/30 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm"
+                                    className="h-12 w-12 rounded-[1.3rem] bg-secondary/80 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm outline-none ring-0"
                                 >
                                     <MoreVertical size={20} />
                                 </Button>

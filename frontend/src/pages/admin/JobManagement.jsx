@@ -575,7 +575,7 @@ const JobManagement = () => {
             </div>
 
             {/* Filter Section */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-card/40 backdrop-blur-xl p-6 rounded-[2.5rem] border border-border/40">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-card/95 dark:bg-slate-900 shadow-xl p-6 rounded-[2.5rem] border border-border/40">
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Search Jobs</Label>
                     <Input 
@@ -644,7 +644,7 @@ const JobManagement = () => {
                     <div className={viewMode === 'grid' ? "grid grid-cols-1 gap-6" : "flex flex-col gap-4"}>
                         {paginatedJobs.map((job) => (
                             viewMode === 'grid' ? (
-                                <div key={job._id} className="group bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] p-8 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col lg:flex-row gap-8 items-start lg:items-center relative">
+                                <div key={job._id} className="group bg-card/95 dark:bg-slate-900 border border-border/40 rounded-[2.5rem] p-8 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col lg:flex-row gap-8 items-start lg:items-center relative">
                                     <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-primary/10 transition-colors duration-700" title="Abstract Background Pattern" />
                                     
                                     {/* Company Branding Container */}
@@ -699,7 +699,7 @@ const JobManagement = () => {
                                             {isAdmin && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <button className="h-12 w-12 flex items-center justify-center rounded-2xl bg-secondary/30 dark:bg-slate-900/60 hover:bg-secondary dark:hover:bg-slate-900 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none active:scale-95">
+                                                        <button className="h-12 w-12 flex items-center justify-center rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 active:scale-95">
                                                             <MoreVertical size={20} />
                                                         </button>
                                                     </DropdownMenuTrigger>
@@ -750,7 +750,7 @@ const JobManagement = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div key={job._id} className="group bg-card/40 backdrop-blur-sm border border-border/40 hover:border-primary/30 rounded-[1.5rem] p-4 lg:px-6 flex flex-col lg:flex-row items-center justify-between gap-6 transition-all hover:shadow-xl hover:shadow-primary/5 text-left">
+                                <div key={job._id} className="group bg-card/95 dark:bg-slate-900 border border-border/40 hover:border-primary/30 rounded-[1.5rem] p-4 lg:px-6 flex flex-col lg:flex-row items-center justify-between gap-6 transition-all hover:shadow-xl hover:shadow-primary/5 text-left">
                                     <div className="flex items-center gap-5 w-full lg:w-4/12">
                                         <div className="w-12 h-12 rounded-xl bg-secondary dark:bg-slate-900 border border-border/60 flex items-center justify-center text-slate-900 dark:text-white font-black text-xl group-hover:bg-primary group-hover:text-white shadow-sm transition-all shrink-0">
                                             {job.companyName.charAt(0).toUpperCase()}
