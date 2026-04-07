@@ -1,0 +1,49 @@
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import DashboardLayout from '@/components/DashboardLayout';
+import { 
+    LayoutDashboard, Users, Briefcase, 
+    ShieldCheck, Wallet, Zap, Trophy
+} from 'lucide-react';
+import DashboardOverview from '@/components/DashboardOverview';
+
+const AgentDashboard = () => {
+    const { user } = useAuth();
+
+    const menuItems = [
+        { icon: <LayoutDashboard size={18} />, label: 'Command Center', path: '/agent/dashboard' },
+        { icon: <Zap size={18} />, label: 'Target Jobs', path: '/agent/jobs' },
+        { icon: <Users size={18} />, label: 'My Referrals', path: '/agent/referrals' },
+        { icon: <ShieldCheck size={18} />, label: 'KYC Status', path: '/agent/kyc' },
+        { icon: <Wallet size={18} />, label: 'Commissions', path: '/agent/commissions' },
+        { icon: <Trophy size={18} />, label: 'Earnings Hub', path: '/agent/incentives' },
+    ];
+
+    const footerContent = (
+        <div className="bg-secondary/30 border border-border/50 rounded-xl p-3">
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Partner Entity</p>
+            <p className="text-xs font-black text-foreground tracking-tight truncate">{user?.agencyName || 'Verified Partner'}</p>
+        </div>
+    );
+
+    return (
+        <DashboardLayout
+            menuItems={menuItems}
+            brandLabel="Forge India"
+            brandSubtitle="Partner Node"
+            brandIcon={<Zap size={20} className="fill-white" />}
+            footerContent={footerContent}
+        >
+            <div className="p-4 lg:p-8 space-y-10">
+                <div className="flex flex-col gap-2 text-left">
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase italic">Partner<span className="text-primary not-italic">.Node</span></h2>
+                    <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em] ml-1">Referral Velocity & Earnings Dashboard</p>
+                </div>
+                
+                <DashboardOverview />
+            </div>
+        </DashboardLayout>
+    );
+};
+
+export default AgentDashboard;

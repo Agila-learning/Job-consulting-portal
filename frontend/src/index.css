@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-heading: 'Outfit', sans-serif;
+
+    /* ── Light Mode ──────────────────────────────────── */
+    --background: oklch(0.985 0 0);
+    --foreground: oklch(0.13 0.04 264);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.13 0.04 264);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.13 0.04 264);
+
+    /* Brand blue stays consistent — #0660fc approximate */
+    --primary: oklch(0.44 0.24 262.9);
+    --primary-foreground: oklch(0.985 0 0);
+
+    --secondary: oklch(0.965 0.002 286);
+    --secondary-foreground: oklch(0.13 0.04 264);
+    --muted: oklch(0.965 0.002 286);
+    --muted-foreground: oklch(0.50 0.04 257);
+    --accent: oklch(0.965 0.002 286);
+    --accent-foreground: oklch(0.13 0.04 264);
+    --destructive: oklch(0.577 0.245 27.3);
+    --destructive-foreground: oklch(0.985 0 0);
+    --border: oklch(0.91 0.003 264);
+    --input: oklch(0.91 0.003 264);
+    --ring: oklch(0.44 0.24 262.9);
+    --radius: 0.75rem;
+
+    --brand-blue: #0660fc;
+    --brand-yellow: #ffcc00;
+
+    /* Semantic Section Colors */
+    --section-jobs: oklch(0.44 0.24 262.9);     /* Blue */
+    --section-team: oklch(0.62 0.17 163.2);     /* Emerald */
+    --section-finance: oklch(0.77 0.15 86);      /* Amber */
+    --section-kyc: oklch(0.55 0.21 346);        /* Rose */
+  }
+
+  .dark {
+    /* ── Dark Mode ──────────────────────────────────── */
+    --background: oklch(0.13 0.035 264);
+    --foreground: oklch(0.96 0 0);
+    --card: oklch(0.17 0.03 264);
+    --card-foreground: oklch(0.96 0 0);
+    --popover: oklch(0.17 0.03 264);
+    --popover-foreground: oklch(0.96 0 0);
+
+    /* Brand blue kept vivid — not white — so text-primary stays blue */
+    --primary: oklch(0.60 0.22 263);
+    --primary-foreground: oklch(0.98 0 0);
+
+    --secondary: oklch(0.20 0.03 264);
+    --secondary-foreground: oklch(0.96 0 0);
+    --muted: oklch(0.20 0.03 264);
+    --muted-foreground: oklch(0.65 0.02 264); /* Reduced lightness for better hierarchy */
+    --accent: oklch(0.25 0.03 264);
+    --accent-foreground: oklch(0.96 0 0);
+    --destructive: oklch(0.45 0.18 27);
+    --destructive-foreground: oklch(0.96 0 0);
+    --border: oklch(0.28 0.03 264);
+    --input: oklch(0.28 0.03 264);
+    --ring: oklch(0.60 0.22 263);
+
+    /* Semantic Section Colors - Dark Mode */
+    --section-jobs: oklch(0.60 0.22 263);
+    --section-team: oklch(0.68 0.16 162);
+    --section-finance: oklch(0.79 0.14 85);
+    --section-kyc: oklch(0.62 0.19 345);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ── Scrollbar utilities ─────────────────────── */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(0.75 0 0);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.55 0 0);
+  }
+
+  /* Hides scrollbar visually but keeps scrolling */
+  .hidden-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hidden-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Role Badges ─────────────────────────── */
+  .badge-consultant {
+    @apply bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800;
+  }
+  .badge-senior {
+    @apply bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800;
+  }
+  .badge-manager {
+    @apply bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800;
+  }
+}
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.animate-shimmer { animation: shimmer 3s infinite linear; }
+@keyframes pulse-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } }
+.animate-pulse-soft { animation: pulse-soft 4s infinite ease-in-out; }
