@@ -23,10 +23,21 @@ if (!fs.existsSync(uploadDir)) {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use(cors({
-    origin: ['https://job-consulting-portal.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Allow any Vercel origin for this specific frontend deployment
+        if (origin.indexOf('vercel.app') !== -1 || origin.indexOf('localhost') !== -1) {
+            return callback(null, true);
+        }
+        
+        return callback(null, true); // Fallback: Allow all during troubleshooting
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
