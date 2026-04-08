@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { toast } from 'sonner';
+import { BASE_URL } from '../services/api';
 
 const SocketContext = createContext();
 
@@ -18,7 +19,7 @@ export const SocketProvider = ({ children, user }) => {
             return;
         }
 
-        const newSocket = io('http://localhost:5000'); // Ensure this matches backend URL
+        const newSocket = io(BASE_URL); // Use dynamic production/local URL
         setSocket(newSocket);
 
         newSocket.on('connect', () => {

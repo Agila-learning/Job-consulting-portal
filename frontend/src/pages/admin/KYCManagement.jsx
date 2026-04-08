@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '@/services/api';
+import api, { BASE_URL } from '@/services/api';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -194,7 +194,7 @@ const KYCManagement = () => {
                                                     <span className="text-xs font-black text-foreground/90 uppercase tracking-widest">{doc.label}</span>
                                                 </div>
                                                 <Button size="sm" variant="ghost" className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-xl" asChild>
-                                                    <a href={`http://localhost:5000/${doc.url?.replaceAll('\\', '/')}`} target="_blank" rel="noopener noreferrer">
+                                                    <a href={`${BASE_URL.replace(/\/$/, '')}/${doc.url?.replaceAll('\\', '/').replace(/^\//, '')}`} target="_blank" rel="noopener noreferrer">
                                                         Explore <ExternalLink size={14} className="ml-2" />
                                                     </a>
                                                 </Button>

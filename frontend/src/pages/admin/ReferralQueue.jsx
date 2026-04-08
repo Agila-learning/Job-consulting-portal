@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import api from '@/services/api';
+import api, { BASE_URL } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,6 +30,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
 
 const ReferralQueue = () => {
+    const { user: currentUser } = useAuth();
+    const isAdmin = currentUser?.role === 'admin';
+    const isTeamLeader = currentUser?.role === 'team_leader';
+    
     const [referrals, setReferrals] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -680,7 +685,9 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
     const getFullUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        return `http://localhost:5000/${url.replaceAll('\\', '/')}`;
+        const cleanBase = BASE_URL.replace(/\/$/, '');
+        const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+        return `${cleanBase}${cleanUrl.replaceAll('\\', '/')}`;
     };
 
     return (
@@ -813,15 +820,19 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                                         </div>
                                         <span className="text-xs font-black uppercase tracking-widest">Advance Pipeline</span>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                        onClick={onFinance}
-                                        className="rounded-xl p-3.5 gap-4 focus:bg-emerald-500/10 focus:text-emerald-600 cursor-pointer group/item transition-all"
-                                    >
-                                        <div className="bg-emerald-500/10 p-2 rounded-xl group-hover/item:bg-emerald-600 group-hover/item:text-white transition-colors">
-                                            <TrendingUp size={16} />
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-widest">Financial Setup</span>
-                                    </DropdownMenuItem>
+
+                                    {isAdmin && (
+                                        <DropdownMenuItem 
+                                            onClick={onFinance}
+                                            className="rounded-xl p-3.5 gap-4 focus:bg-emerald-500/10 focus:text-emerald-600 cursor-pointer group/item transition-all"
+                                        >
+                                            <div className="bg-emerald-500/10 p-2 rounded-xl group-hover/item:bg-emerald-600 group-hover/item:text-white transition-colors">
+                                                <TrendingUp size={16} />
+                                            </div>
+                                            <span className="text-xs font-black uppercase tracking-widest">Financial Setup</span>
+                                        </DropdownMenuItem>
+                                    )}
+
                                     <DropdownMenuItem 
                                         onClick={onTimeline}
                                         className="rounded-xl p-3.5 gap-4 focus:bg-slate-500/10 focus:text-slate-600 cursor-pointer group/item transition-all"
@@ -832,16 +843,20 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                                         <span className="text-xs font-black uppercase tracking-widest">Timeline Logs</span>
                                     </DropdownMenuItem>
                                     
-                                    <DropdownMenuSeparator className="bg-border/20 mx-2 my-2" />
-                                    <DropdownMenuItem 
-                                        onClick={onDelete}
-                                        className="rounded-xl p-3.5 gap-4 focus:bg-rose-500/10 focus:text-rose-600 cursor-pointer group/item transition-all"
-                                    >
-                                        <div className="bg-rose-500/10 p-2 rounded-xl group-hover/item:bg-rose-600 group-hover/item:text-white transition-colors">
-                                            <Trash2 size={16} />
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-widest text-rose-500 group-hover/item:text-white">Purge Entity</span>
-                                    </DropdownMenuItem>
+                                    {isAdmin && (
+                                        <>
+                                            <DropdownMenuSeparator className="bg-border/20 mx-2 my-2" />
+                                            <DropdownMenuItem 
+                                                onClick={onDelete}
+                                                className="rounded-xl p-3.5 gap-4 focus:bg-rose-500/10 focus:text-rose-600 cursor-pointer group/item transition-all"
+                                            >
+                                                <div className="bg-rose-500/10 p-2 rounded-xl group-hover/item:bg-rose-600 group-hover/item:text-white transition-colors">
+                                                    <Trash2 size={16} />
+                                                </div>
+                                                <span className="text-xs font-black uppercase tracking-widest text-rose-500 group-hover/item:text-white">Purge Entity</span>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
                                 </DropdownMenuContent>
                             </DropdownMenuPortal>
                         </DropdownMenu>

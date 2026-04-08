@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '@/services/api';
+import api, { BASE_URL } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,9 +44,10 @@ const KYCSubmission = () => {
                     accountHolderName: res.data.data.accountHolderName || ''
                 });
                 if (res.data.data.aadhaarFront || res.data.data.panCard) {
+                    const cleanBase = BASE_URL.replace(/\/$/, '');
                     setPreviews({
-                        aadhaarFront: res.data.data.aadhaarFront ? `http://localhost:5000${res.data.data.aadhaarFront}` : '',
-                        panCard: res.data.data.panCard ? `http://localhost:5000${res.data.data.panCard}` : ''
+                        aadhaarFront: res.data.data.aadhaarFront ? `${cleanBase}${res.data.data.aadhaarFront}` : '',
+                        panCard: res.data.data.panCard ? `${cleanBase}${res.data.data.panCard}` : ''
                     });
                 }
             }

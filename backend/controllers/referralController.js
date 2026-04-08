@@ -38,11 +38,26 @@ exports.createReferral = async (req, res) => {
 
         res.status(201).json({ success: true, data: referral });
 
-        // Emit real-time notification to Admins
+        // Emit real-time notification to Admins and relevant Team Leaders
         const io = req.app.get('io');
+        const User = require('../models/User');
+
+        // 1. Notify Admins (Global)
         io.emit('newReferral', {
             message: `New candidate ${referral.candidateName} registered for ${job.jobTitle}`,
-            referralId: referral._id
+            referralId: referral._id,
+            role: 'admin'
+        });
+
+        // 2. Notify Relevant Team Leaders based on Job Domain
+        const teamLeaders = await User.find({ role: 'team_leader', team: job.domain });
+        teamLeaders.forEach(tl => {
+            io.to(tl._id.toString()).emit('newReferral', {
+                message: `New ${job.domain} candidate: ${referral.candidateName}`,
+                referralId: referral._id,
+                role: 'team_leader'
+            });
+            console.log(`[NOTIFY] Sent domain notification to TL: ${tl.email} for domain: ${job.domain}`);
         });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -58,18 +73,27 @@ exports.getReferrals = async (req, res) => {
         // Role-based filtering
         if (req.user.role === 'agent') {
             query.referrer = req.user.id;
-        } else if (req.user.role === 'employee' || req.user.role === 'team_leader') {
-            // Find all reports if team_leader
+        } else if (req.user.role === 'team_leader') {
             const User = require('../models/User');
+            // 1. Find the TL's team/domain
+            const teamLeader = await User.findById(req.user.id);
+            const tlDomain = teamLeader.team;
+
+            // 2. Find all jobs in that domain
+            const domainJobs = await Job.find({ domain: tlDomain }).select('_id');
+            const domainJobIds = domainJobs.map(j => j._id);
+
+            // 3. Find all reports if team_leader
             const reports = await User.find({ reportingManager: req.user.id }).select('_id');
             const reportIds = reports.map(r => r._id);
             
-            // Show what they submitted, what's assigned to them, or what's assigned to their reports
+            // Show what they submitted, what's assigned to them, or what matches their DOMAIN
             query = { 
                 $or: [
                     { referrer: req.user.id }, 
                     { assignedEmployee: req.user.id },
-                    { assignedEmployee: { $in: reportIds } }
+                    { assignedEmployee: { $in: reportIds } },
+                    { job: { $in: domainJobIds } }
                 ] 
             };
         }
@@ -294,8 +318,14 @@ exports.getReferralStats = async (req, res) => {
         let query = {};
         if (req.user.role === 'agent') {
             query.referrer = req.user.id;
-        } else if (req.user.role === 'employee' || req.user.role === 'team_leader') {
+        } else if (req.user.role === 'team_leader') {
             const User = require('../models/User');
+            const teamLeader = await User.findById(req.user.id);
+            const tlDomain = teamLeader.team;
+            
+            const domainJobs = await Job.find({ domain: tlDomain }).select('_id');
+            const domainJobIds = domainJobs.map(j => j._id);
+
             const reports = await User.find({ reportingManager: req.user.id }).select('_id');
             const reportIds = reports.map(r => r._id);
             
@@ -303,7 +333,16 @@ exports.getReferralStats = async (req, res) => {
                 $or: [
                     { referrer: req.user.id }, 
                     { assignedEmployee: req.user.id },
-                    { assignedEmployee: { $in: reportIds } }
+                    { assignedEmployee: { $in: reportIds } },
+                    { job: { $in: domainJobIds } }
+                ] 
+            };
+        } else if (req.user.role === 'employee') {
+            const User = require('../models/User');
+            query = { 
+                $or: [
+                    { referrer: req.user.id }, 
+                    { assignedEmployee: req.user.id }
                 ] 
             };
         }
