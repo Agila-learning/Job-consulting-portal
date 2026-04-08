@@ -160,7 +160,11 @@ const LoginPage = () => {
             });
             } catch (err) {
             setAuthStatus('error');
-            setLocalError(err.response?.data?.message || 'Invalid credentials. Please check your password.');
+            if (!err.response) {
+                setLocalError('Cannot connect to mission control. Please check if your backend server is running and accessible.');
+            } else {
+                setLocalError(err.response.data?.message || 'Invalid credentials. Please check your password.');
+            }
             
             // Shake animation for error
             if (document.querySelector(".error-alert")) {
