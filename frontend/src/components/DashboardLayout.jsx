@@ -274,7 +274,8 @@ const DashboardLayout = ({ menuItems, brandLabel, brandSubtitle, brandIcon, foot
                         <div className="grid grid-cols-2 gap-4">
                             <Button variant="outline" className="h-32 flex-col gap-3 rounded-3xl border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all group" onClick={() => { 
                                 closeNewAction(); 
-                                navigate(user.role === 'admin' ? '/admin/jobs' : user.role === 'team_leader' ? '/team-leader/jobs' : '/employee/jobs');
+                                const rolePath = user.role?.replace('_', '-');
+                                navigate(`/${rolePath}/jobs`);
                                 toast.success('Initializing Mandate Pipeline...'); 
                             }}>
                                 <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all"><Plus size={24} /></div>
@@ -282,7 +283,12 @@ const DashboardLayout = ({ menuItems, brandLabel, brandSubtitle, brandIcon, foot
                             </Button>
                             <Button variant="outline" className="h-32 flex-col gap-3 rounded-3xl border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all group" onClick={() => { 
                                 closeNewAction(); 
-                                navigate(user.role === 'agent' ? '/agent/jobs' : user.role === 'employee' ? '/employee/assigned-candidates' : user.role === 'team_leader' ? '/team-leader/pipeline' : '/admin/referrals');
+                                const rolePath = user.role?.replace('_', '-');
+                                const target = user.role === 'agent' ? `/${rolePath}/jobs` : 
+                                               user.role === 'employee' ? `/${rolePath}/assigned-candidates' : 
+                                               `/${rolePath}/pipeline`;
+                                
+                                navigate(target);
                                 toast.success('Initializing Referral Protocol...'); 
                             }}>
                                 <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all"><Plus size={24} /></div>

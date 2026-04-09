@@ -13,10 +13,10 @@ import {
     Phone, Calendar, ArrowRight, User, 
     MousePointer2, Hash, ExternalLink, 
     Network, Search, ArrowUpRight, TrendingUp, Trash2,
-    Clock, MoreVertical, Shield, UserCog, Ghost, RefreshCw, 
+    Clock, Shield, UserCog, Ghost, RefreshCw, 
     Filter, X, CheckCircle2, Plus, Info, AlertCircle, FileText,
     Sparkles, XCircle, BarChart3, PieChart, Zap, ShieldCheck,
-    LayoutGrid, List, ChevronRight
+    LayoutGrid, List, ChevronRight, Edit2
 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
@@ -41,6 +41,7 @@ const ReferralQueue = () => {
     const [isStatusOpen, setIsStatusOpen] = useState(false);
     const [isFinanceOpen, setIsFinanceOpen] = useState(false);
     const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const [statusData, setStatusData] = useState({ status: '', comment: '' });
     const [financeData, setFinanceData] = useState({ calculatedCommission: '', payoutStatus: '', payoutNotes: '' });
     const [branches, setBranches] = useState([]);
@@ -453,6 +454,10 @@ const ReferralQueue = () => {
                                           isAdmin={isAdmin}
                                           viewMode={viewMode}
                                           activeTab={activeTab}
+                                          onEdit={(ref) => {
+                                              setSelectedReferral(ref);
+                                              setIsEditOpen(true);
+                                          }}
                                          onAssign={() => {
                                              setSelectedReferral(row);
                                              setIsAssignOpen(true);
@@ -744,12 +749,38 @@ const ReferralQueue = () => {
                     </div>
                 </DialogContent>
             </Dialog>
+            {/* DETAIL / EDIT MODAL */}
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
+                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                            <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-[1.2rem] bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                    <Edit2 size={22} className="fill-white" />
+                                </div>
+                                Edit Candidate Context
+                            </DialogTitle>
+                        </DialogHeader>
+                    </div>
+                    <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+                         <AddCandidateForm 
+                            initialData={selectedReferral}
+                            onSuccess={() => {
+                                setIsEditOpen(false);
+                                fetchData();
+                            }}
+                            onCancel={() => setIsEditOpen(false)}
+                         />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
 
 /* ── SUB-COMPONENT: CandidateCard ── */
-const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, onFinance, onTimeline, onQuickShortlist, onDelete }) => {
+const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, onFinance, onTimeline, onQuickShortlist, onDelete, onEdit }) => {
     const roleConfig = {
         'admin': { color: 'bg-rose-500/10 text-rose-600 border-rose-500/20', icon: <Shield size={10} className="mr-1.5" /> },
         'employee': { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', icon: <User size={10} className="mr-1.5" /> },
@@ -814,13 +845,23 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                         <button 
                             onClick={(e) => {
                                 e.stopPropagation();
+                                onEdit(row);
+                            }} 
+                            className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-primary/10 hover:text-primary text-muted-foreground flex items-center justify-center transition-all border border-border/40 font-black text-xs"
+                            title="Edit Profile"
+                        >
+                            <Edit2 size={13} />
+                        </button>
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 const url = getFullUrl(row.resumeUrl);
                                 url ? window.open(url, '_blank') : toast.error('No document attached');
                             }} 
                             className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-primary hover:text-white text-muted-foreground flex items-center justify-center transition-all border border-border/40"
                             title="Resume"
                         >
-                            <FileText size={14} />
+                            <FileText size={13} />
                         </button>
                         <button 
                             onClick={(e) => {
@@ -830,7 +871,7 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                             className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-emerald-500 hover:text-white text-muted-foreground flex items-center justify-center transition-all border border-border/40"
                             title="Call"
                         >
-                            <Phone size={14} />
+                            <Phone size={13} />
                         </button>
                     </div>
 
@@ -925,7 +966,17 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                             <span className="text-[10px] font-black text-muted-foreground/40 tracking-widest leading-none group-hover:text-foreground/60 transition-colors uppercase italic">• {new Date(row.createdAt).toLocaleDateString()}</span>
                         </div>
                         
-                        <div className="flex items-center gap-3 pt-3">
+                        <div className="flex items-center gap-2 pt-3">
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(row);
+                                }} 
+                                className="w-10 h-10 rounded-2xl bg-secondary/50 hover:bg-primary/10 hover:text-primary text-muted-foreground flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-primary/20"
+                                title="Edit Profile"
+                            >
+                                <Edit2 size={16} />
+                            </button>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();

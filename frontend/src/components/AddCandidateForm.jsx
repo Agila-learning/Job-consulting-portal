@@ -29,8 +29,8 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
         if (open && triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
             setCoords({
-                top: rect.bottom + window.scrollY + 6,
-                left: rect.left + window.scrollX,
+                top: rect.bottom + 6,
+                left: rect.left,
                 width: rect.width
             });
             setTimeout(() => searchRef.current?.focus(), 50);
@@ -84,7 +84,7 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
             {open && typeof document !== 'undefined' && createPortal(
                 <div
                     ref={dropdownRef}
-                    style={{ top: coords.top, left: coords.left, width: coords.width, position: 'fixed', zIndex: 99999 }}
+                    style={{ top: coords.top, left: coords.left, width: coords.width, position: 'fixed', zIndex: 999999 }}
                     className="bg-card border border-border/40 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
                 >
                     {/* Search inside dropdown */}
@@ -141,26 +141,29 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
 };
 
 // ── Main Form ─────────────────────────────────────────────────────────────────
-const AddCandidateForm = ({ onSuccess, onCancel }) => {
+const AddCandidateForm = ({ onSuccess, onCancel, initialData }) => {
     const [jobs, setJobs] = useState([]);
     const [loadingJobs, setLoadingJobs] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
     const [formData, setFormData] = useState({
-        candidateName: '',
-        candidateEmail: '',
-        mobile: '',
-        jobId: '',
-        branchId: '',
+        candidateName: initialData?.candidateName || '',
+        candidateEmail: initialData?.candidateEmail || '',
+        mobile: initialData?.mobile || '',
+        jobId: initialData?.job?._id || initialData?.jobId || '',
+        branchId: initialData?.branchId?._id || initialData?.branchId || '',
         resume: null,
-        resumeUrl: '',
-        priority: 'medium',
-        experience: '',
-        comments: ''
+        resumeUrl: initialData?.resumeUrl || '',
+        priority: initialData?.priority || 'medium',
+        experience: initialData?.experience || '',
+        comments: initialData?.comments || ''
     });
+
     const [branches, setBranches] = useState([]);
     const { user: currentUser } = useAuth();
     const isAdmin = currentUser?.role === 'admin';
 
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const [jobRes, branchRes] = await Promise.all([
@@ -170,8 +173,8 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                 setJobs(jobRes.data.data || []);
                 setBranches(branchRes.data.data || []);
                 
-                // Set default branch if not admin
-                if (!isAdmin && currentUser?.branchId) {
+                // Set default branch if not admin and not editing
+                if (!initialData && !isAdmin && currentUser?.branchId) {
                     setFormData(prev => ({ ...prev, branchId: currentUser.branchId }));
                 }
             } catch (err) {
@@ -181,7 +184,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
             }
         };
         fetchData();
-    }, [isAdmin, currentUser]);
+    }, [isAdmin, currentUser, initialData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -201,21 +204,28 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
             data.append('comments', formData.comments);
             data.append('resumeUrl', formData.resumeUrl);
             data.append('branchId', formData.branchId);
-            data.append('sourceType', isAdmin ? 'self' : currentUser?.role || 'employee');
             data.append('priority', formData.priority || 'medium');
 
             if (formData.resume) {
                 data.append('resume', formData.resume);
             }
 
-            await api.post('/referrals', data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            if (initialData?._id) {
+                await api.patch(`/referrals/${initialData._id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                toast.success('Candidate profile synchronized');
+            } else {
+                data.append('sourceType', isAdmin ? 'self' : currentUser?.role || 'employee');
+                await api.post('/referrals', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                toast.success('Candidate provisioned successfully');
+            }
 
-            toast.success('Candidate provisioned successfully');
             onSuccess();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Provisioning failed');
+            toast.error(err.response?.data?.message || 'Transaction failure');
         } finally {
             setIsSubmitting(false);
         }

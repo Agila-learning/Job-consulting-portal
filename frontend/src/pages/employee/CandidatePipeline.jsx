@@ -20,7 +20,7 @@ import AddCandidateForm from '@/components/AddCandidateForm';
 import { toast } from 'sonner';
 import { 
     UserPlus, Zap, Briefcase, FileSearch, Sparkles, BrainCircuit, Upload,
-    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter, X
+    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter, X, Edit2
 } from 'lucide-react';
 import { 
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -48,6 +48,7 @@ const CandidatePipeline = () => {
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
@@ -156,6 +157,17 @@ const CandidatePipeline = () => {
             } catch (err) {
                 toast.error('Deletion failed');
             }
+        }
+    };
+
+    const handleQuickAction = (referral, action) => {
+        setSelectedReferral(referral);
+        if (action === 'edit') {
+            setIsEditModalOpen(true);
+        } else if (action === 'status') {
+            setIsPanelOpen(true); // Detail panel already has status update
+        } else if (action === 'timeline') {
+            setIsPanelOpen(true); // Detail panel has timeline
         }
     };
 
@@ -305,6 +317,7 @@ const CandidatePipeline = () => {
                             referrals={filteredReferrals.filter(r => r.status === col.id)} 
                             onCardClick={handleCardClick}
                             onDelete={handleDelete}
+                            onAction={handleQuickAction}
                         />
                     ))}
 
@@ -326,6 +339,33 @@ const CandidatePipeline = () => {
                 referral={selectedReferral}
                 onUpdate={handleUpdate}
             />
+
+            {/* EDIT MODAL */}
+            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
+                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                            <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-[1.2rem] bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                    <Edit2 size={22} className="fill-white" />
+                                </div>
+                                Edit Candidate
+                            </DialogTitle>
+                        </DialogHeader>
+                    </div>
+                    <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+                         <AddCandidateForm 
+                            initialData={selectedReferral}
+                            onSuccess={() => {
+                                setIsEditModalOpen(false);
+                                fetchData();
+                            }}
+                            onCancel={() => setIsEditModalOpen(false)}
+                         />
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* PROVISIONING MODAL */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

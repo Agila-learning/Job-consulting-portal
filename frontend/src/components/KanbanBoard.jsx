@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import {
     Phone, StickyNote, CalendarRange, CheckCircle2, XCircle, AlertCircle,
     Star, MessageSquare, ChevronRight, LayoutPanelLeft, Trash2, GripVertical,
-    Clock, Briefcase
+    Clock, Briefcase, Edit2, RefreshCw, Calendar, TrendingUp, UserPlus, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
@@ -57,7 +57,7 @@ const getStageColor = (status) => {
     return 'bg-slate-500';
 };
 
-export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
+export function KanbanCard({ referral, isOverlay, onClick, onDelete, onAction }) {
     const {
         attributes,
         listeners,
@@ -77,6 +77,8 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
         e.stopPropagation();
         if (action === 'delete' && onDelete) {
             onDelete(referral._id);
+        } else if (onAction) {
+            onAction(referral, action);
         }
     };
 
@@ -139,34 +141,58 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
                     
                     {/* Quick Actions */}
                     <div className="flex items-center gap-1.5 transition-all">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'edit')} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none border border-transparent hover:border-primary/20">
+                                        <Edit2 size={14} />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-primary text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Edit Lead</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
                          <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'call')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-emerald-500/10 hover:text-emerald-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
-                                        <Phone size={15} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'status')} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-indigo-500/10 hover:text-indigo-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none border border-transparent hover:border-indigo-500/20">
+                                        <RefreshCw size={14} />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-emerald-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Call Candidate</TooltipContent>
+                                <TooltipContent className="bg-indigo-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Update Lifecycle</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
+
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'doc')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-indigo-500/10 hover:text-indigo-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
-                                        <FileText size={15} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'timeline')} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-500/10 hover:text-slate-900 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none border border-transparent hover:border-slate-500/20">
+                                        <Calendar size={14} />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-indigo-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">View Profile</TooltipContent>
+                                <TooltipContent className="bg-slate-900 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Timeline Logs</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
+
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'delete')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-600 transition-all text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
-                                        <Trash2 size={15} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'call')} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-emerald-500/10 hover:text-emerald-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none border border-transparent hover:border-emerald-500/20">
+                                        <Phone size={14} />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-rose-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Delete Candidate</TooltipContent>
+                                <TooltipContent className="bg-emerald-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Communicate</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'delete')} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none border border-transparent hover:border-rose-500/20">
+                                        <Trash2 size={14} />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-rose-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Purge Record</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </div>
@@ -176,7 +202,7 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
     );
 }
 
-export function KanbanColumn({ id, title, referrals, onCardClick, onDelete }) {
+export function KanbanColumn({ id, title, referrals, onCardClick, onDelete, onAction }) {
     const stageColor = getStageColor(title);
     
     return (
@@ -208,7 +234,13 @@ export function KanbanColumn({ id, title, referrals, onCardClick, onDelete }) {
                 >
                     <div className="space-y-0.5 min-h-[50vh]">
                         {referrals.map((referral) => (
-                            <KanbanCard key={referral._id} referral={referral} onClick={onCardClick} onDelete={onDelete} />
+                            <KanbanCard 
+                                key={referral._id} 
+                                referral={referral} 
+                                onClick={onCardClick} 
+                                onDelete={onDelete} 
+                                onAction={onAction}
+                            />
                         ))}
                     </div>
                 </SortableContext>
