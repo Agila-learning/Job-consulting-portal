@@ -712,7 +712,7 @@ const JobManagement = () => {
                                         </div>
                                         
                                         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                                            {isAdmin && (
+                                            {(isAdmin || user?.role === 'team_leader') && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button 

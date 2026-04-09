@@ -95,6 +95,7 @@ function App() {
                   <Route path="/agent" element={<AgentDashboard />}>
                     <Route path="dashboard" element={<DashboardOverview />} />
                     <Route path="jobs" element={<AvailableJobs />} />
+                    <Route path="pipeline" element={<CandidatePipeline />} />
                     <Route path="referrals" element={<MyReferrals />} />
                     <Route path="commissions" element={<Commissions />} />
                     <Route path="kyc" element={<KYCSubmission />} />

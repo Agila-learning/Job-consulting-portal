@@ -367,11 +367,13 @@ const LoginPage = () => {
                              <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">New Node?</p>
                              <p className="text-[10px] text-muted-foreground/40 font-bold uppercase">Registration protocol required</p>
                         </div>
-                        <Link to="/register">
-                            <Button variant="outline" className="h-12 px-8 rounded-2xl border-border/60 text-foreground font-black text-[10px] uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all shadow-sm">
-                                Request Access
-                            </Button>
-                        </Link>
+                        <Button 
+                            onClick={(e) => { e.preventDefault(); navigate('/register'); }}
+                            variant="outline" 
+                            className="h-12 px-8 rounded-2xl border-border/60 text-foreground font-black text-[10px] uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all shadow-sm"
+                        >
+                            Request Access
+                        </Button>
                     </div>
                 </div>
 

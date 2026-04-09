@@ -145,33 +145,25 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                 {/* Job Selection */}
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Target Job / Requisition</Label>
-                    <Select onValueChange={(val) => setFormData({...formData, jobId: val})} value={formData.jobId}>
-                        <SelectTrigger className="h-14 bg-background border-border/40 rounded-2xl text-[11px] font-black focus:ring-4 focus:ring-primary/5 transition-all outline-none">
-                            <div className="flex items-center gap-3">
-                                <Briefcase size={16} className="text-primary/60" />
-                                <SelectValue placeholder={loadingJobs ? "Synchronizing inventory..." : "Locate job node..."} />
-                            </div>
-                        </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-border/40 max-h-72 shadow-2xl z-[200]">
-                            {jobs.length === 0 && !loadingJobs ? (
-                                <div className="p-8 text-center space-y-2">
-                                    <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center mx-auto text-muted-foreground/30">
-                                        <Briefcase size={20} />
-                                    </div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">No active jobs available</p>
-                                </div>
-                            ) : (
-                                jobs.map(job => (
-                                    <SelectItem key={job._id} value={job._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 focus:bg-primary/10 focus:text-primary transition-colors px-4">
-                                        <div className="flex flex-col items-start gap-1">
-                                            <span>{job.jobTitle}</span>
-                                            <span className="text-[8px] opacity-40 italic">{job.companyName} • {job.location || 'Remote'}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))
-                            )}
-                        </SelectContent>
-                    </Select>
+                    <div className="relative group">
+                        <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none" size={16} />
+                        <select 
+                            required
+                            value={formData.jobId}
+                            onChange={(e) => setFormData({...formData, jobId: e.target.value})}
+                            className="w-full h-14 pl-12 pr-10 bg-background border border-border/40 hover:border-border/60 focus:border-border/60 rounded-2xl text-[11px] font-black focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none cursor-pointer text-foreground"
+                        >
+                            <option value="" disabled>{loadingJobs ? "Synchronizing inventory..." : "Locate job node..."}</option>
+                            {jobs.map(job => (
+                                <option key={job._id} value={job._id} className="font-black text-[11px]">
+                                    {job.jobTitle} ({job.companyName} - {job.location || 'Remote'})
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground"><path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Resume Section */}

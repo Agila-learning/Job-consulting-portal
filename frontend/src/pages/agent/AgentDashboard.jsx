@@ -14,6 +14,7 @@ const AgentDashboard = () => {
     const menuItems = [
         { icon: <LayoutDashboard size={18} />, label: 'Command Center', path: '/agent/dashboard' },
         { icon: <Zap size={18} />, label: 'Target Jobs', path: '/agent/jobs' },
+        { icon: <Briefcase size={18} />, label: 'Hiring Pipeline', path: '/agent/pipeline' },
         { icon: <Users size={18} />, label: 'My Referrals', path: '/agent/referrals' },
         { icon: <ShieldCheck size={18} />, label: 'KYC Status', path: '/agent/kyc' },
         { icon: <Wallet size={18} />, label: 'Commissions', path: '/agent/commissions' },
