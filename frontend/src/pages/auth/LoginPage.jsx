@@ -32,7 +32,7 @@ const FeedbackOverlay = ({ status }) => {
     return (
         <div ref={overlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md">
             <div className="flex flex-col items-center gap-8 text-center animate-in zoom-in duration-300">
-                <div ref={monkeyRef} className="w-56 h-56 relative rounded-full border-4 border-primary/20 bg-card/50 backdrop-blur-3xl shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex items-center justify-center group ring-8 ring-primary/5">
+                <div ref={monkeyRef} className="w-40 h-40 md:w-56 md:h-56 relative rounded-full border-4 border-primary/20 bg-card/50 backdrop-blur-3xl shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] overflow-hidden flex items-center justify-center group ring-8 ring-primary/5">
                     <img 
                         src={status === 'success' ? monkeySuccess : monkeySad} 
                         alt="Monkey Feedback" 
@@ -40,10 +40,10 @@ const FeedbackOverlay = ({ status }) => {
                     />
                 </div>
                 <div ref={textRef} className="space-y-2">
-                    <h2 className={`text-4xl font-black tracking-tighter ${status === 'success' ? 'text-primary' : 'text-destructive'}`}>
+                    <h2 className={`text-2xl md:text-4xl font-black tracking-tighter ${status === 'success' ? 'text-primary' : 'text-destructive'}`}>
                         {status === 'success' ? 'YOU ARE RIGHT!' : 'SO SAD...'}
                     </h2>
-                    <p className="text-xl font-bold text-muted-foreground uppercase tracking-widest">
+                    <p className="text-sm md:text-xl font-bold text-muted-foreground uppercase tracking-widest">
                         {status === 'success' ? 'Go ahead' : 'You are wrong'}
                     </p>
                 </div>

@@ -4,7 +4,9 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 const { 
     getIncentives, createIncentive, updateIncentive, 
     deleteIncentive, grantManualIncentive, getManualGrants,
-    updateManualGrant, deleteManualGrant
+    updateManualGrant, deleteManualGrant,
+    getIncentiveRules, upsertIncentiveRule, getIncentiveLogs,
+    createPayout, getPayouts
 } = require('../controllers/incentiveController');
 
 // All role visibility
@@ -21,5 +23,12 @@ router.patch('/grants/:id', authorize('admin'), updateManualGrant);
 router.patch('/:id', authorize('admin'), updateIncentive);
 router.delete('/grants/:id', authorize('admin'), deleteManualGrant);
 router.delete('/:id', authorize('admin'), deleteIncentive);
+
+// --- New Module Routes ---
+router.get('/rules', getIncentiveRules);
+router.post('/rules', authorize('admin'), upsertIncentiveRule);
+router.get('/logs', getIncentiveLogs);
+router.post('/payouts', authorize('admin', 'team_leader'), createPayout);
+router.get('/payouts', getPayouts);
 
 module.exports = router;

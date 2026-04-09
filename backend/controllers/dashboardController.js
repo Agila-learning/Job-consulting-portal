@@ -6,8 +6,14 @@ const Referral = require('../models/Referral');
 // Route: GET /api/dashboard/summary
 exports.getDashboardSummary = async (req, res) => {
     try {
-        const { role, id: userId } = req.user;
+        const { role, id: userId, branchId: userBranchId } = req.user;
         let stats = {};
+        let baseQuery = {};
+
+        // Apply Branch Segregation
+        if (role !== 'admin') {
+            baseQuery.branchId = userBranchId;
+        }
 
         // 1. Basic Counts & Role-Specific Stats
         if (role === 'admin') {
@@ -19,31 +25,31 @@ exports.getDashboardSummary = async (req, res) => {
             // Financials
             const financialStats = await Referral.aggregate([
                 { $match: { status: 'Joined' } },
-                { $group: { _id: null, total: { $sum: "$calculatedCommission" }, count: { $sum: 1 } } }
+                { $group: { _id: null, total: { $sum: { $toDouble: "$calculatedCommission" } }, count: { $sum: 1 } } }
             ]);
             stats.totalRevenuePool = financialStats[0]?.total || 0;
             stats.successfulPlacements = financialStats[0]?.count || 0;
 
         } else if (role === 'team_leader') {
-            // TL sees aggregate for the whole system (or team if implemented)
+            // TL sees aggregate for their specific branch
             stats.activeJobs = await Job.countDocuments({ status: 'active' });
-            stats.totalPipeline = await Referral.countDocuments();
-            stats.teamPlacements = await Referral.countDocuments({ status: 'Joined' });
+            stats.totalPipeline = await Referral.countDocuments({ branchId: userBranchId });
+            stats.teamPlacements = await Referral.countDocuments({ branchId: userBranchId, status: 'Joined' });
             
             const pipelineValue = await Referral.aggregate([
-                { $match: { status: 'Joined' } },
-                { $group: { _id: null, total: { $sum: "$calculatedCommission" } } }
+                { $match: { branchId: userBranchId, status: 'Joined' } },
+                { $group: { _id: null, total: { $sum: { $toDouble: "$calculatedCommission" } } } }
             ]);
             stats.managedValue = pipelineValue[0]?.total || 0;
 
         } else if (role === 'employee') {
-            stats.assignedCandidates = await Referral.countDocuments({ assignedEmployee: userId });
-            stats.mySubmissions = await Referral.countDocuments({ referrer: userId });
+            stats.assignedCandidates = await Referral.countDocuments({ assignedEmployee: userId, branchId: userBranchId });
+            stats.mySubmissions = await Referral.countDocuments({ referrer: userId, branchId: userBranchId });
             stats.activeJobs = await Job.countDocuments({ status: 'active' });
             
             const myPlacements = await Referral.aggregate([
-                { $match: { assignedEmployee: userId, status: 'Joined' } },
-                { $group: { _id: null, total: { $sum: "$calculatedCommission" }, count: { $sum: 1 } } }
+                { $match: { assignedEmployee: userId, status: 'Joined', branchId: userBranchId } },
+                { $group: { _id: null, total: { $sum: { $toDouble: "$calculatedCommission" } }, count: { $sum: 1 } } }
             ]);
             stats.successfulPlacements = myPlacements[0]?.count || 0;
             stats.accruedIncentives = myPlacements[0]?.total || 0;
@@ -54,16 +60,19 @@ exports.getDashboardSummary = async (req, res) => {
             
             const myEarnings = await Referral.aggregate([
                 { $match: { referrer: userId, status: 'Joined' } },
-                { $group: { _id: null, total: { $sum: "$calculatedCommission" }, count: { $sum: 1 } } }
+                { $group: { _id: null, total: { $sum: { $toDouble: "$calculatedCommission" } }, count: { $sum: 1 } } }
             ]);
             stats.successfulPlacements = myEarnings[0]?.count || 0;
             stats.totalEarnings = myEarnings[0]?.total || 0;
         }
 
         // 2. Referrals by Status (Distribution)
-        let statusQuery = {};
-        if (role !== 'admin' && role !== 'team_leader') {
-            statusQuery = { $or: [{ referrer: userId }, { assignedEmployee: userId }] };
+        let statusQuery = { ...baseQuery };
+        if (role === 'employee' || role === 'agent') {
+            statusQuery = { 
+                ...statusQuery,
+                $or: [{ referrer: userId }, { assignedEmployee: userId }] 
+            };
         }
         
         const statusDistribution = await Referral.aggregate([

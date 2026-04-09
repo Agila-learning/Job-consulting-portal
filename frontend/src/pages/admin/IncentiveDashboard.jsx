@@ -26,7 +26,12 @@ const IncentiveDashboard = () => {
     const [isGrantOpen, setIsGrantOpen] = useState(false);
     const [referrals, setReferrals] = useState([]);
     const [selectedUserStats, setSelectedUserStats] = useState(null);
-    const [activeMainTab, setActiveMainTab] = useState('slabs');
+    const [activeMainTab, setActiveMainTab] = useState('rules'); // Changed default
+    const [selectedBranch, setSelectedBranch] = useState('all');
+    const [branches, setBranches] = useState([]);
+    const [rules, setRules] = useState([]);
+    const [logs, setLogs] = useState([]);
+    const [payouts, setPayouts] = useState([]);
     
     // Slab Form
     const [formData, setFormData] = useState({
@@ -55,16 +60,24 @@ const IncentiveDashboard = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [slabRes, grantRes, userRes, refRes] = await Promise.all([
+            const [slabRes, grantRes, userRes, refRes, branchRes, ruleRes, logRes, payoutRes] = await Promise.all([
                 api.get('/incentives'),
                 api.get('/incentives/grants'),
                 api.get('/users?role=employee&role=agent'),
-                api.get('/referrals')
+                api.get('/referrals'),
+                api.get('/branches'),
+                api.get('/incentives/rules'),
+                api.get(`/incentives/logs?branchId=${selectedBranch}`),
+                api.get(`/incentives/payouts?branchId=${selectedBranch}`)
             ]);
             setSlabs(slabRes.data.data);
             setManualGrants(grantRes.data.data);
             setUsers(userRes.data.data);
             setReferrals(refRes.data.data);
+            setBranches(branchRes.data.data);
+            setRules(ruleRes.data.data);
+            setLogs(logRes.data.data);
+            setPayouts(payoutRes.data.data);
         } catch (err) {
             toast.error('Failed to sync incentive data');
         } finally {
@@ -74,7 +87,7 @@ const IncentiveDashboard = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedBranch]);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
@@ -304,6 +317,17 @@ const IncentiveDashboard = () => {
                 </div>
 
                 <div className="flex-none flex items-center gap-4">
+                    <select 
+                        value={selectedBranch}
+                        onChange={(e) => setSelectedBranch(e.target.value)}
+                        className="h-12 px-4 rounded-2xl border border-border/40 bg-background/50 font-bold text-[11px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+                    >
+                        <option value="all">All Branches</option>
+                        {branches.map(branch => (
+                            <option key={branch._id} value={branch._id}>{branch.name}</option>
+                        ))}
+                    </select>
+
                     <Dialog open={isGrantOpen} onOpenChange={setIsGrantOpen}>
                         <DialogTrigger asChild>
                             <Button variant="outline" className="h-12 px-6 rounded-2xl border-primary/20 bg-primary/5 text-primary font-black text-[10px] uppercase tracking-widest hover:bg-primary/10 transition-all">
@@ -564,43 +588,138 @@ const IncentiveDashboard = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* Slab Table */}
-                <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
-                    <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
-                        <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-sm">
-                                <ListFilter size={18} />
-                            </div>
-                            Slab Repository
-                        </h3>
-                    </div>
-                    <DataTable 
-                        columns={columns} 
-                        data={slabs} 
-                        loading={loading} 
-                        emptyMessage="Configure logic to initialize slabs." 
-                    />
-                </div>
+            <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="space-y-8">
+                <TabsList className="bg-secondary/30 p-1.5 rounded-[2rem] border border-border/20 w-full md:w-fit h-auto flex flex-wrap">
+                    <TabsTrigger value="rules" className="rounded-2xl px-8 py-3 data-[state=active]:bg-primary data-[state=active]:text-white font-black text-[10px] uppercase tracking-widest transition-all gap-2 flex-1">
+                        <Target size={16} /> Auto Rules
+                    </TabsTrigger>
+                    <TabsTrigger value="logs" className="rounded-2xl px-8 py-3 data-[state=active]:bg-primary data-[state=active]:text-white font-black text-[10px] uppercase tracking-widest transition-all gap-2 flex-1">
+                        <Clock size={16} /> Incentive Logs
+                    </TabsTrigger>
+                    <TabsTrigger value="payouts" className="rounded-2xl px-8 py-3 data-[state=active]:bg-primary data-[state=active]:text-white font-black text-[10px] uppercase tracking-widest transition-all gap-2 flex-1">
+                        <Wallet size={16} /> Payouts
+                    </TabsTrigger>
+                    <TabsTrigger value="slabs" className="rounded-2xl px-8 py-3 data-[state=active]:bg-primary data-[state=active]:text-white font-black text-[10px] uppercase tracking-widest transition-all gap-2 flex-1">
+                        <ListFilter size={16} /> Target Slabs
+                    </TabsTrigger>
+                    <TabsTrigger value="grants" className="rounded-2xl px-8 py-3 data-[state=active]:bg-primary data-[state=active]:text-white font-black text-[10px] uppercase tracking-widest transition-all gap-2 flex-1">
+                        <Zap size={16} /> Manual Grants
+                    </TabsTrigger>
+                </TabsList>
 
-                {/* Manual Grants Table */}
-                <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
-                    <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
-                        <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-xl shadow-sm">
-                                <Zap size={18} />
-                            </div>
-                            Sent Rewards
-                        </h3>
+                <TabsContent value="rules" className="mt-0">
+                    <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
+                            <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-sm">
+                                    <Target size={18} /> Automated Incentive Rules
+                                </div>
+                            </h3>
+                        </div>
+                        <DataTable 
+                            columns={[
+                                { header: 'Target Role', cell: (row) => <Badge className="uppercase">{row.role}</Badge> },
+                                { header: 'Event', cell: (row) => <Badge variant="outline">{row.event}</Badge> },
+                                { header: 'Amount', cell: (row) => <span className="font-black text-emerald-600">₹{row.amount}</span> },
+                                { header: 'Status', cell: (row) => <Badge className={row.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}>{row.status}</Badge> }
+                            ]} 
+                            data={rules} 
+                            loading={loading} 
+                            emptyMessage="No auto-rules configured." 
+                        />
                     </div>
-                    <DataTable 
-                        columns={manualColumns} 
-                        data={manualGrants} 
-                        loading={loading} 
-                        emptyMessage="No manual rewards sent yet." 
-                    />
-                </div>
-            </div>
+                </TabsContent>
+
+                <TabsContent value="logs" className="mt-0">
+                    <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
+                            <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-sm">
+                                    <Clock size={18} /> Generated Incentives
+                                </div>
+                            </h3>
+                        </div>
+                        <DataTable 
+                            columns={[
+                                { header: 'User', accessor: 'user.name' },
+                                { header: 'Referral', accessor: 'referral.candidateName' },
+                                { header: 'Event', cell: (row) => <Badge variant="outline">{row.event}</Badge> },
+                                { header: 'Value', cell: (row) => <span className="font-black text-emerald-600">₹{row.amount}</span> },
+                                { header: 'Date', cell: (row) => new Date(row.createdAt).toLocaleDateString() },
+                                { header: 'Status', cell: (row) => <Badge>{row.status}</Badge> }
+                            ]} 
+                            data={logs} 
+                            loading={loading} 
+                            emptyMessage="No incentive logs found." 
+                        />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="payouts" className="mt-0">
+                    <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
+                            <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-sm">
+                                    <Wallet size={18} /> Disbursement Ledger
+                                </div>
+                            </h3>
+                        </div>
+                        <DataTable 
+                            columns={[
+                                { header: 'Recipient', accessor: 'user.name' },
+                                { header: 'Total Value', cell: (row) => <span className="font-black">₹{row.amount}</span> },
+                                { header: 'Date', cell: (row) => row.paymentDate ? new Date(row.paymentDate).toLocaleDateString() : 'Pending' },
+                                { header: 'Status', cell: (row) => (
+                                    <Badge className={row.status === 'Paid' ? 'bg-emerald-500' : 'bg-amber-500'}>
+                                        {row.status}
+                                    </Badge>
+                                )}
+                            ]} 
+                            data={payouts} 
+                            loading={loading} 
+                            emptyMessage="No payouts recorded." 
+                        />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="slabs" className="mt-0">
+                    <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
+                            <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-xl shadow-sm">
+                                    <ListFilter size={18} />
+                                </div>
+                                Slab Repository
+                            </h3>
+                        </div>
+                        <DataTable 
+                            columns={columns} 
+                            data={slabs} 
+                            loading={loading} 
+                            emptyMessage="Configure logic to initialize slabs." 
+                        />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="grants" className="mt-0">
+                    <div className="bg-card/60 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
+                            <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-3">
+                                <div className="p-2 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-xl shadow-sm">
+                                    <Zap size={18} />
+                                </div>
+                                Sent Rewards
+                            </h3>
+                        </div>
+                        <DataTable 
+                            columns={manualColumns} 
+                            data={manualGrants} 
+                            loading={loading} 
+                            emptyMessage="No manual rewards sent yet." 
+                        />
+                    </div>
+                </TabsContent>
+            </Tabs>
 
             {/* PERFORMANCE HUB */}
             <div className="bg-card/40 backdrop-blur-xl border border-border/40 rounded-[2.5rem] shadow-sm overflow-hidden">

@@ -23,12 +23,28 @@ const DashboardOverview = () => {
         referralGrowth: 12,
         pipelineVelocity: 85
     });
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('all');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchBranches = async () => {
+            if (user?.role === 'admin') {
+                try {
+                    const res = await api.get('/branches');
+                    setBranches(res.data.data);
+                } catch (err) {
+                    console.error('Failed to fetch branches');
+                }
+            }
+        };
+
         const fetchStats = async () => {
             try {
-                const res = await api.get('/referrals/stats');
+                const url = selectedBranch === 'all' 
+                    ? '/referrals/stats' 
+                    : `/referrals/stats?branchId=${selectedBranch}`;
+                const res = await api.get(url);
                 const statsData = res.data.data;
                 setStats({
                     totalJobs: statsData.totalJobs || 0,
@@ -48,8 +64,10 @@ const DashboardOverview = () => {
                 setLoading(false);
             }
         };
+
+        fetchBranches();
         fetchStats();
-    }, []);
+    }, [selectedBranch, user?.role]);
 
     if (loading) {
         return (
@@ -79,6 +97,18 @@ const DashboardOverview = () => {
                     <p className="text-muted-foreground text-sm font-medium ml-1">Real-time overview of your recruitment engine.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    {user?.role === 'admin' && (
+                        <select 
+                            value={selectedBranch}
+                            onChange={(e) => setSelectedBranch(e.target.value)}
+                            className="h-10 px-4 rounded-xl border border-border/60 bg-background/50 font-bold text-[11px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+                        >
+                            <option value="all">All Branches</option>
+                            {branches.map(branch => (
+                                <option key={branch._id} value={branch._id}>{branch.name}</option>
+                            ))}
+                        </select>
+                    )}
                     <Badge variant="outline" className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl border-border/60 bg-background/50 font-black text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm flex items-center gap-2">
                         <Clock size={14} className="text-primary" />
                         <span className="hidden sm:inline text-[9px]">Live Status:</span> Online

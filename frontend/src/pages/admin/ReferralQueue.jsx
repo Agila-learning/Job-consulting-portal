@@ -50,18 +50,22 @@ const ReferralQueue = () => {
     const [isTimelineOpen, setIsTimelineOpen] = useState(false);
     const [statusData, setStatusData] = useState({ status: '', comment: '' });
     const [financeData, setFinanceData] = useState({ calculatedCommission: '', payoutStatus: '', payoutNotes: '' });
+    const [branches, setBranches] = useState([]);
+    const [branchFilter, setBranchFilter] = useState('all');
 
     const containerRef = useRef(null);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [refRes, empRes] = await Promise.all([
+            const [refRes, empRes, branchRes] = await Promise.all([
                 api.get('/referrals'),
-                api.get('/users?role=employee&role=agent')
+                api.get('/users?role=employee&role=agent'),
+                api.get('/branches')
             ]);
             setReferrals(refRes.data.data);
             setEmployees(empRes.data.data);
+            setBranches(branchRes.data.data);
         } catch (err) {
             toast.error('Queue Synchronization Failed');
         } finally {
@@ -97,8 +101,9 @@ const ReferralQueue = () => {
             
             const isPlacementReady = placementStatuses.includes(ref.status);
             const tabMatch = targetTab === 'placements' ? isPlacementReady : !isPlacementReady;
+            const matchesBranch = branchFilter === 'all' ? true : ref.branchId === branchFilter;
 
-            return matchesSearch && matchesStatus && matchesSource && tabMatch;
+            return matchesSearch && matchesStatus && matchesSource && tabMatch && matchesBranch;
         });
     };
 
@@ -298,11 +303,26 @@ const ReferralQueue = () => {
 
                         {/* Search & Select Toggles */}
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                            <div className="md:col-span-6 relative group">
+                            {isAdmin && (
+                                <div className="md:col-span-3">
+                                    <Select value={branchFilter} onValueChange={setBranchFilter}>
+                                        <SelectTrigger className="h-12 bg-background border-border/40 rounded-2xl font-black text-[9px] uppercase tracking-widest">
+                                            <SelectValue placeholder="Branch" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
+                                            <SelectItem value="all">Everywhere</SelectItem>
+                                            {branches.map(b => (
+                                                <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                            <div className={isAdmin ? "md:col-span-3 relative group" : "md:col-span-6 relative group"}>
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 transition-colors group-focus-within:text-primary" />
                                 <input 
                                     type="text" 
-                                    placeholder="Query talent name, job title, or domain..."
+                                    placeholder="Search..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full h-12 pl-11 pr-4 bg-background dark:bg-slate-900 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[11px] font-bold outline-none transition-all placeholder:text-muted-foreground/30 shadow-inner"

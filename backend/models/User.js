@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'employee', 'agent', 'team_leader'], required: true },
     status: { type: String, enum: ['pending', 'active', 'inactive', 'rejected'], default: 'active' },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
     
     // Employee Specific
     employeeId: { type: String },

@@ -8,57 +8,76 @@ const IncentiveSlab = require('../models/IncentiveSlab');
 exports.createReferral = async (req, res) => {
     try {
         const { jobId, ...candidateData } = req.body;
+        const User = require('../models/User');
+        const Branch = require('../models/Branch');
         
-        // Check if job exists
+        // 1. Check if job exists
         const job = await Job.findById(jobId);
         if (!job) {
             return res.status(404).json({ success: false, message: 'Job not found' });
         }
 
+        // 2. Determine Branch
+        let branchId = req.user.branchId; // Default to submitter's branch
+        if (candidateData.preferredLocation) {
+            const branch = await Branch.findOne({ 
+                name: { $regex: new RegExp(`^${candidateData.preferredLocation}$`, 'i') } 
+            });
+            if (branch) branchId = branch._id;
+        }
+
+        // 3. Find Team Leader for Auto-Assignment
+        let assignedEmployee = null;
+        const teamLeader = await User.findOne({ 
+            role: 'team_leader', 
+            branchId, 
+            team: job.domain 
+        });
+        
+        if (teamLeader) {
+            assignedEmployee = teamLeader._id;
+        }
+
         // Handle persistent resume upload
         let resumeUrl = candidateData.resumeUrl || '';
         if (req.file) {
-            // Store relative path for static serving
             resumeUrl = `/uploads/resumes/${req.file.filename}`;
         }
 
-        // Set source and referrer
+        // 4. Create Referral
         const referral = await Referral.create({
             ...candidateData,
             resumeUrl,
             job: jobId,
+            branchId,
+            assignedEmployee,
+            assignedTeam: job.domain,
             sourceType: candidateData.sourceType || (req.user.role === 'admin' ? 'self' : req.user.role),
             referrer: req.user.id,
-            status: 'New Referral',
+            status: assignedEmployee ? 'Assigned' : 'New Referral',
             activityLogs: [{
-                action: 'Referral submitted',
+                action: assignedEmployee ? `Auto-assigned to ${job.domain} Team Leader` : 'Referral submitted',
                 user: req.user.id
             }]
         });
 
         res.status(201).json({ success: true, data: referral });
 
-        // Emit real-time notification to Admins and relevant Team Leaders
+        // Emit notifications
         const io = req.app.get('io');
-        const User = require('../models/User');
-
-        // 1. Notify Admins (Global)
         io.emit('newReferral', {
-            message: `New candidate ${referral.candidateName} registered for ${job.jobTitle}`,
+            message: `New candidate ${referral.candidateName} for ${job.jobTitle} (${candidateData.preferredLocation || 'Main'})`,
             referralId: referral._id,
             role: 'admin'
         });
 
-        // 2. Notify Relevant Team Leaders based on Job Domain
-        const teamLeaders = await User.find({ role: 'team_leader', team: job.domain });
-        teamLeaders.forEach(tl => {
-            io.to(tl._id.toString()).emit('newReferral', {
-                message: `New ${job.domain} candidate: ${referral.candidateName}`,
+        if (assignedEmployee) {
+            io.to(assignedEmployee.toString()).emit('newReferral', {
+                message: `New ${job.domain} candidate auto-assigned: ${referral.candidateName}`,
                 referralId: referral._id,
                 role: 'team_leader'
             });
-            console.log(`[NOTIFY] Sent domain notification to TL: ${tl.email} for domain: ${job.domain}`);
-        });
+        }
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
@@ -70,32 +89,32 @@ exports.getReferrals = async (req, res) => {
     try {
         let query = {};
 
-        // Role-based filtering
+        // 1. Branch Segregation (Admins see all)
+        if (req.user.role !== 'admin') {
+            query.branchId = req.user.branchId;
+        }
+
+        // 2. Role-based data visibility
         if (req.user.role === 'agent') {
             query.referrer = req.user.id;
+        } else if (req.user.role === 'employee') {
+            // Employees see what they referred OR what is assigned to them
+            query.$or = [
+                { referrer: req.user.id },
+                { assignedEmployee: req.user.id }
+            ];
+            // If branch filter is active, we must ensure it's still applied
+            if (query.branchId) {
+                query.$and = [
+                    { branchId: query.branchId },
+                    { $or: query.$or }
+                ];
+                delete query.branchId;
+                delete query.$or;
+            }
         } else if (req.user.role === 'team_leader') {
-            const User = require('../models/User');
-            // 1. Find the TL's team/domain
-            const teamLeader = await User.findById(req.user.id);
-            const tlDomain = teamLeader.team;
-
-            // 2. Find all jobs in that domain
-            const domainJobs = await Job.find({ domain: tlDomain }).select('_id');
-            const domainJobIds = domainJobs.map(j => j._id);
-
-            // 3. Find all reports if team_leader
-            const reports = await User.find({ reportingManager: req.user.id }).select('_id');
-            const reportIds = reports.map(r => r._id);
-            
-            // Show what they submitted, what's assigned to them, or what matches their DOMAIN
-            query = { 
-                $or: [
-                    { referrer: req.user.id }, 
-                    { assignedEmployee: req.user.id },
-                    { assignedEmployee: { $in: reportIds } },
-                    { job: { $in: domainJobIds } }
-                ] 
-            };
+            // Team Leaders see everything in their branch
+            // Query is already filtered by branchId above
         }
 
         // Admin sees everything (no filter)
@@ -224,6 +243,56 @@ exports.updateReferralStatus = async (req, res) => {
                 comment: comment || ''
             });
 
+            // --- START INCENTIVE LOGIC ---
+            const IncentiveRule = require('../models/IncentiveRule');
+            const IncentiveLog = require('../models/IncentiveLog');
+
+            let event = null;
+            if (status === 'Interview Attended') event = 'Interview';
+            else if (status === 'Selected') event = 'Selection';
+            else if (status === 'Joined') event = 'Joining';
+
+            if (event) {
+                // 1. Employee Incentives (Assigned Recruiter)
+                if (referral.assignedEmployee) {
+                    const rule = await IncentiveRule.findOne({ role: 'employee', event, status: 'active' });
+                    if (rule) {
+                        await IncentiveLog.create({
+                            user: referral.assignedEmployee,
+                            referral: referral._id,
+                            rule: rule._id,
+                            amount: rule.amount,
+                            event,
+                            branchId: referral.branchId
+                        });
+                    }
+                }
+
+                // 2. Referrer Incentives (Agent/Employee) - ONLY ON JOINING
+                if (status === 'Joined' && referral.referrer) {
+                    const User = require('../models/User');
+                    const referrer = await User.findById(referral.referrer);
+                    if (referrer) {
+                        const rule = await IncentiveRule.findOne({ 
+                            role: referrer.role === 'agent' ? 'agent' : 'employee', 
+                            event: 'Joining', 
+                            status: 'active' 
+                        });
+                        if (rule) {
+                            await IncentiveLog.create({
+                                user: referrer._id,
+                                referral: referral._id,
+                                rule: rule._id,
+                                amount: rule.amount,
+                                event: 'Joining',
+                                branchId: referral.branchId
+                            });
+                        }
+                    }
+                }
+            }
+            // --- END INCENTIVE LOGIC ---
+
             // Emit real-time notification to Referrer
             const io = req.app.get('io');
             io.to(referral.referrer.toString()).emit('statusChanged', {
@@ -316,35 +385,28 @@ exports.bulkUpdateReferrals = async (req, res) => {
 exports.getReferralStats = async (req, res) => {
     try {
         let query = {};
+        
+        // 1. Branch Segregation
+        if (req.user.role !== 'admin') {
+            query.branchId = req.user.branchId;
+        }
+
+        // 2. Role Filtering
         if (req.user.role === 'agent') {
             query.referrer = req.user.id;
-        } else if (req.user.role === 'team_leader') {
-            const User = require('../models/User');
-            const teamLeader = await User.findById(req.user.id);
-            const tlDomain = teamLeader.team;
-            
-            const domainJobs = await Job.find({ domain: tlDomain }).select('_id');
-            const domainJobIds = domainJobs.map(j => j._id);
-
-            const reports = await User.find({ reportingManager: req.user.id }).select('_id');
-            const reportIds = reports.map(r => r._id);
-            
-            query = { 
-                $or: [
-                    { referrer: req.user.id }, 
-                    { assignedEmployee: req.user.id },
-                    { assignedEmployee: { $in: reportIds } },
-                    { job: { $in: domainJobIds } }
-                ] 
-            };
         } else if (req.user.role === 'employee') {
-            const User = require('../models/User');
-            query = { 
-                $or: [
-                    { referrer: req.user.id }, 
-                    { assignedEmployee: req.user.id }
-                ] 
-            };
+            query.$or = [
+                { referrer: req.user.id },
+                { assignedEmployee: req.user.id }
+            ];
+            if (query.branchId) {
+                query.$and = [
+                    { branchId: query.branchId },
+                    { $or: query.$or }
+                ];
+                delete query.branchId;
+                delete query.$or;
+            }
         }
 
         const stats = await Referral.aggregate([

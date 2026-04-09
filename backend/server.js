@@ -51,6 +51,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/jobs', require('./routes/jobRoutes'));
 app.use('/api/referrals', require('./routes/referralRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/branches', require('./routes/branchRoutes'));
 app.use('/api/kyc', require('./routes/kycRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/scripts', require('./routes/scriptRoutes'));
