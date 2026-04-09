@@ -378,10 +378,11 @@ const ReferralQueue = () => {
                         ) : (
                             <div className="space-y-4">
                                 {filteredList.map((row) => (
-                                    <CandidateCard 
-                                        key={row._id} 
-                                        row={row} 
-                                        activeTab={activeTab}
+                                     <CandidateCard 
+                                         key={row._id} 
+                                         row={row} 
+                                         isAdmin={isAdmin}
+                                         activeTab={activeTab}
                                         onAssign={() => {
                                             setSelectedReferral(row);
                                             setIsAssignOpen(true);
@@ -677,7 +678,7 @@ const ReferralQueue = () => {
 };
 
 /* ── SUB-COMPONENT: CandidateCard ── */
-const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeline, onDelete }) => {
+const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance, onTimeline, onDelete }) => {
     const roleConfig = {
         'admin': { color: 'bg-rose-500/10 text-rose-600 border-rose-500/20', icon: <Shield size={10} className="mr-1.5" /> },
         'employee': { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', icon: <User size={10} className="mr-1.5" /> },
@@ -815,7 +816,6 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                              <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40 leading-none">Yield Estimate</p>
                              <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter leading-none italic">₹{row.calculatedCommission || '0'}</p>
                         </div>
-
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button 

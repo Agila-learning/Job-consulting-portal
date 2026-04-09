@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
+import { toast } from 'sonner';
 
 const AuthContext = createContext();
 
@@ -64,14 +65,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
+    const switchBranch = (branchId) => {
+        const updatedUser = { ...user, branchId };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        toast.success(`Switched to ${branchId.charAt(0).toUpperCase() + branchId.slice(1)} Branch`);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, error, login, register, logout, switchBranch }}>
             {children}
         </AuthContext.Provider>
     );

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const Topbar = ({ title, showSidebarMobile }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, switchBranch } = useAuth();
   const { toggleChat, toggleNewAction, openNotifications, notifications } = useUI();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
@@ -92,6 +92,20 @@ const Topbar = ({ title, showSidebarMobile }) => {
         </div>
 
         <div className="flex items-center gap-2">
+            {user?.role === 'admin' && (
+                <div className="hidden xl:flex items-center gap-2 mr-4 bg-secondary/30 p-1.5 px-3 rounded-2xl border border-border/40 shadow-inner">
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Branch:</span>
+                    <select 
+                        value={user?.branchId || 'bangalore'}
+                        onChange={(e) => switchBranch(e.target.value)}
+                        className="bg-transparent text-[11px] font-black uppercase tracking-widest text-primary outline-none cursor-pointer hover:opacity-80 transition-all border-0 focus:ring-0"
+                    >
+                        <option value="bangalore" className="bg-background text-foreground">Bangalore</option>
+                        <option value="chennai" className="bg-background text-foreground">Chennai</option>
+                        <option value="krishnagiri" className="bg-background text-foreground">Krishnagiri</option>
+                    </select>
+                </div>
+            )}
             <ThemeToggle />
             <NotificationCenter />
         </div>

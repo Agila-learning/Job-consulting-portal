@@ -25,7 +25,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator
+    DropdownMenuSeparator,
+    DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
 
 const JobManagement = () => {
@@ -708,7 +709,8 @@ const JobManagement = () => {
                                                             <MoreVertical size={20} />
                                                         </button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-64 p-3 rounded-[2rem] bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl mt-2 border" style={{ zIndex: 9999 }}>
+                                                    <DropdownMenuPortal>
+                                                        <DropdownMenuContent align="end" className="w-64 p-3 rounded-[2rem] bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl mt-2 border" style={{ zIndex: 9999 }}>
                                                         <DropdownMenuItem onClick={() => openEdit(job)} className="rounded-xl flex gap-4 p-4 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all group">
                                                             <Edit2 size={18} className="text-muted-foreground group-hover:text-primary" />
                                                             <div className="flex flex-col">
@@ -743,7 +745,8 @@ const JobManagement = () => {
                                                             <span className="font-black text-[10px] uppercase tracking-widest">Permanent Delete</span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                </DropdownMenuPortal>
+                                            </DropdownMenu>
                                             )}
                                             <Button 
                                                 onClick={() => openDetails(job)} 
@@ -786,7 +789,8 @@ const JobManagement = () => {
                                                         <MoreVertical size={16} />
                                                     </button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 shadow-xl mt-1 border" style={{ zIndex: 9999 }}>
+                                                    <DropdownMenuPortal>
+                                                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 shadow-xl mt-1 border" style={{ zIndex: 9999 }}>
                                                     <DropdownMenuItem onClick={() => openEdit(job)} className="rounded-xl flex gap-3 p-3 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all group">
                                                         <Edit2 size={15} className="text-muted-foreground group-hover:text-primary" />
                                                         <span className="font-black text-[10px] uppercase tracking-widest">Edit</span>
@@ -800,7 +804,8 @@ const JobManagement = () => {
                                                         <Trash2 size={15} />
                                                         <span className="font-black text-[10px] uppercase tracking-widest">Delete</span>
                                                     </DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenuPortal>
                                             </DropdownMenu>
                                         )}
                                         <Button onClick={() => openDetails(job)} className="h-9 px-4 text-[9px] font-black uppercase tracking-widest rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-0 group/btn hover:scale-105 active:scale-95 transition-all">

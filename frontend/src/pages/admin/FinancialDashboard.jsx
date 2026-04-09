@@ -403,10 +403,10 @@ const FinancialDashboard = () => {
             {/* FINANCIAL SUMMARY HUD */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
-                    { label: 'Total Liability', value: stats.totalLiability, icon: Wallet, color: 'text-indigo-600', bg: 'bg-indigo-500/5', border: 'border-indigo-500/20' },
-                    { label: 'Disbursed Capital', value: stats.totalPaid, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
-                    { label: 'Pending Audit', value: stats.pendingSettlements, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
-                    { label: 'Monthly Velocity', value: stats.monthlyVelocity, icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-500/5', border: 'border-rose-500/20' },
+                    { label: 'Pending Payouts', value: stats.totalLiability, icon: Wallet, color: 'text-indigo-600', bg: 'bg-indigo-500/5', border: 'border-indigo-500/20' },
+                    { label: 'Total Paid Amount', value: stats.totalPaid, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
+                    { label: 'Waiting Approval', value: stats.pendingSettlements, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
+                    { label: 'Monthly Earnings', value: stats.monthlyVelocity, icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-500/5', border: 'border-rose-500/20' },
                 ].map((stat, i) => (
                     <div key={i} className="group bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 relative overflow-hidden text-left">
                         <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg} rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none transition-transform group-hover:scale-150 duration-1000`} />
@@ -511,7 +511,7 @@ const FinancialDashboard = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 w-full text-left">
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Universal Analytics Search</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Search Finance Records</Label>
                                     <div className="relative">
                                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={18} />
                                         <Input 
@@ -524,17 +524,17 @@ const FinancialDashboard = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Ledger Distribution</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Payment Status Filter</Label>
                                     <select 
                                         value={statusFilter} 
                                         onChange={(e) => setStatusFilter(e.target.value)}
                                         className="w-full h-16 px-8 bg-white/5 border border-white/10 rounded-2xl text-xs font-black text-white outline-none cursor-pointer focus:bg-white/10 transition-all uppercase tracking-widest appearance-none shadow-inner"
                                     >
-                                        <option value="all" className="bg-slate-900">Universal Access</option>
-                                        <option value="pending_approval" className="bg-slate-900 text-amber-400">Unreconciled Pipeline</option>
-                                        <option value="processing" className="bg-slate-900 text-blue-400">Transit Protocol</option>
-                                        <option value="paid" className="bg-slate-900 text-emerald-400">Cleared Assets</option>
-                                        <option value="declined" className="bg-slate-900 text-rose-400">Void Liabilities</option>
+                                        <option value="all" className="bg-slate-900">Global View</option>
+                                        <option value="pending_approval" className="bg-slate-900 text-amber-400">Pending Approval</option>
+                                        <option value="processing" className="bg-slate-900 text-blue-400">In Process</option>
+                                        <option value="paid" className="bg-slate-900 text-emerald-400">Completed Payouts</option>
+                                        <option value="declined" className="bg-slate-900 text-rose-400">Declined/Cancelled</option>
                                     </select>
                                 </div>
 
@@ -560,8 +560,8 @@ const FinancialDashboard = () => {
                             <History size={32} />
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-[13px] font-black text-primary uppercase tracking-[0.4em] italic mb-1">Financial Reconciliation Hub</h3>
-                            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase">Ledger Master Protocol</h2>
+                            <h3 className="text-[13px] font-black text-primary uppercase tracking-[0.4em] italic mb-1">Finance Summary</h3>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase">Payment History Ledger</h2>
                         </div>
                     </div>
                 </div>
@@ -587,8 +587,8 @@ const FinancialDashboard = () => {
                                     <Focus size={36} />
                                 </div>
                                 <div className="flex flex-col gap-1 items-start">
-                                    Authorize Flow
-                                    <span className="text-[11px] text-primary uppercase tracking-[0.4em] font-black leading-none mt-2">Capital Disbursement Protocol</span>
+                                    Authorize Payout
+                                    <span className="text-[11px] text-primary uppercase tracking-[0.4em] font-black leading-none mt-2">Payment Approval System</span>
                                 </div>
                             </DialogTitle>
                         </DialogHeader>
@@ -630,7 +630,7 @@ const FinancialDashboard = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] space-y-2 group/val hover:bg-emerald-500/10 transition-all">
-                                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">Net Bounty Amount</span>
+                                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">Net Payout Amount</span>
                                         <div className="flex items-baseline gap-2">
                                             <span className="text-4xl font-black text-emerald-600 tracking-tighter">₹{parseInt(selectedClaim.calculatedCommission || selectedClaim.job?.incentiveAgent || '5000').toLocaleString()}</span>
                                         </div>
@@ -740,7 +740,7 @@ const FinancialDashboard = () => {
                                     <div className="space-y-8">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1 h-6 bg-emerald-500 rounded-full" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-900 dark:text-white">Audit Transaction</h4>
+                                            <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-900 dark:text-white">Audit & History</h4>
                                         </div>
                                         <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] p-10 flex flex-col items-center justify-center gap-4 text-center group/payout hover:bg-emerald-500/10 transition-all">
                                             <div className="w-20 h-20 rounded-[2.5rem] bg-emerald-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-500/40 transform group-hover:rotate-12 transition-transform">
@@ -789,7 +789,7 @@ const FinancialDashboard = () => {
                                 <FileText size={24} />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black tracking-tight text-foreground">Financial Object Preview</h3>
+                                <h3 className="text-xl font-black tracking-tight text-foreground">Invoice Preview</h3>
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Tax Compliant Settlement Hub</p>
                             </div>
                          </div>
@@ -797,7 +797,7 @@ const FinancialDashboard = () => {
                             onClick={handlePrintInvoice}
                             className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-xs h-12 px-8 rounded-xl shadow-xl shadow-primary/20"
                          >
-                            <Download size={18} className="mr-2" /> Execute Print Protocol
+                            <Download size={18} className="mr-2" /> Print Invoice
                          </Button>
                     </div>
                     <div className="p-10 bg-slate-100 dark:bg-slate-950/40 relative max-h-[70vh] overflow-y-auto custom-scrollbar">
