@@ -15,7 +15,7 @@ import {
     Network, Search, ArrowUpRight, TrendingUp, Trash2,
     Clock, MoreVertical, Shield, UserCog, Ghost, RefreshCw, Zap,
     Filter, X, CheckCircle2, Plus, Info, AlertCircle, FileText,
-    Sparkles, XCircle
+    Sparkles, XCircle, Activity
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -386,8 +386,11 @@ const ReferralQueue = () => {
                                     placeholder="Search nodes..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full h-12 pl-11 pr-4 bg-background dark:bg-slate-900 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[11px] font-black outline-none transition-all placeholder:text-muted-foreground/30 shadow-inner"
+                                    className="w-full h-12 pl-11 pr-12 bg-background dark:bg-slate-900 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[11px] font-black outline-none transition-all placeholder:text-muted-foreground/30 shadow-inner"
                                 />
+                                <button className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-xl bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center border border-primary/10">
+                                    <Search size={14} />
+                                </button>
                             </div>
                             <div className="md:col-span-3">
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -887,7 +890,11 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                             <DropdownMenuTrigger asChild>
                                 <Button 
                                     variant="ghost" 
-                                    onClick={(e) => e.stopPropagation()}
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                    }}
                                     className="h-12 w-12 rounded-[1.3rem] bg-secondary/80 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm outline-none ring-0 relative z-20"
                                 >
                                     <MoreVertical size={20} />

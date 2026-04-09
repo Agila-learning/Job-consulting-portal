@@ -584,12 +584,22 @@ const JobManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-card/95 dark:bg-slate-900 shadow-xl p-6 rounded-[2.5rem] border border-border/40">
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Search Jobs</Label>
-                    <Input 
-                        placeholder="Search role/company..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="h-12 bg-background border-border/50 rounded-xl text-xs font-bold"
-                    />
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 transition-colors group-focus-within:text-primary" />
+                        <Input 
+                            placeholder="Search role/company..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="h-12 pl-11 pr-12 bg-background border-border/50 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/5 transition-all"
+                        />
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all border border-primary/10"
+                        >
+                            <Search size={14} />
+                        </Button>
+                    </div>
                 </div>
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Lifecycle Status</Label>
@@ -705,12 +715,18 @@ const JobManagement = () => {
                                             {isAdmin && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <button 
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 active:scale-95 relative z-20"
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon"
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                            }}
+                                                            className="h-12 w-12 rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 relative z-20"
                                                         >
                                                             <MoreVertical size={20} />
-                                                        </button>
+                                                        </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuPortal>
                                                         <DropdownMenuContent align="end" className="w-64 p-3 rounded-[2rem] bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl mt-2 border" style={{ zIndex: 9999 }}>

@@ -512,14 +512,21 @@ const FinancialDashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 w-full text-left">
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Search Finance Records</Label>
-                                    <div className="relative">
-                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                                    <div className="relative group">
+                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 transition-colors group-focus-within:text-primary" size={18} />
                                         <Input 
                                             placeholder="Agent, Payment ID, or Job..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="h-16 bg-white/5 border-white/10 rounded-2xl text-[13px] font-black text-white pl-14 focus:bg-white/10 transition-all border-0 focus:ring-2 focus:ring-primary/50 shadow-inner"
+                                            className="h-16 bg-white/5 border-white/10 rounded-2xl text-[13px] font-black text-white pl-14 pr-16 focus:bg-white/10 transition-all border-0 focus:ring-2 focus:ring-primary/50 shadow-inner"
                                         />
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl transition-all border border-primary/20"
+                                        >
+                                            <Search size={18} />
+                                        </Button>
                                     </div>
                                 </div>
 

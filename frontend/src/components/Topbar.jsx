@@ -29,12 +29,18 @@ const Topbar = ({ title, showSidebarMobile }) => {
     navigate('/login');
   };
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter' && searchValue.trim()) {
+  const triggerSearch = () => {
+    if (searchValue.trim()) {
       const role = user?.role || 'authorized';
       const rolePath = role === 'team_leader' ? 'team-leader' : role;
       navigate(`/${rolePath}/referrals?q=${encodeURIComponent(searchValue.trim())}`);
       setSearchValue("");
+    }
+  };
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      triggerSearch();
     }
   };
 
@@ -70,8 +76,16 @@ const Topbar = ({ title, showSidebarMobile }) => {
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onKeyDown={handleSearch}
-          className="pl-11 h-12 bg-secondary/20 dark:bg-slate-900/60 border-border/40 hover:bg-secondary/40 dark:hover:bg-slate-900/80 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all rounded-2xl font-bold placeholder:text-muted-foreground/30 text-[11px] shadow-sm outline-none dark:border-white/5 dark:focus:border-primary/40 text-slate-900 dark:text-white"
+          className="pl-11 pr-14 h-12 bg-secondary/20 dark:bg-slate-900/60 border-border/40 hover:bg-secondary/40 dark:hover:bg-slate-900/80 focus:bg-background focus:ring-4 focus:ring-primary/5 transition-all rounded-2xl font-bold placeholder:text-muted-foreground/30 text-[11px] shadow-sm outline-none dark:border-white/5 dark:focus:border-primary/40 text-slate-900 dark:text-white"
         />
+        <Button 
+            onClick={triggerSearch} 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-2 h-8 w-8 rounded-lg hover:bg-primary hover:text-white transition-all text-muted-foreground/40"
+        >
+            <Search size={14} />
+        </Button>
         <div className="absolute right-4 hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-background border border-border/50 text-[10px] font-black text-muted-foreground/40 shadow-sm pointer-events-none group-focus-within:opacity-0 transition-opacity">
             <span className="text-[10px] opacity-60">⌘</span>K
         </div>
