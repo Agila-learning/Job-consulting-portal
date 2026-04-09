@@ -11,7 +11,7 @@ import {
     Search, ShieldCheck, CheckCircle2, XCircle, 
     Eye, ExternalLink, User, Landmark, 
     CreditCard, FileText, Smartphone, Mail,
-    ShieldAlert, Fingerprint, Banknote, Shield
+    ShieldAlert, Fingerprint, Banknote, Shield, X
 } from 'lucide-react';
 
 const KYCManagement = () => {
@@ -158,7 +158,13 @@ const KYCManagement = () => {
 
             {selectedKYC && (
                 <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-                    <DialogContent className="max-w-4xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden focus-visible:ring-0">
+                    <DialogContent className="max-w-4xl max-h-[90vh] bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-y-auto focus-visible:ring-0">
+                        <button 
+                            onClick={() => setIsReviewOpen(false)}
+                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground bg-white/50 backdrop-blur-sm shadow-sm"
+                        >
+                            <X size={20} />
+                        </button>
                         <div className="p-10 border-b border-border/40 bg-secondary/30 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                             <div className="flex items-center gap-6 relative z-10">

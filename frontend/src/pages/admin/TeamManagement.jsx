@@ -433,7 +433,7 @@ const TeamManagement = () => {
                             placeholder="Search by name, email, or serial..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-12 pl-14 pr-4 bg-background border border-border/50 focus:ring-4 focus:ring-primary/5 rounded-xl text-xs font-bold shadow-inner outline-none transition-all placeholder:text-muted-foreground/40"
+                            className="w-full h-12 pl-12 pr-4 bg-background border border-border/50 focus:ring-4 focus:ring-primary/5 rounded-xl text-xs font-bold shadow-inner outline-none transition-all placeholder:text-muted-foreground/40"
                         />
                     </div>
                 </div>
@@ -458,9 +458,22 @@ const TeamManagement = () => {
                         className="w-full h-12 pl-4 pr-10 bg-background border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest outline-none transition-all cursor-pointer shadow-sm focus:border-primary/40 focus:ring-4 focus:ring-primary/5 appearance-none"
                     >
                         <option value="all">All Departments</option>
-                        {Array.from(new Set(employees.map(e => e.department).filter(Boolean))).map(dept => (
-                            <option key={dept} value={dept}>{dept.toUpperCase()}</option>
-                        ))}
+                        <option value="IT">IT</option>
+                        <option value="BDA">BDA</option>
+                        <option value="Consulting">CONSULTING</option>
+                        <option value="Credit card">CREDIT CARD</option>
+                        <option value="Administration">ADMINISTRATION</option>
+                        <option value="HR">HR</option>
+                        <option value="Insurance">INSURANCE</option>
+                        <option value="Marketing">MARKETING</option>
+                        <option value="Manufacturing">MANUFACTURING</option>
+                        <option value="Banking">BANKING</option>
+                        {Array.from(new Set(employees.map(e => e.department).filter(Boolean)))
+                            .filter(dept => !["IT", "BDA", "Consulting", "Credit card", "Administration", "HR", "Insurance", "Marketing", "Manufacturing", "Banking"].includes(dept))
+                            .map(dept => (
+                                <option key={dept} value={dept}>{dept.toUpperCase()}</option>
+                            ))
+                        }
                     </select>
                 </div>
             </div>

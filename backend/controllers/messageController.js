@@ -42,6 +42,18 @@ exports.sendMessage = async (req, res) => {
         }
 
         const message = await Message.create(messageData);
+        const populatedMessage = await Message.findById(message._id).populate('sender', 'name role');
+
+        // Emit real-time notification
+        const io = req.app.get('io');
+        if (isDirect) {
+            io.to(recipientId.toString()).emit('new_message', populatedMessage);
+            io.to(senderId.toString()).emit('new_message', populatedMessage);
+        } else {
+            // Emit to referral thread participants (Referrer, Assigned, Admin)
+            io.emit('new_message', populatedMessage); // Simplification: broadcast or use room
+        }
+
         res.status(200).json({ success: true, data: message });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

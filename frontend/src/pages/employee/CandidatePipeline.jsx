@@ -20,7 +20,7 @@ import AddCandidateForm from '@/components/AddCandidateForm';
 import { toast } from 'sonner';
 import { 
     UserPlus, Zap, Briefcase, FileSearch, Sparkles, BrainCircuit, Upload,
-    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter
+    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter, X
 } from 'lucide-react';
 import { 
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -250,17 +250,17 @@ const CandidatePipeline = () => {
 
             {/* FILTERS & ENGINE CONTROLS */}
             <div className="flex flex-col lg:flex-row gap-6 bg-card/50 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-6 shadow-sm">
-                <div className="flex-1 relative group">
+                <div className="flex-1 relative group w-full">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors duration-300" size={18} />
                     <input 
                         type="text" 
-                        placeholder="Search candidates by name, identity, or contact metadata..."
+                        placeholder="Search candidates..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-[1.2rem] text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
+                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
                     />
                 </div>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
                     <Select onValueChange={setPriorityFilter} value={priorityFilter}>
                         <SelectTrigger className="w-48 h-15 bg-background dark:bg-slate-900/60 border-border/40 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
                              <div className="flex items-center gap-3"><Filter size={14} className="text-primary/60" /><SelectValue placeholder="Priority" /></div>
@@ -363,7 +363,7 @@ const CandidatePipeline = () => {
 
             {/* ATS AI MODAL */}
             <Dialog open={isATSModalOpen} onOpenChange={setIsATSModalOpen}>
-                <DialogContent className="max-w-xl bg-card border-border/40 rounded-[2.5rem] shadow-2xl p-0 overflow-hidden outline-none z-[120]">
+                <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto bg-card border-border/40 rounded-[2.5rem] shadow-2xl p-0 outline-none z-[120]">
                     <div className="p-8 border-b border-border/30 bg-primary/5 relative overflow-hidden">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">

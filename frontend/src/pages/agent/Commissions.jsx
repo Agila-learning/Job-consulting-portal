@@ -11,8 +11,9 @@ import { toast } from 'sonner';
 import { 
     DollarSign, TrendingUp, CheckCircle, Clock, 
     FileText, Upload, Send, Loader2, Landmark,
-    AlertCircle, ShieldCheck, ChevronRight, Activity, Zap
+    AlertCircle, ShieldCheck, ChevronRight, Activity, Zap, X
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const Commissions = () => {
     const [referrals, setReferrals] = useState([]);
@@ -60,6 +61,23 @@ const Commissions = () => {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleExport = () => {
+        const data = referrals.map(r => ({
+            'Candidate Name': r.candidateName,
+            'Job Role': r.job?.jobTitle || 'N/A',
+            'Projected Value (INR)': r.calculatedCommission || r.job?.incentiveAgent || 5000,
+            'Ledger Status': r.payoutStatus,
+            'Lifecycle Node': r.status,
+            'Submission Date': r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A'
+        }));
+        
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Financial Ledger');
+        XLSX.writeFile(workbook, `financial_ledger_${new Date().toISOString().split('T')[0]}.xlsx`);
+        toast.success('Financial Ledger Exported to Excel');
     };
 
     const totalEarned = referrals
@@ -162,7 +180,7 @@ const Commissions = () => {
                     <p className="text-muted-foreground text-sm font-medium">Track operational commissions, project pipeline value, and synchronize payouts.</p>
                 </div>
                 
-                <Button className="h-11 px-6 rounded-xl bg-primary shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all font-black text-[10px] uppercase tracking-widest">
+                <Button onClick={handleExport} className="h-11 px-6 rounded-xl bg-primary shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all font-black text-[10px] uppercase tracking-widest">
                     <FileText size={16} className="mr-2" />
                     Export Ledger
                 </Button>
@@ -249,7 +267,13 @@ const Commissions = () => {
             </div>
 
             <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-                <DialogContent className="max-w-xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden">
+                <DialogContent className="max-w-xl max-h-[90vh] bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-y-auto focus:ring-0">
+                    <button 
+                        onClick={() => setIsUploadOpen(false)}
+                        className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground bg-white/50 backdrop-blur-sm shadow-sm"
+                    >
+                        <X size={20} />
+                    </button>
                     <div className="p-10 border-b border-border/40 bg-secondary/30 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                         <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-4 relative z-10">

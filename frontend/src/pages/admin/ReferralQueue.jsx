@@ -363,11 +363,11 @@ const ReferralQueue = () => {
                         </div>
 
                         {/* Search & Select Toggles */}
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full h-full">
                             {isAdmin && (
-                                <div className="md:col-span-3">
+                                <div className="w-full sm:w-48">
                                     <Select value={branchFilter} onValueChange={setBranchFilter}>
-                                        <SelectTrigger className="h-12 bg-background border-border/40 rounded-2xl font-black text-[9px] uppercase tracking-widest">
+                                        <SelectTrigger className="h-12 bg-background border-border/40 rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-sm">
                                             <SelectValue placeholder="Branch" />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
@@ -379,14 +379,14 @@ const ReferralQueue = () => {
                                     </Select>
                                 </div>
                             )}
-                            <div className={isAdmin ? "md:col-span-3 relative group" : "md:col-span-6 relative group"}>
+                            <div className="relative group flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 transition-colors group-focus-within:text-primary" />
                                 <input 
                                     type="text" 
-                                    placeholder="Search..."
+                                    placeholder="Search nodes..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full h-12 pl-11 pr-4 bg-background dark:bg-slate-900 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[11px] font-bold outline-none transition-all placeholder:text-muted-foreground/30 shadow-inner"
+                                    className="w-full h-12 pl-11 pr-4 bg-background dark:bg-slate-900 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[11px] font-black outline-none transition-all placeholder:text-muted-foreground/30 shadow-inner"
                                 />
                             </div>
                             <div className="md:col-span-3">
@@ -476,7 +476,7 @@ const ReferralQueue = () => {
 
             {/* Delegation Orchestrator (Dialog) */}
             <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
-                <DialogContent className="max-w-xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-2xl overflow-hidden text-left focus:ring-0">
+                <DialogContent className="max-w-xl max-h-[90vh] bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-2xl overflow-y-auto focus:ring-0">
                     <div className="p-10 relative overflow-hidden bg-primary/5 border-b border-border/20 text-left">
                         <DialogHeader className="relative z-10 p-0 text-left">
                             <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-5 text-foreground leading-none">
@@ -655,7 +655,7 @@ const ReferralQueue = () => {
 
             {/* Financial Protocol (Commission Config) Dialog */}
             <Dialog open={isFinanceOpen} onOpenChange={setIsFinanceOpen}>
-                <DialogContent className="max-w-xl bg-card border-border/40 rounded-[2.5rem] p-0 overflow-hidden outline-none">
+                <DialogContent className="max-w-xl max-h-[90vh] bg-card border-border/40 rounded-[2.5rem] p-0 overflow-y-auto outline-none">
                     <div className="p-10 bg-emerald-500/5 border-b border-border/20">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-4">
@@ -714,7 +714,7 @@ const ReferralQueue = () => {
 
             {/* Timeline Logs Dialog */}
             <Dialog open={isTimelineOpen} onOpenChange={setIsTimelineOpen}>
-                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] p-0 overflow-hidden outline-none">
+                <DialogContent className="max-w-2xl max-h-[90vh] bg-card border-border/40 rounded-[2.8rem] p-0 overflow-y-auto outline-none">
                     <div className="p-8 border-b border-border/30 bg-secondary/10 flex items-center justify-between">
                         <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-4">
                             <div className="w-12 h-12 rounded-[1.2rem] bg-slate-900 flex items-center justify-center text-white">
