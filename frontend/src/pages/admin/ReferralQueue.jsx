@@ -102,7 +102,8 @@ const ReferralQueue = () => {
             
             const isPlacementReady = placementStatuses.includes(ref.status);
             const tabMatch = targetTab === 'placements' ? isPlacementReady : !isPlacementReady;
-            const matchesBranch = branchFilter === 'all' ? true : ref.branchId === branchFilter;
+            const matchesBranch = branchFilter === 'all' ? true : 
+                                 (typeof ref.branchId === 'object' ? ref.branchId?._id === branchFilter : ref.branchId === branchFilter);
 
             return matchesSearch && matchesStatus && matchesSource && tabMatch && matchesBranch;
         });

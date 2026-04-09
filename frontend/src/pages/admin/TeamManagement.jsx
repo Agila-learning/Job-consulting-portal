@@ -26,20 +26,31 @@ const TeamManagement = () => {
     const [deptFilter, setDeptFilter] = useState('all');
     
     const [formData, setFormData] = useState({
-        name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee'
+        name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: ''
     });
     const [editFormData, setEditFormData] = useState({
-        name: '', email: '', designation: '', department: '', employeeId: ''
+        name: '', email: '', designation: '', department: '', employeeId: '', branchId: ''
     });
+
+    const [branches, setBranches] = useState([]);
+    const [branchFilter, setBranchFilter] = useState('all');
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data.data);
+        } catch (err) {}
+    };
 
     const fetchEmployees = async () => {
         setLoading(true);
         try {
-            const roleQuery = user?.role === 'admin' ? 'employee,team_leader,agent' : 'employee';
-            const res = await api.get(`/users?role=${roleQuery}`);
+            const roleQuery = user?.role === 'admin' || user?.role === 'team_leader' ? 'employee,team_leader,agent' : 'employee';
+            const branchQuery = branchFilter !== 'all' ? `&branchId=${branchFilter}` : '';
+            const res = await api.get(`/users?role=${roleQuery}${branchQuery}`);
             setEmployees(res.data.data);
         } catch (err) {
-            toast.error('Failed to fetch consulting workforce');
+            toast.error('Failed to fetch workforce data');
         } finally {
             setLoading(false);
         }
@@ -71,8 +82,9 @@ const TeamManagement = () => {
     };
 
     useEffect(() => {
+        fetchBranches();
         fetchEmployees();
-    }, []);
+    }, [branchFilter]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -106,7 +118,8 @@ const TeamManagement = () => {
             email: user.email,
             designation: user.designation || '',
             department: user.department || '',
-            employeeId: user.employeeId || ''
+            employeeId: user.employeeId || '',
+            branchId: user.branchId || ''
         });
         setIsEditOpen(true);
     };
@@ -212,7 +225,11 @@ const TeamManagement = () => {
                         )}>
                             {row.department || 'General'}
                         </Badge>
-                        <p className="text-[9px] font-black text-foreground/70 uppercase tracking-[0.2em] ml-1">{row.designation || 'Specialist'}</p>
+                        <div className="flex items-center gap-1.5 ml-1">
+                            <p className="text-[9px] font-black text-foreground/70 uppercase tracking-[0.2em]">{row.designation || 'Specialist'}</p>
+                            <span className="text-[9px] text-muted-foreground/30">•</span>
+                            <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">{row.branchId?.name || 'Local'}</p>
+                        </div>
                     </div>
                 );
             }
@@ -331,12 +348,41 @@ const TeamManagement = () => {
                                         <Input id="password" type="password" required value={formData.password} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="Temporary Passcode" />
                                     </div>
                                     <div className="space-y-3">
-                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Job Title</Label>
-                                        <Input id="designation" required value={formData.designation} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="Senior Consultant" />
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Domain / Department</Label>
+                                        <select 
+                                            id="department" 
+                                            value={formData.department} 
+                                            onChange={handleChange} 
+                                            className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="Consulting">Consulting</option>
+                                            <option value="IT">IT</option>
+                                            <option value="Information Technology">Information Technology</option>
+                                            <option value="BDA">BDA</option>
+                                            <option value="Credit card">Credit card</option>
+                                            <option value="Administration">Administration</option>
+                                            <option value="HR">HR</option>
+                                            <option value="Insurance">Insurance</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Manufacturing">Manufacturing</option>
+                                            <option value="Banking">Banking</option>
+                                            <option value="Healthcare">Healthcare</option>
+                                        </select>
                                     </div>
                                     <div className="space-y-3">
-                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Department</Label>
-                                        <Input id="department" required value={formData.department} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="Talent Acquisition" />
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Branch Office</Label>
+                                        <select 
+                                            id="branchId" 
+                                            value={formData.branchId} 
+                                            onChange={handleChange} 
+                                            className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
+                                            required={user?.role === 'admin'}
+                                        >
+                                            <option value="">Select Branch</option>
+                                            {branches.map(b => (
+                                                <option key={b._id} value={b._id}>{b.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                                 <DialogFooter className="pt-6 border-t border-border/40">
@@ -365,6 +411,19 @@ const TeamManagement = () => {
                             className="w-full h-12 pl-12 pr-4 bg-background border border-border/50 focus:ring-2 focus:ring-primary/20 rounded-xl text-xs font-bold outline-none transition-all"
                         />
                     </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Branch Hub</Label>
+                    <select 
+                        value={branchFilter} 
+                        onChange={(e) => setBranchFilter(e.target.value)}
+                        className="w-full h-12 pl-4 pr-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none transition-all cursor-pointer"
+                    >
+                        <option value="all">Global (Everywhere)</option>
+                        {branches.map(b => (
+                            <option key={b._id} value={b._id}>{b.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department Scope</Label>
@@ -452,12 +511,41 @@ const TeamManagement = () => {
                                 <Input id="employeeId" required value={editFormData.employeeId} onChange={handleEditChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Job Title</Label>
-                                <Input id="designation" required value={editFormData.designation} onChange={handleEditChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" />
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Domain / Department</Label>
+                                <select 
+                                    id="department" 
+                                    value={editFormData.department} 
+                                    onChange={handleEditChange} 
+                                    className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="Consulting">Consulting</option>
+                                    <option value="IT">IT</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="BDA">BDA</option>
+                                    <option value="Credit card">Credit card</option>
+                                    <option value="Administration">Administration</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Insurance">Insurance</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Banking">Banking</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                </select>
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Department</Label>
-                                <Input id="department" required value={editFormData.department} onChange={handleEditChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" />
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Branch Office</Label>
+                                <select 
+                                    id="branchId" 
+                                    value={editFormData.branchId} 
+                                    onChange={handleEditChange} 
+                                    className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
+                                    required={user?.role === 'admin'}
+                                >
+                                    <option value="">Select Branch</option>
+                                    {branches.map(b => (
+                                        <option key={b._id} value={b._id}>{b.name}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                         <DialogFooter className="pt-6 border-t border-border/40">

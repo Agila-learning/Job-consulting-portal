@@ -36,15 +36,33 @@ const ATSResumeTracker = () => {
     }, [user?.role]);
 
     const DOMAINS = [
-        { id: 'tech', label: 'Technical / IT' },
-        { id: 'non-tech', label: 'Non-Technical / Ops' },
-        { id: 'sales', label: 'Sales & Marketing' }
+        { id: 'IT', label: 'IT' },
+        { id: 'Information Technology', label: 'Information Technology' },
+        { id: 'BDA', label: 'BDA' },
+        { id: 'Consulting', label: 'Consulting' },
+        { id: 'Credit card', label: 'Credit card' },
+        { id: 'Administration', label: 'Administration' },
+        { id: 'HR', label: 'HR' },
+        { id: 'Insurance', label: 'Insurance' },
+        { id: 'Marketing', label: 'Marketing' },
+        { id: 'Manufacturing', label: 'Manufacturing' },
+        { id: 'Banking', label: 'Banking' },
+        { id: 'Healthcare', label: 'Healthcare' }
     ];
 
     const ROLES = {
-        'tech': ['MERN Developer', 'UI/UX Designer', 'Cloud Architect (AWS)', 'DevOps Engineer', 'Quality Analyst'],
-        'non-tech': ['HR Manager', 'Operations Lead', 'Recruitment Specialist', 'Admin Coordinator'],
-        'sales': ['Business Development', 'Account Manager', 'Inside Sales', 'Growth Specialist']
+        'IT': ['MERN Developer', 'UI/UX Designer', 'Cloud Architect (AWS)', 'DevOps Engineer', 'Quality Analyst'],
+        'Information Technology': ['Network Admin', 'System Analyst', 'Security Specialist'],
+        'BDA': ['Business Analyst', 'Data Scientist', 'BI Developer'],
+        'Consulting': ['Management Consultant', 'Strategy Analyst', 'Process Expert'],
+        'Credit card': ['Credit Analyst', 'Collections Specialist', 'Underwriter'],
+        'Administration': ['Office Manager', 'Executive Assistant', 'Admin Lead'],
+        'HR': ['Recruiter', 'HR Generalist', 'Benefits Coordinator'],
+        'Insurance': ['Claims Adjuster', 'Policy Analyst', 'Underwriter'],
+        'Marketing': ['Content Growth', 'Performance Marketing', 'SEO Strategist'],
+        'Manufacturing': ['Production Manager', 'Quality Control', 'Supply Chain Analyst'],
+        'Banking': ['Relationship Manager', 'Branch Lead', 'Investment Banker'],
+        'Healthcare': ['Clinical Admin', 'Health Analytics', 'Care Coordinator']
     };
 
     const handleFileChange = (e) => {
@@ -269,7 +287,11 @@ const ATSResumeTracker = () => {
                             </Button>
                             {result.status === 'Shortlisted' && (
                                 <Button 
-                                    className="flex-1 h-16 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 transition-all"
+                                    onClick={() => {
+                                        const basePath = user?.role === 'admin' ? '/admin' : (user?.role === 'team_leader' ? '/team-leader' : '/employee');
+                                        window.location.href = `${basePath}/jobs`;
+                                    }}
+                                    className="flex-1 h-16 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 transition-all font-sans"
                                 >
                                     Proceed with Candidate
                                 </Button>

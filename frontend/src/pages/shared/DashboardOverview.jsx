@@ -190,7 +190,7 @@ const DashboardOverview = () => {
                         </div>
                         
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            {['IT', 'Non-IT', 'Banking', 'BDA', 'Healthcare', 'Engineering'].map(team => {
+                            {['IT', 'BDA', 'Consulting', 'Credit card', 'Banking', 'Manufacturing'].map(team => {
                                 const teamStat = stats.teamPerformance?.find(t => t._id === team);
                                 const count = teamStat ? teamStat.count : 0;
                                 const percentage = stats.totalCandidates > 0 ? (count / stats.totalCandidates) * 100 : 0;
@@ -223,7 +223,13 @@ const DashboardOverview = () => {
                                 </h3>
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Real-time status updates</p>
                             </div>
-                            <button onClick={() => navigate('/admin/referrals')} className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
+                            <button 
+                                onClick={() => {
+                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : '/admin');
+                                    navigate(`${basePath}/referrals`);
+                                }} 
+                                className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+                            >
                                 View ATS Pipeline <ArrowRight size={14} />
                             </button>
                         </div>
@@ -330,7 +336,11 @@ const DashboardOverview = () => {
                                 </p>
                              </div>
                              <button 
-                                onClick={() => navigate('/admin/referrals')}
+                                onClick={() => {
+                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : '/admin');
+                                    const path = user?.role === 'admin' ? '/admin/referrals' : `${basePath}/pipeline`;
+                                    navigate(path);
+                                }}
                                 className="h-12 w-full bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-2 group/btn"
                              >
                                 Open Referral Port <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />

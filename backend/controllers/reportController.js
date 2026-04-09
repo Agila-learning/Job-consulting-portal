@@ -10,6 +10,8 @@ exports.getAuditRecords = async (req, res) => {
         // For non-admins, force their own branch
         if (req.user.role !== 'admin') {
             branchId = req.user.branchId;
+        } else if (branchId === 'all') {
+            branchId = null;
         }
 
         const query = branchId ? { branchId } : {};

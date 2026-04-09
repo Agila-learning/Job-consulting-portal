@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { 
     FileText, Upload, Plus, Download, 
     BarChart3, Calendar, MoreVertical, 

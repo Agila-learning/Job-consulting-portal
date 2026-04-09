@@ -341,12 +341,17 @@ const JobManagement = () => {
                                                     <SelectTrigger className="h-14 bg-background border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none">
                                                         <SelectValue placeholder="Select Domain" />
                                                     </SelectTrigger>
-                                                    <SelectContent className="rounded-2xl border-border/50 bg-background/95 backdrop-blur-xl">
-                                                        <SelectItem value="IT" className="rounded-xl font-bold text-xs py-2.5">IT & software</SelectItem>
-                                                        <SelectItem value="Finance" className="rounded-xl font-bold text-xs py-2.5">Banking & Finance</SelectItem>
-                                                        <SelectItem value="Healthcare" className="rounded-xl font-bold text-xs py-2.5">Healthcare</SelectItem>
-                                                        <SelectItem value="Sales" className="rounded-xl font-bold text-xs py-2.5">Sales & Marketing</SelectItem>
-                                                        <SelectItem value="Operations" className="rounded-xl font-bold text-xs py-2.5">Operations</SelectItem>
+                                                    <SelectContent className="rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl z-[150]">
+                                                        <SelectItem value="IT" className="rounded-xl font-bold text-xs py-2.5">IT</SelectItem>
+                                                        <SelectItem value="BDA" className="rounded-xl font-bold text-xs py-2.5">BDA</SelectItem>
+                                                        <SelectItem value="Consulting" className="rounded-xl font-bold text-xs py-2.5">Consulting</SelectItem>
+                                                        <SelectItem value="Credit card" className="rounded-xl font-bold text-xs py-2.5">Credit card</SelectItem>
+                                                        <SelectItem value="Administration" className="rounded-xl font-bold text-xs py-2.5">Administration</SelectItem>
+                                                        <SelectItem value="HR" className="rounded-xl font-bold text-xs py-2.5">HR</SelectItem>
+                                                        <SelectItem value="Insurance" className="rounded-xl font-bold text-xs py-2.5">Insurance</SelectItem>
+                                                        <SelectItem value="Marketing" className="rounded-xl font-bold text-xs py-2.5">Marketing</SelectItem>
+                                                        <SelectItem value="Manufacturing" className="rounded-xl font-bold text-xs py-2.5">Manufacturing</SelectItem>
+                                                        <SelectItem value="Banking" className="rounded-xl font-bold text-xs py-2.5">Banking</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>

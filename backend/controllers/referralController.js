@@ -106,9 +106,12 @@ exports.getReferrals = async (req, res) => {
     try {
         let query = {};
 
-        // 1. Branch Segregation (Admins see all)
+        // 1. Branch Segregation
+        const { branchId } = req.query;
         if (req.user.role !== 'admin') {
             query.branchId = req.user.branchId;
+        } else if (branchId && branchId !== 'all') {
+            query.branchId = branchId;
         }
 
         // 2. Role-based data visibility
@@ -130,8 +133,8 @@ exports.getReferrals = async (req, res) => {
                 delete query.$or;
             }
         } else if (req.user.role === 'team_leader') {
-            // Team Leaders see everything in their branch
-            // Query is already filtered by branchId above
+            // Team Leaders see candidates in their branch AND their domain
+            query.assignedTeam = req.user.team;
         }
 
         // Admin sees everything (no filter)
