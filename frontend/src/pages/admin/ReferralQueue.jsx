@@ -95,8 +95,8 @@ const ReferralQueue = () => {
 
     const getFilteredData = (targetTab) => {
         return referrals.filter(ref => {
-            const matchesSearch = ref.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                 ref.job?.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = (ref.candidateName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+                                 (ref.job?.jobTitle?.toLowerCase() || '').includes(searchTerm.toLowerCase());
             const matchesStatus = statusFilter === 'all' ? true : ref.status === statusFilter;
             const matchesSource = sourceFilter === 'all' ? true : ref.sourceType === sourceFilter;
             
@@ -722,7 +722,7 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                 {/* 1. Identity Segment (Avatar + Main Info) */}
                 <div className="col-span-12 lg:col-span-5 flex items-center gap-6">
                     <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 border border-border/20 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 ${activeTab === 'placements' ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl shadow-emerald-500/20' : 'bg-secondary/60 text-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/20'}`}>
-                        {row.candidateName.charAt(0)}
+                        {row.candidateName ? row.candidateName.charAt(0) : 'C'}
                     </div>
                     <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex flex-col">

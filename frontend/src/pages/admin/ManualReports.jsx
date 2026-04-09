@@ -124,7 +124,7 @@ const ManualReports = () => {
                 </div>
                 <Button 
                     onClick={handleGenerate}
-                    className="h-12 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 flex gap-3 transition-all active:scale-[0.98]"
+                    className="h-12 w-full lg:w-auto px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 flex gap-3 transition-all active:scale-[0.98] justify-center"
                 >
                     <Plus size={16} /> Generate New Snapshot
                 </Button>

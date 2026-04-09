@@ -190,7 +190,7 @@ const DashboardOverview = () => {
                         </div>
                         
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            {['IT', 'BDA', 'Consulting', 'Credit card', 'Banking', 'Manufacturing'].map(team => {
+                            {['IT', 'BDA', 'Consulting', 'Credit card', 'Administration', 'HR', 'Insurance', 'Marketing', 'Manufacturing', 'Banking'].map(team => {
                                 const teamStat = stats.teamPerformance?.find(t => t._id === team);
                                 const count = teamStat ? teamStat.count : 0;
                                 const percentage = stats.totalCandidates > 0 ? (count / stats.totalCandidates) * 100 : 0;
@@ -225,8 +225,9 @@ const DashboardOverview = () => {
                             </div>
                             <button 
                                 onClick={() => {
-                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : '/admin');
-                                    navigate(`${basePath}/referrals`);
+                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : (user?.role === 'agent' ? '/agent' : '/admin'));
+                                    const path = user?.role === 'admin' ? '/admin/referrals' : (user?.role === 'agent' ? '/agent/referrals' : `${basePath}/pipeline`);
+                                    navigate(path);
                                 }} 
                                 className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
                             >
@@ -337,8 +338,8 @@ const DashboardOverview = () => {
                              </div>
                              <button 
                                 onClick={() => {
-                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : '/admin');
-                                    const path = user?.role === 'admin' ? '/admin/referrals' : `${basePath}/pipeline`;
+                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : (user?.role === 'agent' ? '/agent' : '/admin'));
+                                    const path = user?.role === 'admin' ? '/admin/referrals' : (user?.role === 'agent' ? '/agent/referrals' : `${basePath}/pipeline`);
                                     navigate(path);
                                 }}
                                 className="h-12 w-full bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-2 group/btn"

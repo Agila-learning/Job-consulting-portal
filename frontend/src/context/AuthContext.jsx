@@ -65,6 +65,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+    };
+
     const switchBranch = (branchId) => {
         const updatedUser = { ...user, branchId };
         localStorage.setItem('user', JSON.stringify(updatedUser));

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { 
@@ -14,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const ATSResumeTracker = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [file, setFile] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -37,7 +39,6 @@ const ATSResumeTracker = () => {
 
     const DOMAINS = [
         { id: 'IT', label: 'IT' },
-        { id: 'Information Technology', label: 'Information Technology' },
         { id: 'BDA', label: 'BDA' },
         { id: 'Consulting', label: 'Consulting' },
         { id: 'Credit card', label: 'Credit card' },
@@ -46,13 +47,11 @@ const ATSResumeTracker = () => {
         { id: 'Insurance', label: 'Insurance' },
         { id: 'Marketing', label: 'Marketing' },
         { id: 'Manufacturing', label: 'Manufacturing' },
-        { id: 'Banking', label: 'Banking' },
-        { id: 'Healthcare', label: 'Healthcare' }
+        { id: 'Banking', label: 'Banking' }
     ];
 
     const ROLES = {
         'IT': ['MERN Developer', 'UI/UX Designer', 'Cloud Architect (AWS)', 'DevOps Engineer', 'Quality Analyst'],
-        'Information Technology': ['Network Admin', 'System Analyst', 'Security Specialist'],
         'BDA': ['Business Analyst', 'Data Scientist', 'BI Developer'],
         'Consulting': ['Management Consultant', 'Strategy Analyst', 'Process Expert'],
         'Credit card': ['Credit Analyst', 'Collections Specialist', 'Underwriter'],
@@ -61,8 +60,7 @@ const ATSResumeTracker = () => {
         'Insurance': ['Claims Adjuster', 'Policy Analyst', 'Underwriter'],
         'Marketing': ['Content Growth', 'Performance Marketing', 'SEO Strategist'],
         'Manufacturing': ['Production Manager', 'Quality Control', 'Supply Chain Analyst'],
-        'Banking': ['Relationship Manager', 'Branch Lead', 'Investment Banker'],
-        'Healthcare': ['Clinical Admin', 'Health Analytics', 'Care Coordinator']
+        'Banking': ['Relationship Manager', 'Branch Lead', 'Investment Banker']
     };
 
     const handleFileChange = (e) => {
@@ -289,7 +287,8 @@ const ATSResumeTracker = () => {
                                 <Button 
                                     onClick={() => {
                                         const basePath = user?.role === 'admin' ? '/admin' : (user?.role === 'team_leader' ? '/team-leader' : '/employee');
-                                        window.location.href = `${basePath}/jobs`;
+                                        navigate(`${basePath}/jobs`, { state: { prefilledCandidate: result.candidateName || result.name } });
+                                        toast.success('Sequence transferred to Job Inventory');
                                     }}
                                     className="flex-1 h-16 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 transition-all font-sans"
                                 >

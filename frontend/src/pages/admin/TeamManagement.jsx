@@ -26,10 +26,10 @@ const TeamManagement = () => {
     const [deptFilter, setDeptFilter] = useState('all');
     
     const [formData, setFormData] = useState({
-        name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: ''
+        name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: '', commissionPercentage: ''
     });
     const [editFormData, setEditFormData] = useState({
-        name: '', email: '', designation: '', department: '', employeeId: '', branchId: ''
+        name: '', email: '', designation: '', department: '', employeeId: '', branchId: '', commissionPercentage: ''
     });
 
     const [branches, setBranches] = useState([]);
@@ -119,7 +119,8 @@ const TeamManagement = () => {
             designation: user.designation || '',
             department: user.department || '',
             employeeId: user.employeeId || '',
-            branchId: user.branchId || ''
+            branchId: user.branchId?._id || user.branchId || '',
+            commissionPercentage: user.commissionPercentage || ''
         });
         setIsEditOpen(true);
     };
@@ -233,6 +234,20 @@ const TeamManagement = () => {
                     </div>
                 );
             }
+        },
+        {
+            header: 'Incentive Structure',
+            cell: (row) => (
+                <div className="flex flex-col gap-1.5">
+                    <p className="text-[10px] font-black text-foreground tracking-tight">
+                        {row.commissionPercentage ? `${row.commissionPercentage}% Override` : 'Global Slab'}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Active Policy</span>
+                    </div>
+                </div>
+            )
         },
         {
             header: 'Status',
@@ -349,16 +364,15 @@ const TeamManagement = () => {
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Domain / Department</Label>
-                                        <select 
+                                         <select 
                                             id="department" 
                                             value={formData.department} 
                                             onChange={handleChange} 
                                             className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
                                         >
-                                            <option value="Consulting">Consulting</option>
                                             <option value="IT">IT</option>
-                                            <option value="Information Technology">Information Technology</option>
                                             <option value="BDA">BDA</option>
+                                            <option value="Consulting">Consulting</option>
                                             <option value="Credit card">Credit card</option>
                                             <option value="Administration">Administration</option>
                                             <option value="HR">HR</option>
@@ -366,8 +380,11 @@ const TeamManagement = () => {
                                             <option value="Marketing">Marketing</option>
                                             <option value="Manufacturing">Manufacturing</option>
                                             <option value="Banking">Banking</option>
-                                            <option value="Healthcare">Healthcare</option>
                                         </select>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Custom Incentive %</Label>
+                                        <Input id="commissionPercentage" type="number" value={formData.commissionPercentage} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="e.g. 5" />
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Branch Office</Label>
@@ -433,8 +450,8 @@ const TeamManagement = () => {
                         className="w-full h-12 pl-4 pr-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none transition-all cursor-pointer"
                     >
                         <option value="all">All Departments</option>
-                        {Array.from(new Set(employees.map(e => e.department))).map(dept => (
-                            <option key={dept || 'unassigned'} value={dept}>{dept}</option>
+                        {Array.from(new Set(employees.map(e => e.department).filter(Boolean))).map(dept => (
+                            <option key={dept} value={dept}>{dept}</option>
                         ))}
                     </select>
                 </div>
@@ -512,16 +529,15 @@ const TeamManagement = () => {
                             </div>
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Domain / Department</Label>
-                                <select 
+                                 <select 
                                     id="department" 
                                     value={editFormData.department} 
                                     onChange={handleEditChange} 
                                     className="w-full h-14 pl-4 pr-10 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none appearance-none cursor-pointer"
                                 >
-                                    <option value="Consulting">Consulting</option>
                                     <option value="IT">IT</option>
-                                    <option value="Information Technology">Information Technology</option>
                                     <option value="BDA">BDA</option>
+                                    <option value="Consulting">Consulting</option>
                                     <option value="Credit card">Credit card</option>
                                     <option value="Administration">Administration</option>
                                     <option value="HR">HR</option>
@@ -529,8 +545,11 @@ const TeamManagement = () => {
                                     <option value="Marketing">Marketing</option>
                                     <option value="Manufacturing">Manufacturing</option>
                                     <option value="Banking">Banking</option>
-                                    <option value="Healthcare">Healthcare</option>
                                 </select>
+                            </div>
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Custom Incentive %</Label>
+                                <Input id="commissionPercentage" type="number" value={editFormData.commissionPercentage} onChange={handleEditChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="e.g. 5" />
                             </div>
                             <div className="space-y-3">
                                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Branch Office</Label>
