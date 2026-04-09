@@ -431,6 +431,11 @@ exports.getReferralStats = async (req, res) => {
                 delete query.branchId;
                 delete query.$or;
             }
+        } else if (req.user.role === 'team_leader') {
+            // Team Leaders only see their domain's stats within their branch
+            if (req.user.team) {
+                query.assignedTeam = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
+            }
         }
 
         const stats = await Referral.aggregate([

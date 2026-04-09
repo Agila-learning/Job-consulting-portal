@@ -257,7 +257,7 @@ const CandidatePipeline = () => {
                         placeholder="Search candidates by name, identity, or contact metadata..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-15 pl-15 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30"
+                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-[1.2rem] text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
                     />
                 </div>
                 <div className="flex flex-wrap items-center gap-4">

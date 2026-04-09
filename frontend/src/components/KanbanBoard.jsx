@@ -138,12 +138,12 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
                     </div>
                     
                     {/* Quick Actions */}
-                    <div className="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-all translate-x-0 sm:translate-x-2 group-hover:translate-x-0">
+                    <div className="flex items-center gap-1.5 transition-all">
                          <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'call')} className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-emerald-500/10 hover:text-emerald-600 transition-colors text-muted-foreground outline-none bg-secondary/20 sm:bg-transparent">
-                                        <Phone size={14} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'call')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-emerald-500/10 hover:text-emerald-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
+                                        <Phone size={15} />
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="bg-emerald-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Call Candidate</TooltipContent>
@@ -152,18 +152,18 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'note')} className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-blue-500/10 hover:text-blue-600 transition-colors text-muted-foreground outline-none bg-secondary/20 sm:bg-transparent">
-                                        <StickyNote size={14} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'doc')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-indigo-500/10 hover:text-indigo-600 transition-colors text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
+                                        <FileText size={15} />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-blue-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Add Note</TooltipContent>
+                                <TooltipContent className="bg-indigo-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">View Profile</TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div role="button" onClick={(e) => handleQuickAction(e, 'delete')} className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-600 transition-all text-muted-foreground outline-none bg-secondary/20 sm:bg-transparent">
-                                        <Trash2 size={14} />
+                                    <div role="button" onClick={(e) => handleQuickAction(e, 'delete')} className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-rose-500/10 hover:text-rose-600 transition-all text-muted-foreground outline-none bg-secondary/30 sm:bg-transparent shadow-sm sm:shadow-none">
+                                        <Trash2 size={15} />
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="bg-rose-600 text-white border-none text-[10px] font-black uppercase tracking-widest rounded-lg">Delete Candidate</TooltipContent>

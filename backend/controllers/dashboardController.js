@@ -31,13 +31,18 @@ exports.getDashboardSummary = async (req, res) => {
             stats.successfulPlacements = financialStats[0]?.count || 0;
 
         } else if (role === 'team_leader') {
-            // TL sees aggregate for their specific branch
-            stats.activeJobs = await Job.countDocuments({ status: 'active' });
-            stats.totalPipeline = await Referral.countDocuments({ branchId: userBranchId });
-            stats.teamPlacements = await Referral.countDocuments({ branchId: userBranchId, status: 'Joined' });
+            // TL sees aggregate for their specific branch and domain
+            const tlQuery = { branchId: userBranchId };
+            if (req.user.team) {
+                tlQuery.assignedTeam = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
+            }
+            
+            stats.activeJobs = await Job.countDocuments({ status: 'active', domain: req.user.team });
+            stats.totalPipeline = await Referral.countDocuments(tlQuery);
+            stats.teamPlacements = await Referral.countDocuments({ ...tlQuery, status: 'Joined' });
             
             const pipelineValue = await Referral.aggregate([
-                { $match: { branchId: userBranchId, status: 'Joined' } },
+                { $match: { ...tlQuery, status: 'Joined' } },
                 { $group: { _id: null, total: { $sum: { $toDouble: "$calculatedCommission" } } } }
             ]);
             stats.managedValue = pipelineValue[0]?.total || 0;

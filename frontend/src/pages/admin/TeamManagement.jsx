@@ -319,7 +319,7 @@ const TeamManagement = () => {
                             <div className="p-10 relative overflow-hidden bg-secondary/30 border-b border-border/40">
                                 <button 
                                     onClick={() => setIsCreateOpen(false)}
-                                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
+                                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground bg-white/50 backdrop-blur-sm shadow-sm"
                                 >
                                     <X size={20} />
                                 </button>
@@ -337,7 +337,7 @@ const TeamManagement = () => {
                                 </DialogHeader>
                             </div>
                             
-                            <form onSubmit={handleCreate} className="space-y-8 p-6 md:p-10 bg-background/50 relative z-10 w-full overflow-y-auto max-h-[70vh]">
+                            <form onSubmit={handleCreate} className="space-y-8 p-6 md:p-10 bg-background/50 relative z-10 w-full">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                     {user?.role === 'admin' && (
                                         <div className="space-y-3 col-span-1 md:col-span-2">
@@ -433,7 +433,7 @@ const TeamManagement = () => {
                             placeholder="Search by name, email, or serial..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-12 pl-12 pr-4 bg-background border border-border/50 focus:ring-2 focus:ring-primary/20 rounded-xl text-xs font-bold outline-none transition-all"
+                            className="w-full h-12 pl-14 pr-4 bg-background border border-border/50 focus:ring-4 focus:ring-primary/5 rounded-xl text-xs font-bold shadow-inner outline-none transition-all placeholder:text-muted-foreground/40"
                         />
                     </div>
                 </div>
@@ -442,11 +442,11 @@ const TeamManagement = () => {
                     <select 
                         value={branchFilter} 
                         onChange={(e) => setBranchFilter(e.target.value)}
-                        className="w-full h-12 pl-4 pr-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none transition-all cursor-pointer"
+                        className="w-full h-12 pl-4 pr-10 bg-background border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest outline-none transition-all cursor-pointer shadow-sm focus:border-primary/40 focus:ring-4 focus:ring-primary/5 appearance-none"
                     >
                         <option value="all">Global (Everywhere)</option>
                         {branches.map(b => (
-                            <option key={b._id} value={b._id}>{b.name}</option>
+                            <option key={b._id} value={b._id}>{b.name.toUpperCase()}</option>
                         ))}
                     </select>
                 </div>
@@ -455,11 +455,11 @@ const TeamManagement = () => {
                     <select 
                         value={deptFilter} 
                         onChange={(e) => setDeptFilter(e.target.value)}
-                        className="w-full h-12 pl-4 pr-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none transition-all cursor-pointer"
+                        className="w-full h-12 pl-4 pr-10 bg-background border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest outline-none transition-all cursor-pointer shadow-sm focus:border-primary/40 focus:ring-4 focus:ring-primary/5 appearance-none"
                     >
                         <option value="all">All Departments</option>
                         {Array.from(new Set(employees.map(e => e.department).filter(Boolean))).map(dept => (
-                            <option key={dept} value={dept}>{dept}</option>
+                            <option key={dept} value={dept}>{dept.toUpperCase()}</option>
                         ))}
                     </select>
                 </div>
