@@ -109,7 +109,12 @@ exports.getReferrals = async (req, res) => {
         // 1. Branch Segregation
         const { branchId } = req.query;
         if (req.user.role !== 'admin') {
-            query.branchId = req.user.branchId;
+            if (!req.user.branchId) {
+                // If a non-admin has no branch assigned, they see nothing (security protocol)
+                query.branchId = "000000000000000000000000"; 
+            } else {
+                query.branchId = req.user.branchId;
+            }
         } else if (branchId && branchId !== 'all') {
             query.branchId = branchId;
         }
@@ -218,6 +223,11 @@ exports.updateReferralStatus = async (req, res) => {
                            
         if (!isAuthorized) {
             return res.status(403).json({ success: false, message: 'Not authorized to update this referral' });
+        }
+
+        // Branch Isolation Check for Team Leaders
+        if (userRole !== 'admin' && referral.branchId && referral.branchId.toString() !== (req.user.branchId ? req.user.branchId.toString() : '')) {
+            return res.status(403).json({ success: false, message: 'Cross-branch data modification prohibited' });
         }
 
         if (status) {
@@ -385,6 +395,11 @@ exports.updateReferral = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized to update this referral' });
         }
 
+        // Branch Isolation Check
+        if (req.user.role !== 'admin' && referral.branchId && referral.branchId.toString() !== (req.user.branchId ? req.user.branchId.toString() : '')) {
+            return res.status(403).json({ success: false, message: 'Cross-branch data modification prohibited' });
+        }
+
         const updatedReferral = await Referral.findByIdAndUpdate(
             req.params.id,
             { $set: req.body },
@@ -408,8 +423,13 @@ exports.bulkUpdateReferrals = async (req, res) => {
         if (assignedEmployee) updateData.assignedEmployee = assignedEmployee;
         if (priority) updateData.priority = priority;
 
+        const query = { _id: { $in: ids } };
+        if (req.user.role !== 'admin') {
+            query.branchId = req.user.branchId;
+        }
+
         await Referral.updateMany(
-            { _id: { $in: ids } },
+            query,
             { 
                 $set: updateData,
                 $push: { 
@@ -436,7 +456,11 @@ exports.getReferralStats = async (req, res) => {
         
         // 1. Branch Segregation
         if (req.user.role !== 'admin') {
-            query.branchId = req.user.branchId;
+            if (!req.user.branchId) {
+                query.branchId = "000000000000000000000000";
+            } else {
+                query.branchId = req.user.branchId;
+            }
         }
 
         // 2. Role Filtering
@@ -577,6 +601,11 @@ exports.deleteReferral = async (req, res) => {
 
         if (!referral) {
             return res.status(404).json({ success: false, message: 'Candidate record not found' });
+        }
+
+        // Branch Isolation Check
+        if (req.user.role !== 'admin' && referral.branchId && referral.branchId.toString() !== (req.user.branchId ? req.user.branchId.toString() : '')) {
+            return res.status(403).json({ success: false, message: 'Not authorized to purge cross-branch records' });
         }
 
         await referral.deleteOne();

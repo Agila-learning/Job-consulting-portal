@@ -15,17 +15,9 @@ import {
     Network, Search, ArrowUpRight, TrendingUp, Trash2,
     Clock, MoreVertical, Shield, UserCog, Ghost, RefreshCw, 
     Filter, X, CheckCircle2, Plus, Info, AlertCircle, FileText,
-    Sparkles, XCircle, BarChart3, PieChart, Zap, ShieldCheck
+    Sparkles, XCircle, BarChart3, PieChart, Zap, ShieldCheck,
+    LayoutGrid, List, ChevronRight
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuPortal,
-} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
 import * as XLSX from 'xlsx';
@@ -53,6 +45,7 @@ const ReferralQueue = () => {
     const [financeData, setFinanceData] = useState({ calculatedCommission: '', payoutStatus: '', payoutNotes: '' });
     const [branches, setBranches] = useState([]);
     const [branchFilter, setBranchFilter] = useState(currentUser?.role === 'admin' ? 'all' : (currentUser?.branchId || 'all'));
+    const [viewMode, setViewMode] = useState('grid');
 
     const containerRef = useRef(null);
 
@@ -353,6 +346,20 @@ const ReferralQueue = () => {
 
                             {/* Actions Group */}
                             <div className="flex items-center gap-2">
+                                <div className="hidden sm:flex bg-secondary/50 rounded-2xl p-1 border border-border/40 mr-2">
+                                    <button 
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        <LayoutGrid size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        <List size={16} />
+                                    </button>
+                                </div>
                                 <Button onClick={() => setIsAddOpen(true)} variant="ghost" size="icon" className="h-11 w-11 rounded-2xl border border-border/20 hover:bg-primary/10 hover:text-primary transition-all">
                                     <Plus size={18} />
                                 </Button>
@@ -438,12 +445,13 @@ const ReferralQueue = () => {
                                 <Button onClick={() => {setSearchTerm(''); setStatusFilter('all'); setSourceFilter('all');}} variant="link" className="text-[10px] font-black uppercase text-primary tracking-widest">Reset Discovery Stack</Button>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className={viewMode === 'grid' ? "grid grid-cols-1 gap-6" : "flex flex-col gap-4"}>
                                 {filteredList.map((row) => (
                                       <CandidateCard 
                                           key={row._id} 
                                           row={row} 
                                           isAdmin={isAdmin}
+                                          viewMode={viewMode}
                                           activeTab={activeTab}
                                          onAssign={() => {
                                              setSelectedReferral(row);
@@ -741,7 +749,7 @@ const ReferralQueue = () => {
 };
 
 /* ── SUB-COMPONENT: CandidateCard ── */
-const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance, onTimeline, onQuickShortlist, onDelete }) => {
+const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, onFinance, onTimeline, onQuickShortlist, onDelete }) => {
     const roleConfig = {
         'admin': { color: 'bg-rose-500/10 text-rose-600 border-rose-500/20', icon: <Shield size={10} className="mr-1.5" /> },
         'employee': { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', icon: <User size={10} className="mr-1.5" /> },
@@ -776,13 +784,119 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
         return `${cleanBase}${cleanUrl.replaceAll('\\', '/')}`;
     };
 
+    if (viewMode === 'list') {
+        return (
+            <div className={`animate-card group w-full bg-card/95 dark:bg-slate-900 border border-border/40 hover:border-primary/30 rounded-[1.5rem] p-4 lg:px-6 flex flex-col lg:flex-row items-center justify-between gap-6 transition-all hover:shadow-xl hover:shadow-primary/5 text-left border-l-[4px] ${themeColor}`}>
+                <div className="flex items-center gap-5 w-full lg:w-4/12">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0 border border-border/40 transition-all ${activeTab === 'placements' ? 'bg-emerald-600 text-white' : 'bg-secondary/50 text-foreground group-hover:bg-primary group-hover:text-white'}`}>
+                        {row.candidateName ? row.candidateName.charAt(0) : 'C'}
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                        <h3 className="text-sm font-black tracking-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-none truncate">{row.candidateName}</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5 truncate">
+                            <Briefcase size={12} className="text-primary/60" /> {row.job?.jobTitle}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4 w-full lg:w-3/12 flex-wrap text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                    <Badge variant="outline" className={`rounded-xl px-2 py-0 border text-[9px] font-black uppercase tracking-widest shadow-none h-6 flex items-center ${stConfig.color}`}>
+                        {row.status}
+                    </Badge>
+                    <div className="flex items-center gap-1.5 bg-secondary/30 px-2 py-1 rounded-lg">
+                        <UserCheck size={12} className={row.assignedEmployee ? 'text-primary' : ''} />
+                        <span className="truncate max-w-[100px]">{row.assignedEmployee?.name || 'Unassigned'}</span>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
+                    <div className="flex items-center gap-1.5 mr-4">
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const url = getFullUrl(row.resumeUrl);
+                                url ? window.open(url, '_blank') : toast.error('No document attached');
+                            }} 
+                            className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-primary hover:text-white text-muted-foreground flex items-center justify-center transition-all border border-border/40"
+                            title="Resume"
+                        >
+                            <FileText size={14} />
+                        </button>
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact');
+                            }} 
+                            className="w-8 h-8 rounded-lg bg-secondary/50 hover:bg-emerald-500 hover:text-white text-muted-foreground flex items-center justify-center transition-all border border-border/40"
+                            title="Call"
+                        >
+                            <Phone size={14} />
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onAssign}
+                            title="Assign Agent"
+                            className="h-9 w-9 rounded-xl border border-border/40 bg-secondary/20 hover:bg-primary/10 hover:text-primary transition-all"
+                        >
+                            <UserPlus size={15} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onStatus}
+                            title="Update Status"
+                            className="h-9 w-9 rounded-xl border border-border/40 bg-secondary/20 hover:bg-indigo-500/10 hover:text-indigo-600 transition-all"
+                        >
+                            <RefreshCw size={15} />
+                        </Button>
+                        {isAdmin && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onFinance}
+                                title="Finance"
+                                className="h-9 w-9 rounded-xl border border-border/40 bg-secondary/20 hover:bg-emerald-500/10 hover:text-emerald-600 transition-all"
+                            >
+                                <TrendingUp size={15} />
+                            </Button>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onTimeline}
+                            title="Timeline"
+                            className="h-9 w-9 rounded-xl border border-border/40 bg-secondary/20 hover:bg-slate-500/10 hover:text-slate-900 transition-all"
+                        >
+                            <Calendar size={15} />
+                        </Button>
+                        {isAdmin && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onDelete}
+                                title="Delete"
+                                className="h-9 w-9 rounded-xl border border-border/40 bg-rose-500/5 hover:bg-rose-600 hover:text-white text-rose-600 transition-all"
+                            >
+                                <Trash2 size={15} />
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Default Grid View
     return (
         <div className={`animate-card group w-full bg-card/95 dark:bg-slate-900 border border-border/40 hover:border-primary/40 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all relative text-left border-l-[6px] ${themeColor} duration-500`}>
             
-            {/* Top Layout: Fluid Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start lg:items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                 
-                {/* 1. Identity Segment (Avatar + Main Info) */}
+                {/* 1. Identity Segment */}
                 <div className="col-span-12 lg:col-span-5 flex items-center gap-6">
                     <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 border border-border/20 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 ${activeTab === 'placements' ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl shadow-emerald-500/20' : 'bg-secondary/60 text-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/20'}`}>
                         {row.candidateName ? row.candidateName.charAt(0) : 'C'}
@@ -790,13 +904,18 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                     <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex flex-col">
                             <h4 className="font-black text-foreground text-lg md:text-xl tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors truncate">{row.candidateName}</h4>
-                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 flex items-center gap-2 leading-none whitespace-nowrap overflow-hidden">
-                                <Hash size={10} className="text-primary" /> FIC-{row._id.slice(-6).toUpperCase()}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 flex items-center gap-2 leading-none">
+                                    <Hash size={10} className="text-primary" /> FIC-{row._id.slice(-6).toUpperCase()}
+                                </p>
+                                <Badge variant="outline" className={`h-5 rounded-full px-2 text-[8px] font-black uppercase tracking-widest shadow-none border ${config.color}`}>
+                                    {config.icon} {row.referrer?.name || 'Anonymous'}
+                                </Badge>
+                            </div>
                         </div>
                         <div className="flex items-center gap-2 pt-1 flex-wrap">
                             <Badge variant="outline" className="px-3 py-0.5 border-primary/20 text-primary bg-primary/5 text-[9px] font-black uppercase tracking-widest rounded-xl h-6 leading-none shadow-none group-hover:bg-primary group-hover:text-white transition-all">
-                                {row.job?.domain || 'Tech Node'}
+                                {row.job?.domain || 'General Tech'}
                             </Badge>
                             {row.branchId && (
                                 <Badge variant="outline" className="px-3 py-0.5 border-indigo-500/20 text-indigo-500 bg-indigo-500/5 text-[9px] font-black uppercase tracking-widest rounded-xl h-6 leading-none shadow-none group-hover:bg-indigo-500 group-hover:text-white transition-all">
@@ -806,7 +925,6 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                             <span className="text-[10px] font-black text-muted-foreground/40 tracking-widest leading-none group-hover:text-foreground/60 transition-colors uppercase italic">• {new Date(row.createdAt).toLocaleDateString()}</span>
                         </div>
                         
-                        {/* Quick Desktop & Mobile Actions */}
                         <div className="flex items-center gap-3 pt-3">
                             <button 
                                 onClick={(e) => {
@@ -815,17 +933,17 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                                     url ? window.open(url, '_blank') : toast.error('No document attached');
                                 }} 
                                 className="w-10 h-10 rounded-2xl bg-secondary/50 hover:bg-primary hover:text-white text-muted-foreground flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-primary/20"
-                                title="View Document"
+                                title="Resume"
                             >
                                 <FileText size={16} />
                             </button>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact number available');
+                                    row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact');
                                 }} 
                                 className="w-10 h-10 rounded-2xl bg-secondary/50 hover:bg-emerald-500 hover:text-white text-muted-foreground flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-emerald-500/20"
-                                title="Quick Call"
+                                title="Call"
                             >
                                 <Phone size={16} />
                             </button>
@@ -835,7 +953,7 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                                     onQuickShortlist(row); 
                                 }} 
                                 className="w-10 h-10 rounded-2xl bg-emerald-500/5 hover:bg-emerald-600 hover:text-white text-emerald-600 flex items-center justify-center transition-all shadow-sm border border-emerald-500/10 hover:border-emerald-500"
-                                title="Fast-Track Shortlist"
+                                title="Fast-Track"
                             >
                                 <Zap size={16} className="fill-current" />
                             </button>
@@ -843,132 +961,73 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                     </div>
                 </div>
 
-                {/* 2. Employment Segment (Job + Company) */}
-                <div className="col-span-12 lg:col-span-4 space-y-3">
-                    <div className="space-y-1">
+                {/* 2. Employment Segment */}
+                <div className="col-span-12 lg:col-span-4 space-y-4">
+                    <div className="space-y-1.5">
                         <p className="text-xs font-black text-foreground flex items-center gap-2 leading-tight">
                             <Briefcase size={14} className="text-primary/40 shrink-0" /> 
                             <span className="truncate">{row.job?.jobTitle}</span>
                         </p>
                         <p className="text-[11px] font-bold text-muted-foreground/60 leading-tight pl-5 truncate">
-                            {row.job?.companyName || 'Confidential Client Node'}
+                            {row.job?.companyName || 'Confidential Client'}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 pt-1">
-                        <Badge variant="outline" className={`h-6 rounded-xl px-3 text-[9px] font-black uppercase tracking-widest shadow-none border ${config.color}`}>
-                            {config.icon} {row.referrer?.name || 'Anonymous Protocol'}
-                        </Badge>
+                    
+                    <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-2xl border border-border/20">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${row.assignedEmployee ? 'bg-primary/10 text-primary border-primary/20' : 'bg-secondary text-muted-foreground/40 border-border/40'}`}>
+                            {row.assignedEmployee ? <UserCheck size={14} /> : <Ghost size={14} />}
+                        </div>
+                        <div className="flex flex-col leading-none gap-1">
+                            <span className="text-[10px] font-black text-foreground truncate max-w-[120px]">
+                                {row.assignedEmployee?.name || 'Unassigned'}
+                            </span>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Assigned Integration</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* 3. Status & Action Segment */}
+                {/* 3. Action Segment */}
                 <div className="col-span-12 lg:col-span-3 flex flex-row items-center justify-between lg:justify-end gap-6 border-t lg:border-0 border-border/10 pt-6 lg:pt-0">
-                    <div className="space-y-3 w-full md:w-auto">
-                         <Badge variant="outline" className={`h-8 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm border flex items-center gap-2 w-fit ${stConfig.color}`}>
+                    <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
+                        <Badge variant="outline" className={`h-8 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm border flex items-center gap-2 w-fit ${stConfig.color}`}>
                             {stConfig.icon} {row.status}
                         </Badge>
-                        
-                        <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-xl bg-secondary/50 flex items-center justify-center text-muted-foreground/60 border border-border/20 ${row.assignedEmployee ? 'text-primary border-primary/10 bg-primary/5' : ''}`}>
-                                {row.assignedEmployee ? <UserCheck size={14} /> : <Ghost size={14} />}
-                            </div>
-                            <div className="flex flex-col items-start leading-none gap-1">
-                                <span className={`text-[10px] font-black tracking-tight ${row.assignedEmployee ? 'text-foreground' : 'text-muted-foreground italic opacity-60'}`}>
-                                    {row.assignedEmployee?.name || 'Protocol Hub Unassigned'}
-                                </span>
-                                <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Assigned Integration Node</span>
-                            </div>
+                        <div className="flex flex-col items-end leading-none">
+                             <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40 mb-1">Yield Estimate</p>
+                             <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter italic">₹{row.calculatedCommission || '0'}</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                        <div className="flex flex-col items-end gap-1 mr-2">
-                             <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40 leading-none">Yield Estimate</p>
-                             <p className="text-xl font-black text-slate-900 dark:text-white tracking-tighter leading-none italic">₹{row.calculatedCommission || '0'}</p>
+                    <div className="flex lg:flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" onClick={onAssign} title="Reassign Agent" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-primary/10 hover:text-primary transition-all">
+                                <UserPlus size={16} />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={onStatus} title="Advance Pipeline" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-indigo-500/10 hover:text-indigo-600 transition-all">
+                                <RefreshCw size={16} />
+                            </Button>
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                    }}
-                                    className="h-12 w-12 rounded-[1.3rem] bg-secondary/80 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm outline-none ring-0 relative z-20"
-                                >
-                                    <MoreVertical size={20} />
+                        <div className="flex items-center gap-2">
+                            {isAdmin && (
+                                <Button variant="ghost" size="icon" onClick={onFinance} title="Financial Setup" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-emerald-500/10 hover:text-emerald-600 transition-all">
+                                    <TrendingUp size={16} />
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuPortal>
-                                <DropdownMenuContent align="end" sideOffset={8} className="w-64 p-2.5 rounded-[2rem] bg-white dark:bg-slate-950 border border-border/40 shadow-[0_30px_100px_-15px_rgba(0,0,0,0.35)] overflow-hidden" style={{ zIndex: 9999 }}>
-                                    <DropdownMenuLabel className="font-black text-[8px] uppercase tracking-[0.25em] text-muted-foreground/50 px-4 py-3">Lifecycle Protocols</DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-border/10 mx-2 mb-2" />
-                                    <DropdownMenuItem 
-                                        onClick={onAssign}
-                                        className="rounded-2xl p-4 gap-4 focus:bg-primary/10 focus:text-primary cursor-pointer group/item transition-all"
-                                    >
-                                        <div className="bg-primary/10 p-2 rounded-xl group-hover/item:bg-primary group-hover/item:text-white transition-colors">
-                                            <UserPlus size={16} />
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-widest">Reassign Node</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                        onClick={onStatus}
-                                        className="rounded-2xl p-4 gap-4 focus:bg-indigo-500/10 focus:text-indigo-600 cursor-pointer group/item transition-all"
-                                    >
-                                        <div className="bg-indigo-500/10 p-2 rounded-xl group-hover/item:bg-indigo-600 group-hover/item:text-white transition-colors">
-                                            <RefreshCw size={16} />
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-widest">Advance Pipeline</span>
-                                    </DropdownMenuItem>
-
-                                    {isAdmin && (
-                                        <DropdownMenuItem 
-                                            onClick={onFinance}
-                                            className="rounded-xl p-3.5 gap-4 focus:bg-emerald-500/10 focus:text-emerald-600 cursor-pointer group/item transition-all"
-                                        >
-                                            <div className="bg-emerald-500/10 p-2 rounded-xl group-hover/item:bg-emerald-600 group-hover/item:text-white transition-colors">
-                                                <TrendingUp size={16} />
-                                            </div>
-                                            <span className="text-xs font-black uppercase tracking-widest">Financial Setup</span>
-                                        </DropdownMenuItem>
-                                    )}
-
-                                    <DropdownMenuItem 
-                                        onClick={onTimeline}
-                                        className="rounded-xl p-3.5 gap-4 focus:bg-slate-500/10 focus:text-slate-600 cursor-pointer group/item transition-all"
-                                    >
-                                        <div className="bg-slate-500/10 p-2 rounded-xl group-hover/item:bg-slate-900 group-hover/item:text-white transition-colors">
-                                            <Calendar size={16} />
-                                        </div>
-                                        <span className="text-xs font-black uppercase tracking-widest">Timeline Logs</span>
-                                    </DropdownMenuItem>
-                                    
-                                    {isAdmin && (
-                                        <>
-                                            <DropdownMenuSeparator className="bg-border/20 mx-2 my-2" />
-                                            <DropdownMenuItem 
-                                                onClick={onDelete}
-                                                className="rounded-xl p-3.5 gap-4 focus:bg-rose-500/10 focus:text-rose-600 cursor-pointer group/item transition-all"
-                                            >
-                                                <div className="bg-rose-500/10 p-2 rounded-xl group-hover/item:bg-rose-600 group-hover/item:text-white transition-colors">
-                                                    <Trash2 size={16} />
-                                                </div>
-                                                <span className="text-xs font-black uppercase tracking-widest text-rose-500 group-hover/item:text-white">Purge Entity</span>
-                                            </DropdownMenuItem>
-                                        </>
-                                    )}
-                                </DropdownMenuContent>
-                            </DropdownMenuPortal>
-                        </DropdownMenu>
+                            )}
+                            <Button variant="ghost" size="icon" onClick={onTimeline} title="Timeline Logs" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-slate-500/10 hover:text-slate-900 transition-all">
+                                <Calendar size={16} />
+                            </Button>
+                            {isAdmin && (
+                                <Button variant="ghost" size="icon" onClick={onDelete} title="Purge Record" className="h-10 w-10 rounded-xl bg-rose-500/5 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-600 transition-all">
+                                    <Trash2 size={16} />
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Hover Backdrop Decor */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-[80px] -translate-y-20 translate-x-10 group-hover:bg-primary/10 transition-all duration-1000" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-[60px] translate-y-12 -translate-x-10 group-hover:bg-emerald-500/10 transition-all duration-1000" />
+            {/* Hover Decor */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -translate-y-16 translate-x-10 group-hover:bg-primary/10 transition-all duration-1000" />
         </div>
     );
 };

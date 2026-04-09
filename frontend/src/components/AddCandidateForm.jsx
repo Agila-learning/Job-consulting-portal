@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, User, Mail, Phone, Briefcase, FileText, Send, Zap, ChevronDown, Search, Check } from 'lucide-react';
+import { Loader2, User, Mail, Phone, Briefcase, FileText, Send, Zap, ChevronDown, Search, Check, Building2 } from 'lucide-react';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // ── Portal-based Job Picker ────────────────────────────────────────────────────
 const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
@@ -148,26 +150,38 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
         candidateEmail: '',
         mobile: '',
         jobId: '',
+        branchId: '',
         resume: null,
         resumeUrl: '',
         priority: 'medium',
         experience: '',
         comments: ''
     });
+    const [branches, setBranches] = useState([]);
+    const { user: currentUser } = useAuth();
+    const isAdmin = currentUser?.role === 'admin';
 
-    useEffect(() => {
-        const fetchJobs = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/jobs');
-                setJobs(res.data.data || []);
+                const [jobRes, branchRes] = await Promise.all([
+                    api.get('/jobs'),
+                    api.get('/branches')
+                ]);
+                setJobs(jobRes.data.data || []);
+                setBranches(branchRes.data.data || []);
+                
+                // Set default branch if not admin
+                if (!isAdmin && currentUser?.branchId) {
+                    setFormData(prev => ({ ...prev, branchId: currentUser.branchId }));
+                }
             } catch (err) {
-                toast.error('Failed to load active jobs');
+                toast.error('Failed to load provisioning metadata');
             } finally {
                 setLoadingJobs(false);
             }
         };
-        fetchJobs();
-    }, []);
+        fetchData();
+    }, [isAdmin, currentUser]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -186,7 +200,8 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
             data.append('experience', formData.experience);
             data.append('comments', formData.comments);
             data.append('resumeUrl', formData.resumeUrl);
-            data.append('sourceType', 'employee');
+            data.append('branchId', formData.branchId);
+            data.append('sourceType', isAdmin ? 'self' : currentUser?.role || 'employee');
             data.append('priority', formData.priority || 'medium');
 
             if (formData.resume) {
@@ -269,6 +284,31 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                         />
                     </div>
                 </div>
+
+                {/* Branch Selection — Admin Only */}
+                {isAdmin && (
+                    <div className="space-y-2 md:col-span-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Assigned Operational Branch</Label>
+                        <Select 
+                            value={formData.branchId} 
+                            onValueChange={(val) => setFormData({...formData, branchId: val})}
+                        >
+                            <SelectTrigger className="h-12 bg-background border-border/50 rounded-xl text-xs font-bold ring-0 focus:ring-4 focus:ring-primary/5 transition-all">
+                                <div className="flex items-center gap-3">
+                                    <Building2 size={16} className="text-primary/60" />
+                                    <SelectValue placeholder="Select target branch hub..." />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-border/40 bg-card shadow-2xl z-[99999]">
+                                {branches.map(branch => (
+                                    <SelectItem key={branch._id} value={branch._id} className="rounded-xl font-bold py-3">
+                                        {branch.name} Hub
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
                 {/* Job Selection — Portal Picker */}
                 <div className="space-y-2 md:col-span-2">
