@@ -70,11 +70,13 @@ const RegisterPage = () => {
     const formRef = useRef(null);
 
     useEffect(() => {
-        if (user) {
+        // Only auto-redirect if specifically in a success state or fresh context
+        // This prevents the "Request Access" loop where users are kicked back to login/dashboard
+        if (user && authStatus === 'success') {
             const redirectPath = user.role === 'admin' ? '/admin/dashboard' : user.role === 'employee' ? '/employee/dashboard' : '/agent/dashboard';
             navigate(redirectPath);
         }
-    }, [user, navigate]);
+    }, [user, navigate, authStatus]);
 
     useEffect(() => {
         const ctx = gsap.context(() => {

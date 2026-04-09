@@ -249,20 +249,20 @@ const CandidatePipeline = () => {
             </div>
 
             {/* FILTERS & ENGINE CONTROLS */}
-            <div className="flex flex-col lg:flex-row gap-6 bg-card/50 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-6 shadow-sm">
-                <div className="flex-1 relative group w-full">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 bg-card/50 backdrop-blur-3xl border border-border/40 rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-6 shadow-sm">
+                <div className="flex-1 relative group">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors duration-300" size={18} />
                     <input 
                         type="text" 
-                        placeholder="Search candidates..."
+                        placeholder="Search candidates by name or identity..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
+                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
                     />
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     <Select onValueChange={setPriorityFilter} value={priorityFilter}>
-                        <SelectTrigger className="w-48 h-15 bg-background dark:bg-slate-900/60 border-border/40 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
+                        <SelectTrigger className="w-full sm:w-48 h-14 bg-background dark:bg-slate-900/60 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
                              <div className="flex items-center gap-3"><Filter size={14} className="text-primary/60" /><SelectValue placeholder="Priority" /></div>
                         </SelectTrigger>
                         <SelectContent className="rounded-[2.2rem] border-border/40 bg-card/95 backdrop-blur-3xl shadow-2xl p-2 z-[100] outline-none">
@@ -273,7 +273,7 @@ const CandidatePipeline = () => {
                         </SelectContent>
                     </Select>
                     <Select onValueChange={setJobFilter} value={jobFilter}>
-                        <SelectTrigger className="w-64 h-15 bg-background dark:bg-slate-900/60 border-border/40 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
+                        <SelectTrigger className="w-full sm:w-64 h-14 bg-background dark:bg-slate-900/60 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
                              <div className="flex items-center gap-3"><Briefcase size={14} className="text-primary/60" /><SelectValue placeholder="Job View" /></div>
                         </SelectTrigger>
                         <SelectContent className="rounded-[2.2rem] border-border/40 bg-card/95 backdrop-blur-3xl shadow-2xl p-2 z-[100] max-h-80 outline-none">

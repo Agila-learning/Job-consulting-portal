@@ -12,6 +12,7 @@ import { Lock, Mail, ArrowRight, Loader2, Zap } from 'lucide-react';
 import monkeySad from '@/assets/animations/monkey_sad.png';
 import monkeySuccess from '@/assets/animations/monkey_success.png';
 import logo from '@/assets/Updated-Logo-New.jpg';
+import { Eye, EyeOff, Checkbox as CheckboxIcon } from 'lucide-react';
 
 const FeedbackOverlay = ({ status }) => {
     const overlayRef = useRef(null);
@@ -54,40 +55,31 @@ const FeedbackOverlay = ({ status }) => {
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const [localError, setLocalError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [authStatus, setAuthStatus] = useState('idle'); // idle, success, error
-    const { login, user } = useAuth();
+    const { login, user, logout } = useAuth();
     const navigate = useNavigate();
     const containerRef = useRef(null);
     const formRef = useRef(null);
 
     useEffect(() => {
+        // Only auto-redirect if the user session is fresh or specifically coming from a successful login
         if (user && authStatus === 'success') {
-            console.log('Login Successful. Role:', user.role);
             const timer = setTimeout(() => {
                 let redirectPath = '/login';
                 
                 switch(user.role) {
-                    case 'admin':
-                        redirectPath = '/admin/dashboard';
-                        break;
-                    case 'team_leader':
-                        redirectPath = '/team-leader/dashboard';
-                        break;
-                    case 'employee':
-                        redirectPath = '/employee/dashboard';
-                        break;
-                    case 'agent':
-                        redirectPath = '/agent/dashboard';
-                        break;
-                    default:
-                        redirectPath = '/login';
+                    case 'admin': redirectPath = '/admin/dashboard'; break;
+                    case 'team_leader': redirectPath = '/team-leader/dashboard'; break;
+                    case 'employee': redirectPath = '/employee/dashboard'; break;
+                    case 'agent': redirectPath = '/agent/dashboard'; break;
+                    default: redirectPath = '/login';
                 }
-                
-                console.log('Navigating to:', redirectPath);
                 navigate(redirectPath, { replace: true });
-            }, 1500);
+            }, 1000);
             return () => clearTimeout(timer);
         }
     }, [user, navigate, authStatus]);
@@ -202,9 +194,11 @@ const LoginPage = () => {
             
             {/* LEFT SIDE: BRAND EXPERIENCE */}
             <div className="login-left hidden lg:flex lg:w-1/2 relative bg-slate-900 items-center justify-center p-20 overflow-hidden">
-                {/* Dynamic Background Elements */}
-                <div className="absolute top-0 right-0 w-[800px] h-full bg-primary/20 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/4" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
+                {/* Canvas Background for Particles */}
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,96,252,0.15),transparent_70%)] animate-pulse" />
+                    <div className="absolute top-0 right-0 w-[800px] h-full bg-primary/20 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/4" />
+                </div>
                 
                 <div className="relative z-10 space-y-10 max-w-xl">
                     <div className="w-24 h-24 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center p-3 transform -rotate-6 hover:rotate-0 transition-transform duration-500">
@@ -238,6 +232,21 @@ const LoginPage = () => {
                             <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Verified Agents</p>
                          </div>
                     </div>
+                    
+                    {/* Role & Branch Awareness Preview */}
+                    <div className="pt-8 hero-line">
+                        <div className="p-6 bg-white/5 border border-white/10 rounded-[2rem] backdrop-blur-md flex items-center gap-6">
+                            <div className="flex -space-x-4">
+                                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white ring-4 ring-slate-900 font-black">B</div>
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white ring-4 ring-slate-900 font-black">C</div>
+                                <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white ring-4 ring-slate-900 font-black">K</div>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-white/40">Multi-Branch Awareness</p>
+                                <p className="text-xs font-bold text-white uppercase italic">Bangalore • Chennai • Krishnagiri</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 {/* Geometric Decor */}
@@ -268,40 +277,62 @@ const LoginPage = () => {
                         )}
                         
                         <div className="space-y-6">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Universal Identity</Label>
-                                <div className="relative group/input">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors" />
-                                    <Input 
-                                        id="email" 
-                                        type="email" 
-                                        placeholder="node-identifier@workforce.com" 
-                                        className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
-                                        required
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                            {/* Floating Label Email Input */}
+                            <div className="relative group/input">
+                                <Mail className="absolute left-6 top-[22px] w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors z-10" />
+                                <Input 
+                                    id="email" 
+                                    type="email" 
+                                    placeholder=" " 
+                                    className="peer h-16 pl-14 pr-6 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
+                                    required
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                                <Label 
+                                    htmlFor="email" 
+                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
+                                >
+                                    Universal Identity
+                                </Label>
                             </div>
 
-                            <div className="space-y-2.5">
-                                <div className="flex items-center justify-between ml-1">
-                                    <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Access Matrix</Label>
-                                    <a href="#" className="text-[9px] uppercase tracking-widest font-black text-primary hover:opacity-80 transition-opacity">Reset Sequence</a>
-                                </div>
-                                <div className="relative group/input">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors" />
-                                    <Input 
-                                        id="password" 
-                                        type="password" 
-                                        placeholder="••••••••••••"
-                                        className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
-                                        required
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                            {/* Floating Label Password Input */}
+                            <div className="relative group/input">
+                                <Lock className="absolute left-6 top-[22px] w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors z-10" />
+                                <Input 
+                                    id="password" 
+                                    type={showPassword ? "text" : "password"} 
+                                    placeholder=" "
+                                    className="peer h-16 pl-14 pr-14 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                />
+                                <Label 
+                                    htmlFor="password" 
+                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
+                                >
+                                    Access Matrix
+                                </Label>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-primary transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
+                        </div>
+
+                        <div className="flex items-center justify-between px-1">
+                            <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setRememberMe(!rememberMe)}>
+                                <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-primary border-primary' : 'border-border group-hover:border-primary'}`}>
+                                    {rememberMe && <ArrowRight size={12} className="text-white rotate-90" />}
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Remember Session</span>
+                            </div>
+                            <a href="#" className="text-[9px] uppercase tracking-widest font-black text-primary hover:opacity-80 transition-opacity">Reset Sequence</a>
                         </div>
 
                         <Button 

@@ -144,18 +144,21 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
 
                 {/* Job Selection */}
                 <div className="space-y-2 md:col-span-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Target Job</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Target Job / Requisition</Label>
                     <Select onValueChange={(val) => setFormData({...formData, jobId: val})} value={formData.jobId}>
-                        <SelectTrigger className="h-12 bg-background border-border/50 rounded-xl text-xs font-bold">
-                            <div className="flex items-center gap-2">
+                        <SelectTrigger className="h-14 bg-background border-border/40 rounded-2xl text-[11px] font-black group-focus:ring-4 group-focus:ring-primary/5 transition-all outline-none">
+                            <div className="flex items-center gap-3">
                                 <Briefcase size={16} className="text-primary/60" />
-                                <SelectValue placeholder={loadingJobs ? "Loading jobs..." : "Select Job..."} />
+                                <SelectValue placeholder={loadingJobs ? "Synchronizing inventory..." : "Locate job node..."} />
                             </div>
                         </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-border/40 max-h-64">
+                        <SelectContent className="rounded-2xl border-border/40 max-h-72 shadow-2xl">
                             {jobs.map(job => (
-                                <SelectItem key={job._id} value={job._id} className="rounded-xl font-bold text-xs py-3">
-                                    {job.jobTitle} at {job.companyName}
+                                <SelectItem key={job._id} value={job._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 focus:bg-primary/10 focus:text-primary transition-colors px-4">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <span>{job.jobTitle}</span>
+                                        <span className="text-[8px] opacity-40 italic">{job.companyName} • {job.location || 'Remote'}</span>
+                                    </div>
                                 </SelectItem>
                             ))}
                         </SelectContent>

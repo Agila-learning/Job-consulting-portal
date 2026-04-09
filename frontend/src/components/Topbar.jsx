@@ -31,7 +31,8 @@ const Topbar = ({ title, showSidebarMobile }) => {
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchValue.trim()) {
-      const rolePath = user?.role === 'team_leader' ? 'team-leader' : user?.role;
+      const role = user?.role || 'authorized';
+      const rolePath = role === 'team_leader' ? 'team-leader' : role;
       navigate(`/${rolePath}/referrals?q=${encodeURIComponent(searchValue.trim())}`);
       setSearchValue("");
     }

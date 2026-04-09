@@ -562,12 +562,6 @@ const ReferralQueue = () => {
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-2xl p-0 overflow-y-auto max-h-[95vh] outline-none">
                     <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden">
-                        <button 
-                            onClick={() => setIsAddOpen(false)}
-                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
-                        >
-                            <X size={20} />
-                        </button>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black text-foreground uppercase tracking-tight flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg">
@@ -602,12 +596,6 @@ const ReferralQueue = () => {
             <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
                 <DialogContent className="max-w-xl bg-card border-border/40 rounded-[2.5rem] p-0 overflow-y-auto max-h-[95vh] outline-none">
                     <div className="p-10 bg-primary/5 border-b border-border/20 relative">
-                        <button 
-                            onClick={() => setIsStatusOpen(false)}
-                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
-                        >
-                            <X size={20} />
-                        </button>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[1.2rem] bg-indigo-500 flex items-center justify-center text-white">
@@ -804,15 +792,15 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                             </p>
                         </div>
                         <div className="flex items-center gap-2 pt-1 flex-wrap">
-                            <Badge variant="outline" className="px-2 py-0 border-primary/20 text-primary bg-primary/5 text-[8px] font-black uppercase tracking-widest rounded-lg h-5 leading-none shadow-none">
+                            <Badge variant="outline" className="px-3 py-0.5 border-primary/20 text-primary bg-primary/5 text-[9px] font-black uppercase tracking-widest rounded-xl h-6 leading-none shadow-none group-hover:bg-primary group-hover:text-white transition-all">
                                 {row.job?.domain || 'Tech Node'}
                             </Badge>
                             {row.branchId && (
-                                <Badge variant="outline" className="px-2 py-0 border-indigo-500/20 text-indigo-500 bg-indigo-500/5 text-[8px] font-black uppercase tracking-widest rounded-lg h-5 leading-none shadow-none">
-                                    {typeof row.branchId === 'object' ? row.branchId.name : 'Branch Node'}
+                                <Badge variant="outline" className="px-3 py-0.5 border-indigo-500/20 text-indigo-500 bg-indigo-500/5 text-[9px] font-black uppercase tracking-widest rounded-xl h-6 leading-none shadow-none group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                                    {typeof row.branchId === 'object' ? row.branchId.name : 'Central Node'}
                                 </Badge>
                             )}
-                            <span className="text-[10px] font-bold text-muted-foreground/60 tracking-tight leading-none">• {new Date(row.createdAt).toLocaleDateString()}</span>
+                            <span className="text-[10px] font-black text-muted-foreground/40 tracking-widest leading-none group-hover:text-foreground/60 transition-colors uppercase italic">• {new Date(row.createdAt).toLocaleDateString()}</span>
                         </div>
                         
                         {/* Quick Desktop & Mobile Actions */}
@@ -823,30 +811,30 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                                     const url = getFullUrl(row.resumeUrl);
                                     url ? window.open(url, '_blank') : toast.error('No document attached');
                                 }} 
-                                className="w-8 h-8 rounded-full bg-secondary hover:bg-primary/20 hover:text-primary text-muted-foreground flex items-center justify-center transition-all shadow-sm"
+                                className="w-10 h-10 rounded-2xl bg-secondary/50 hover:bg-primary hover:text-white text-muted-foreground flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-primary/20"
                                 title="View Document"
                             >
-                                <FileText size={14} />
+                                <FileText size={16} />
                             </button>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact number available');
                                 }} 
-                                className="w-8 h-8 rounded-full bg-secondary hover:bg-emerald-500/20 hover:text-emerald-500 text-muted-foreground flex items-center justify-center transition-all shadow-sm"
+                                className="w-10 h-10 rounded-2xl bg-secondary/50 hover:bg-emerald-500 hover:text-white text-muted-foreground flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-emerald-500/20"
                                 title="Quick Call"
                             >
-                                <Phone size={14} />
+                                <Phone size={16} />
                             </button>
                             <button 
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onQuickShortlist(row); // Open status update directly
+                                    onQuickShortlist(row); 
                                 }} 
-                                className="w-8 h-8 rounded-full bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 flex items-center justify-center transition-all shadow-sm border border-emerald-500/20"
-                                title="Move to Shortlist"
+                                className="w-10 h-10 rounded-2xl bg-emerald-500/5 hover:bg-emerald-600 hover:text-white text-emerald-600 flex items-center justify-center transition-all shadow-sm border border-emerald-500/10 hover:border-emerald-500"
+                                title="Fast-Track Shortlist"
                             >
-                                <CheckCircle2 size={14} />
+                                <Zap size={16} className="fill-current" />
                             </button>
                         </div>
                     </div>
