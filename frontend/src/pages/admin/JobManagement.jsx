@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
-import { cn } from "@/lib/utils";
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,22 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { 
     Plus, Search, Filter, Briefcase, 
-    MoreVertical, Edit2, Archive, Loader2,
-    Download, LayoutPanelLeft, Activity, 
+    Edit2, Archive, Loader2,
+    Download, LayoutPanelLeft, Zap, 
     DollarSign, Clock, Globe, Calendar, RefreshCw,
     PlusCircle, Layers, Building, MapPin, ChevronRight, 
     X, Trash2, LayoutGrid, List
 } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import * as XLSX from 'xlsx';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-    DropdownMenuSeparator,
-    DropdownMenuPortal
-} from '@/components/ui/dropdown-menu';
 
 const JobManagement = () => {
     const { user } = useAuth();
@@ -535,7 +526,7 @@ const JobManagement = () => {
                                                     <div className="space-y-4">
                                                         <h4 className="text-xs font-black uppercase tracking-[0.15em] flex items-center gap-3 text-slate-900 dark:text-white">
                                                             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
-                                                                <Activity size={16} />
+                                                                <Zap size={16} />
                                                             </div>
                                                             Key Details
                                                         </h4>
@@ -713,59 +704,44 @@ const JobManagement = () => {
                                         
                                         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                                             {(isAdmin || user?.role === 'team_leader') && (
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button 
-                                                            variant="ghost" 
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        type="button"
+                                                        title="Edit Job"
+                                                        onClick={(e) => { e.stopPropagation(); openEdit(job); }}
+                                                        className="h-10 w-10 rounded-xl bg-secondary/80 hover:bg-primary/10 hover:text-primary border border-border/40 transition-all text-muted-foreground shadow-sm"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        type="button"
+                                                        title={job.status === 'active' ? 'Close Job' : 'Reactivate Job'}
+                                                        onClick={(e) => { e.stopPropagation(); handleStatusToggle(job); }}
+                                                        className={`h-10 w-10 rounded-xl border transition-all shadow-sm ${
+                                                            job.status === 'active'
+                                                            ? 'bg-amber-500/10 hover:bg-amber-500 hover:text-white text-amber-600 border-amber-500/20'
+                                                            : 'bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 border-emerald-500/20'
+                                                        }`}
+                                                    >
+                                                        {job.status === 'active' ? <Archive size={16} /> : <RefreshCw size={16} />}
+                                                    </Button>
+                                                    {isAdmin && (
+                                                        <Button
+                                                            variant="ghost"
                                                             size="icon"
                                                             type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                e.preventDefault();
-                                                            }}
-                                                            className="h-12 w-12 rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 relative z-20"
+                                                            title="Delete Job"
+                                                            onClick={(e) => { e.stopPropagation(); handleHardDelete(job._id); }}
+                                                            className="h-10 w-10 rounded-xl bg-rose-500/10 hover:bg-rose-600 hover:text-white text-rose-600 border border-rose-500/20 transition-all shadow-sm"
                                                         >
-                                                            <MoreVertical size={20} />
+                                                            <Trash2 size={16} />
                                                         </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuPortal>
-                                                        <DropdownMenuContent align="end" className="w-64 p-3 rounded-[2rem] bg-background/95 backdrop-blur-xl border-border/40 shadow-2xl mt-2 border" style={{ zIndex: 9999 }}>
-                                                        <DropdownMenuItem onClick={() => openEdit(job)} className="rounded-xl flex gap-4 p-4 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all group">
-                                                            <Edit2 size={18} className="text-muted-foreground group-hover:text-primary" />
-                                                            <div className="flex flex-col">
-                                                                <span className="font-black text-[10px] uppercase tracking-widest">Update Details</span>
-                                                                <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">Modify job parameters</span>
-                                                            </div>
-                                                        </DropdownMenuItem>
-                                                        
-                                                        <DropdownMenuItem 
-                                                            onClick={() => handleStatusToggle(job)} 
-                                                            className={cn(
-                                                                "rounded-xl flex gap-4 p-4 cursor-pointer transition-all mt-1 group",
-                                                                job.status === 'active' ? "hover:bg-rose-500/10 hover:text-rose-600" : "hover:bg-emerald-500/10 hover:text-emerald-600"
-                                                            )}
-                                                        >
-                                                            {job.status === 'active' ? <Archive size={18} /> : <RefreshCw size={18} />}
-                                                            <div className="flex flex-col">
-                                                                <span className="font-black text-[10px] uppercase tracking-widest">
-                                                                    {job.status === 'active' ? 'Mark as Closed' : 'Restore to Active'}
-                                                                </span>
-                                                                <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">Toggle visibility</span>
-                                                            </div>
-                                                        </DropdownMenuItem>
-                                                        
-                                                        <DropdownMenuSeparator className="bg-border/40" />
-                                                        
-                                                        <DropdownMenuItem 
-                                                            onClick={() => handleHardDelete(job._id)} 
-                                                            className="rounded-xl flex gap-4 p-4 text-rose-600 focus:text-white focus:bg-rose-600 hover:bg-rose-600 hover:text-white cursor-pointer transition-all"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                            <span className="font-black text-[10px] uppercase tracking-widest">Permanent Delete</span>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenuPortal>
-                                            </DropdownMenu>
+                                                    )}
+                                                </div>
                                             )}
                                             <Button 
                                                 onClick={() => openDetails(job)} 
@@ -802,30 +778,39 @@ const JobManagement = () => {
 
                                     <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
                                         {isAdmin && (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <button className="w-9 h-9 rounded-xl bg-secondary hover:bg-primary/10 hover:text-primary text-muted-foreground flex items-center justify-center transition-all outline-none">
-                                                        <MoreVertical size={16} />
-                                                    </button>
-                                                </DropdownMenuTrigger>
-                                                    <DropdownMenuPortal>
-                                                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 shadow-xl mt-1 border" style={{ zIndex: 9999 }}>
-                                                    <DropdownMenuItem onClick={() => openEdit(job)} className="rounded-xl flex gap-3 p-3 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all group">
-                                                        <Edit2 size={15} className="text-muted-foreground group-hover:text-primary" />
-                                                        <span className="font-black text-[10px] uppercase tracking-widest">Edit</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleSoftDelete(job._id)} disabled={job.status === 'closed'} className="rounded-xl flex gap-3 p-3 text-rose-500 focus:text-white focus:bg-rose-500 hover:bg-rose-500 hover:text-white cursor-pointer transition-all mt-1">
-                                                        <Archive size={15} />
-                                                        <span className="font-black text-[10px] uppercase tracking-widest">Archive</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator className="bg-border/40" />
-                                                    <DropdownMenuItem onClick={() => handleHardDelete(job._id)} className="rounded-xl flex gap-3 p-3 text-rose-600 focus:text-white focus:bg-rose-600 hover:bg-rose-600 hover:text-white cursor-pointer transition-all">
-                                                        <Trash2 size={15} />
-                                                        <span className="font-black text-[10px] uppercase tracking-widest">Delete</span>
-                                                    </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenuPortal>
-                                            </DropdownMenu>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    type="button"
+                                                    title="Edit"
+                                                    onClick={(e) => { e.stopPropagation(); openEdit(job); }}
+                                                    className="w-9 h-9 rounded-xl bg-secondary hover:bg-primary/10 hover:text-primary text-muted-foreground flex items-center justify-center transition-all outline-none"
+                                                >
+                                                    <Edit2 size={15} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    type="button"
+                                                    title={job.status === 'active' ? 'Archive' : 'Restore'}
+                                                    onClick={(e) => { e.stopPropagation(); handleSoftDelete(job._id); }}
+                                                    disabled={job.status === 'closed'}
+                                                    className="w-9 h-9 rounded-xl bg-amber-500/10 hover:bg-amber-500 hover:text-white text-amber-600 border border-amber-500/20 flex items-center justify-center transition-all outline-none"
+                                                >
+                                                    <Archive size={15} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    type="button"
+                                                    title="Delete"
+                                                    onClick={(e) => { e.stopPropagation(); handleHardDelete(job._id); }}
+                                                    className="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-600 hover:text-white text-rose-600 border border-rose-500/20 flex items-center justify-center transition-all outline-none"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </Button>
+                                            </div>
                                         )}
                                         <Button onClick={() => openDetails(job)} className="h-9 px-4 text-[9px] font-black uppercase tracking-widest rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-0 group/btn hover:scale-105 active:scale-95 transition-all">
                                             View

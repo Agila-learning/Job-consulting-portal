@@ -1,13 +1,144 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, User, Mail, Phone, Briefcase, FileText, Send, Zap } from 'lucide-react';
+import { Loader2, User, Mail, Phone, Briefcase, FileText, Send, Zap, ChevronDown, Search, Check } from 'lucide-react';
 import api from '@/services/api';
 
+// ── Portal-based Job Picker ────────────────────────────────────────────────────
+const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const triggerRef = useRef(null);
+    const dropdownRef = useRef(null);
+    const searchRef = useRef(null);
+    const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+
+    const selectedJob = jobs.find(j => j._id === value);
+    const filtered = jobs.filter(j =>
+        j.jobTitle.toLowerCase().includes(search.toLowerCase()) ||
+        (j.companyName || '').toLowerCase().includes(search.toLowerCase())
+    );
+
+    useEffect(() => {
+        if (open && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setCoords({
+                top: rect.bottom + window.scrollY + 6,
+                left: rect.left + window.scrollX,
+                width: rect.width
+            });
+            setTimeout(() => searchRef.current?.focus(), 50);
+        }
+    }, [open]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+                triggerRef.current && !triggerRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+                setSearch('');
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelect = (job) => {
+        onChange(job._id);
+        setOpen(false);
+        setSearch('');
+    };
+
+    return (
+        <>
+            <button
+                type="button"
+                ref={triggerRef}
+                onClick={() => setOpen(prev => !prev)}
+                className="w-full h-14 px-4 bg-background border border-border/40 hover:border-primary/40 focus:border-primary/60 focus:ring-4 focus:ring-primary/5 rounded-2xl text-left flex items-center gap-3 transition-all outline-none cursor-pointer group"
+            >
+                <Briefcase size={16} className="text-muted-foreground/50 group-hover:text-primary shrink-0 transition-colors" />
+                {selectedJob ? (
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-black text-foreground truncate">{selectedJob.jobTitle}</p>
+                        <p className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest truncate">
+                            {selectedJob.companyName} · {selectedJob.location || 'Remote'}
+                        </p>
+                    </div>
+                ) : (
+                    <span className="text-[11px] font-bold text-muted-foreground/50 flex-1">
+                        {loadingJobs ? 'Loading jobs...' : 'Select a job position...'}
+                    </span>
+                )}
+                <ChevronDown size={14} className={`text-muted-foreground/40 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`} />
+            </button>
+
+            {open && typeof document !== 'undefined' && createPortal(
+                <div
+                    ref={dropdownRef}
+                    style={{ top: coords.top, left: coords.left, width: coords.width, position: 'fixed', zIndex: 99999 }}
+                    className="bg-card border border-border/40 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
+                >
+                    {/* Search inside dropdown */}
+                    <div className="p-3 border-b border-border/40 bg-secondary/20">
+                        <div className="relative">
+                            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+                            <input
+                                ref={searchRef}
+                                type="text"
+                                placeholder="Search jobs..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full h-9 pl-8 pr-3 bg-background border border-border/40 rounded-xl text-xs font-bold outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Job list */}
+                    <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar">
+                        {loadingJobs ? (
+                            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                                <Loader2 size={16} className="animate-spin" />
+                                <span className="text-xs font-bold">Loading...</span>
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div className="py-8 text-center">
+                                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">No jobs found</p>
+                            </div>
+                        ) : (
+                            filtered.map(job => (
+                                <button
+                                    key={job._id}
+                                    type="button"
+                                    onClick={() => handleSelect(job)}
+                                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-primary/5 transition-colors text-left group ${value === job._id ? 'bg-primary/10' : ''}`}
+                                >
+                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${value === job._id ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white'}`}>
+                                        <Briefcase size={13} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-xs font-black truncate ${value === job._id ? 'text-primary' : 'text-foreground'}`}>{job.jobTitle}</p>
+                                        <p className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest truncate">{job.companyName} · {job.location || 'Remote'}</p>
+                                    </div>
+                                    {value === job._id && <Check size={14} className="text-primary shrink-0 mt-1" />}
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )}
+        </>
+    );
+};
+
+// ── Main Form ─────────────────────────────────────────────────────────────────
 const AddCandidateForm = ({ onSuccess, onCancel }) => {
     const [jobs, setJobs] = useState([]);
     const [loadingJobs, setLoadingJobs] = useState(true);
@@ -48,8 +179,6 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
         setIsSubmitting(true);
         try {
             const data = new FormData();
-            
-            // Append all string fields
             data.append('candidateName', formData.candidateName);
             data.append('candidateEmail', formData.candidateEmail);
             data.append('mobile', formData.mobile);
@@ -57,10 +186,9 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
             data.append('experience', formData.experience);
             data.append('comments', formData.comments);
             data.append('resumeUrl', formData.resumeUrl);
-            data.append('sourceType', 'employee'); // Marking as direct employee/TL entry
+            data.append('sourceType', 'employee');
             data.append('priority', formData.priority || 'medium');
 
-            // Append file if exists
             if (formData.resume) {
                 data.append('resume', formData.resume);
             }
@@ -86,7 +214,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Candidate Name</Label>
                     <div className="relative group">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" size={16} />
-                        <Input 
+                        <Input
                             required
                             placeholder="Full Name"
                             value={formData.candidateName}
@@ -101,7 +229,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Identity</Label>
                     <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" size={16} />
-                        <Input 
+                        <Input
                             required
                             type="email"
                             placeholder="email@example.com"
@@ -117,7 +245,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Contact Number</Label>
                     <div className="relative group">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" size={16} />
-                        <Input 
+                        <Input
                             required
                             placeholder="+91 XXXXX XXXXX"
                             value={formData.mobile}
@@ -132,7 +260,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Total Experience</Label>
                     <div className="relative group">
                         <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" size={16} />
-                        <Input 
+                        <Input
                             required
                             placeholder="e.g. 5 Years"
                             value={formData.experience}
@@ -142,36 +270,23 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     </div>
                 </div>
 
-                {/* Job Selection */}
+                {/* Job Selection — Portal Picker */}
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Target Job / Requisition</Label>
-                    <div className="relative group">
-                        <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none" size={16} />
-                        <select 
-                            required
-                            value={formData.jobId}
-                            onChange={(e) => setFormData({...formData, jobId: e.target.value})}
-                            className="w-full h-14 pl-12 pr-10 bg-background border border-border/40 hover:border-border/60 focus:border-border/60 rounded-2xl text-[11px] font-black focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none cursor-pointer text-foreground"
-                        >
-                            <option value="" disabled>{loadingJobs ? "Synchronizing inventory..." : "Locate job node..."}</option>
-                            {jobs.map(job => (
-                                <option key={job._id} value={job._id} className="font-black text-[11px]">
-                                    {job.jobTitle} ({job.companyName} - {job.location || 'Remote'})
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground"><path d="M4.18179 6.18181C4.35753 6.00608 4.64245 6.00608 4.81819 6.18181L7.49999 8.86362L10.1818 6.18181C10.3575 6.00608 10.6424 6.00608 10.8182 6.18181C10.9939 6.35755 10.9939 6.64247 10.8182 6.81821L7.81819 9.81821C7.73379 9.9026 7.61934 9.95001 7.49999 9.95001C7.38064 9.95001 7.26618 9.9026 7.18179 9.81821L4.18179 6.81821C4.00605 6.64247 4.00605 6.35755 4.18179 6.18181Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
-                        </div>
-                    </div>
+                    <JobPicker
+                        jobs={jobs}
+                        loadingJobs={loadingJobs}
+                        value={formData.jobId}
+                        onChange={(val) => setFormData({...formData, jobId: val})}
+                    />
                 </div>
 
-                {/* Resume Section */}
+                {/* Resume URL */}
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Resume / Asset Repository Link</Label>
                     <div className="relative group">
                         <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors" size={16} />
-                        <Input 
+                        <Input
                             placeholder="GDrive, Dropbox, or Portfolio Link"
                             value={formData.resumeUrl}
                             onChange={(e) => setFormData({...formData, resumeUrl: e.target.value})}
@@ -180,10 +295,11 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                     </div>
                 </div>
 
+                {/* File Upload */}
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Upload Resume (PDF / DOCX / TXT)</Label>
                     <div className="relative group">
-                        <Input 
+                        <Input
                             type="file"
                             accept=".pdf,.docx,.txt"
                             onChange={(e) => setFormData({...formData, resume: e.target.files[0]})}
@@ -195,9 +311,9 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                 {/* Internal Note */}
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Provisioning Notes (Internal)</Label>
-                    <Textarea 
-                        placeholder="Add screening feedback, salary expectations, or referral context..." 
-                        className="min-h-[100px] bg-background border-border/50 rounded-xl text-xs font-medium p-4 resize-none" 
+                    <Textarea
+                        placeholder="Add screening feedback, salary expectations, or referral context..."
+                        className="min-h-[100px] bg-background border-border/50 rounded-xl text-xs font-medium p-4 resize-none"
                         value={formData.comments}
                         onChange={(e) => setFormData({...formData, comments: e.target.value})}
                     />
@@ -205,7 +321,7 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
             </div>
 
             <div className="flex items-center gap-4 pt-2">
-                <Button 
+                <Button
                     type="button"
                     variant="ghost"
                     onClick={onCancel}
@@ -213,8 +329,8 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                 >
                     Cancel
                 </Button>
-                <Button 
-                    type="submit" 
+                <Button
+                    type="submit"
                     disabled={isSubmitting}
                     className="flex-[2] h-12 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20"
                 >
