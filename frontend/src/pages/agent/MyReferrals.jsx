@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
-import DataTable from '@/components/DataTable';
+import { AgentKanbanColumn } from '@/components/AgentKanbanBoard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -83,129 +83,22 @@ const MyReferrals = () => {
         toast.success('Intelligence Export Initiated');
     };
 
-    const getStatusStyle = (status) => {
-        const styles = {
-            'Referred': 'bg-primary/10 text-primary border-primary/20',
-            'Assigned': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-            'Interview Scheduled': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-            'Selected': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-            'Rejected': 'bg-destructive/10 text-destructive border-destructive/20',
-            'Joined': 'bg-primary text-white border-transparent shadow-sm'
-        };
-        return styles[status] || 'bg-secondary text-muted-foreground border-border/50';
+    const handleCardClick = (referral) => {
+        setSelectedReferral(referral);
+        setIsChatOpen(true);
     };
 
-    const columns = [
-        {
-            header: 'Candidate Profile',
-            cell: (row) => (
-                <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center font-bold text-primary shadow-sm shrink-0">
-                        {row.candidateName.charAt(0)}
-                    </div>
-                    <div className="overflow-hidden">
-                        <p className="font-bold text-foreground text-sm tracking-tight leading-none mb-1.5 truncate">{row.candidateName}</p>
-                        <div className="flex items-center gap-1.5">
-                            <Badge variant="outline" className="h-5 px-1.5 rounded-md text-[8px] font-black tracking-widest bg-secondary/50 text-muted-foreground border-none uppercase">
-                                {row.experience || 'ENTRY'} LEVEL
-                            </Badge>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            header: 'Operational Mandate',
-            cell: (row) => (
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-secondary/50 rounded-lg text-muted-foreground/40">
-                        <Briefcase size={16} />
-                    </div>
-                    <div className="overflow-hidden">
-                        <p className="text-xs font-bold text-foreground tracking-tight truncate max-w-[150px] mb-0.5">{row.job?.jobTitle}</p>
-                        <p className="text-[10px] text-muted-foreground font-medium truncate max-w-[150px]">{row.job?.companyName}</p>
-                    </div>
-                </div>
-            )
-        },
-        {
-            header: 'Lifecycle Status',
-            cell: (row) => (
-                <div className="flex flex-col gap-2">
-                    <Badge className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.05em] border inline-flex items-center justify-center w-fit h-6 ${getStatusStyle(row.status)}`}>
-                        {row.status}
-                    </Badge>
-                    {row.assignedEmployee && (
-                        <div className="flex items-center gap-1.5 text-[9px] text-primary font-bold uppercase tracking-wider leading-none">
-                            <Clock size={10} className="text-primary/60" />
-                            <span>Consultant Active</span>
-                        </div>
-                    )}
-                </div>
-            )
-        },
-        {
-            header: 'Last Synchronization',
-            cell: (row) => (
-                <div className="flex flex-col">
-                    <span className="text-[11px] text-foreground font-bold tracking-tight">
-                        {new Date(row.updatedAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                        })}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest opacity-60">
-                        {new Date(row.updatedAt).toLocaleTimeString('en-IN', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}
-                    </span>
-                </div>
-            )
-        },
-        {
-            header: 'Orchestration',
-            cell: (row) => (
-                <div className="flex items-center gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="h-10 w-10 rounded-xl text-primary hover:text-white hover:bg-primary border-border/50 hover:border-primary transition-all shadow-sm"
-                        onClick={() => {
-                            setSelectedReferral(row);
-                            setIsChatOpen(true);
-                        }}
-                    >
-                        <MessageCircle size={18} />
-                    </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent hover:border-border/50">
-                                <MoreHorizontal size={18} />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuPortal>
-                            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-white dark:bg-slate-950 border-border/40 shadow-2xl z-[100]">
-                                <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground px-3 py-2">Candidate Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-border/10" />
-                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors" onClick={() => toast.info('Edit functionality being synchronized...')}>
-                                    <Edit size={16} />
-                                    <span className="text-xs font-bold">Edit Profile</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    className="flex items-center gap-3 p-3 rounded-xl focus:bg-destructive/10 focus:text-destructive cursor-pointer transition-colors"
-                                    onClick={() => handleDelete(row._id)}
-                                >
-                                    <Trash2 size={16} />
-                                    <span className="text-xs font-bold">Withdraw Referral</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenu>
-                </div>
-            )
-        }
+    const COLUMNS = [
+        { id: 'New Referral', title: 'Referred' },
+        { id: 'Under Review', title: 'Under Review' },
+        { id: 'Contacted', title: 'Contacted' },
+        { id: 'Interview Scheduled', title: 'Interview Scheduled' },
+        { id: 'Interview Attended', title: 'Interview Completed' },
+        { id: 'Selected', title: 'Selected' },
+        { id: 'Offered', title: 'Offered' },
+        { id: 'Joined', title: 'Joined / Placed' },
+        { id: 'Rejected', title: 'Rejected' },
+        { id: 'Hold', title: 'Hold' }
     ];
 
     return (
@@ -260,24 +153,33 @@ const MyReferrals = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="w-full h-12 pl-4 pr-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none transition-all cursor-pointer"
                     >
-                        <option value="all">All Stages</option>
-                        <option value="Referred">Referred</option>
-                        <option value="Interview Scheduled">Interview Scheduled</option>
-                        <option value="Selected">Selected</option>
-                        <option value="Joined">Joined</option>
-                        <option value="Rejected">Rejected</option>
+                        <option value="all">All Active Stages</option>
+                        {COLUMNS.map(col => (
+                            <option key={col.id} value={col.id}>{col.title}</option>
+                        ))}
                     </select>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="shadow-[0_20px_50px_rgba(0,0,0,0.02)]">
-                <DataTable 
-                    columns={columns} 
-                    data={filteredReferrals} 
-                    loading={loading} 
-                    emptyMessage="Operational queue is empty. No matching records found." 
-                />
+            {/* Kanban Content */}
+            <div className="flex-1 overflow-x-auto custom-scrollbar flex items-start gap-0 pb-12 w-full h-[calc(100vh-400px)] min-h-[600px] relative scroll-smooth bg-secondary/5 rounded-[3rem] p-6 border border-border/40 shadow-inner">
+                {COLUMNS.filter(col => statusFilter === 'all' || statusFilter === col.id).map((col) => {
+                    // Match multiple possible statuses for robust stage mapping, or exact if defined
+                    const stageReferrals = filteredReferrals.filter(r => {
+                        if (col.id === 'New Referral') return r.status === 'New Referral' || r.status === 'Referred';
+                        if (col.id === 'Joined') return r.status === 'Joined' || r.status === 'Joined / Placed';
+                        return r.status === col.id;
+                    });
+                    
+                    return (
+                        <AgentKanbanColumn 
+                            key={col.id} 
+                            title={col.title} 
+                            referrals={stageReferrals} 
+                            onCardClick={handleCardClick}
+                        />
+                    );
+                })}
             </div>
 
             {selectedReferral && (

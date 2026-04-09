@@ -256,42 +256,53 @@ const LoginPage = () => {
             </div>
 
             {/* RIGHT SIDE: AUTH FORM */}
-            <div className="login-right w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-background relative">
-                {/* Mobile Decor (Hidden on Desktop) */}
-                <div className="lg:hidden absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="login-right w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-background relative overflow-hidden">
+                {/* Background Decor - Animated Bubbles/Particles */}
+                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+                </div>
                 
-                <div className="w-full max-w-md space-y-12 login-form-content">
+                <div className="w-full max-w-md space-y-12 login-form-content relative z-10">
                     <div className="space-y-4">
                         <div className="lg:hidden w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center p-2 mb-8 border border-border/40">
                              <img src={logo} alt="FIC Logo" className="w-full h-full object-contain" />
                         </div>
-                        <h2 className="text-4xl font-black text-foreground tracking-tighter leading-tight italic uppercase">Access Protocol</h2>
-                        <p className="text-muted-foreground font-medium">Initialize your session to manage the engine.</p>
+                        <div className="flex items-center gap-3 mb-2">
+                             <div className="h-1 w-12 bg-primary rounded-full" />
+                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Secure Gateway</span>
+                        </div>
+                        <h2 className="text-4xl lg:text-5xl font-black text-foreground tracking-tighter leading-tight italic uppercase">Access Protocol</h2>
+                        <p className="text-muted-foreground font-medium text-sm">Initialize your session to manage the workforce engine.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {localError && (
-                            <Alert variant="destructive" className="error-alert bg-destructive/5 border-destructive/20 text-destructive py-4 rounded-2xl">
-                                <AlertDescription className="text-xs font-bold leading-tight">{localError}</AlertDescription>
+                            <Alert variant="destructive" className="error-alert bg-destructive/5 border-destructive/20 text-destructive py-4 rounded-2xl overflow-hidden relative">
+                                <div className="absolute left-0 top-0 w-1 h-full bg-destructive" />
+                                <AlertDescription className="text-[11px] font-black uppercase tracking-wider leading-tight flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded-lg bg-destructive text-white flex items-center justify-center flex-shrink-0">!</div>
+                                    {localError}
+                                </AlertDescription>
                             </Alert>
                         )}
                         
                         <div className="space-y-6">
                             {/* Floating Label Email Input */}
                             <div className="relative group/input">
-                                <Mail className="absolute left-6 top-[22px] w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors z-10" />
+                                <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-all duration-300 z-10" />
                                 <Input 
                                     id="email" 
                                     type="email" 
                                     placeholder=" " 
-                                    className="peer h-16 pl-14 pr-6 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
+                                    className="peer h-16 pl-14 pr-6 bg-secondary/30 border-border/20 focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/40 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.02] shadow-sm"
                                     required
                                     value={formData.email}
                                     onChange={handleChange}
                                 />
                                 <Label 
                                     htmlFor="email" 
-                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
+                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60 pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
                                 >
                                     Universal Identity
                                 </Label>
@@ -299,19 +310,19 @@ const LoginPage = () => {
 
                             {/* Floating Label Password Input */}
                             <div className="relative group/input">
-                                <Lock className="absolute left-6 top-[22px] w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors z-10" />
+                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-all duration-300 z-10" />
                                 <Input 
                                     id="password" 
                                     type={showPassword ? "text" : "password"} 
                                     placeholder=" "
-                                    className="peer h-16 pl-14 pr-14 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.01]"
+                                    className="peer h-16 pl-14 pr-14 bg-secondary/30 border-border/20 focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/40 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.02] shadow-sm"
                                     required
                                     value={formData.password}
                                     onChange={handleChange}
                                 />
                                 <Label 
                                     htmlFor="password" 
-                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
+                                    className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60 pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
                                 >
                                     Access Matrix
                                 </Label>
@@ -327,18 +338,18 @@ const LoginPage = () => {
 
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setRememberMe(!rememberMe)}>
-                                <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-primary border-primary' : 'border-border group-hover:border-primary'}`}>
-                                    {rememberMe && <ArrowRight size={12} className="text-white rotate-90" />}
+                                <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${rememberMe ? 'bg-primary border-primary scale-110' : 'border-border/60 group-hover:border-primary/60'}`}>
+                                    {rememberMe && <CheckCircleIcon className="w-3.5 h-3.5 text-white" fill="currentColor" />}
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Remember Session</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">Remember Session</span>
                             </div>
-                            <a href="#" className="text-[9px] uppercase tracking-widest font-black text-primary hover:opacity-80 transition-opacity">Reset Sequence</a>
+                            <button type="button" className="text-[9px] uppercase tracking-widest font-black text-primary hover:text-primary/60 transition-all border-b border-primary/20 hover:border-transparent">Reset Sequence</button>
                         </div>
 
                         <Button 
                             type="submit" 
                             disabled={isSubmitting}
-                            className="group/btn w-full h-16 bg-slate-900 dark:bg-primary hover:scale-[1.01] active:scale-95 text-white font-black rounded-2xl shadow-2xl shadow-primary/20 transition-all mt-4 flex gap-3 text-[11px] uppercase tracking-[0.2em] border-0 overflow-hidden relative"
+                            className="group/btn w-full h-16 bg-slate-900 dark:bg-primary hover:scale-[1.02] active:scale-95 text-white font-black rounded-2xl shadow-2xl shadow-primary/20 transition-all mt-4 flex gap-3 text-[11px] uppercase tracking-[0.2em] border-0 overflow-hidden relative"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite] pointer-events-none" />
                             {isSubmitting ? (
@@ -352,21 +363,32 @@ const LoginPage = () => {
                     </form>
 
                     <div className="pt-10 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <p className="text-muted-foreground text-xs font-medium">New integration node?</p>
+                        <div className="space-y-1 text-center sm:text-left">
+                             <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">New Node?</p>
+                             <p className="text-[10px] text-muted-foreground/40 font-bold uppercase">Registration protocol required</p>
+                        </div>
                         <Link to="/register">
-                            <Button variant="ghost" className="h-12 px-8 rounded-2xl border border-border/40 text-slate-900 dark:text-white font-black text-[10px] uppercase tracking-widest hover:bg-primary/5 hover:text-primary transition-all">
+                            <Button variant="outline" className="h-12 px-8 rounded-2xl border-border/60 text-foreground font-black text-[10px] uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all shadow-sm">
                                 Request Access
                             </Button>
                         </Link>
                     </div>
                 </div>
 
-                <div className="absolute bottom-8 text-[9px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] italic">
-                    FORGE INDIA CONNECT • CRM V2.0 ENGINE
+                <div className="absolute bottom-8 text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.5em] italic flex items-center gap-4">
+                    <span className="w-8 h-[1px] bg-muted-foreground/20" />
+                    FORGE INDIA CONNECT • V2.0 ENGINE
+                    <span className="w-8 h-[1px] bg-muted-foreground/20" />
                 </div>
             </div>
         </div>
     );
 };
+
+const CheckCircleIcon = (props) => (
+  <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
 
 export default LoginPage;

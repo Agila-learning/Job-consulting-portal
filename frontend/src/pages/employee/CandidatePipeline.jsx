@@ -339,14 +339,6 @@ const CandidatePipeline = () => {
                                 </div>
                                 Provision Candidate
                             </DialogTitle>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => setIsAddModalOpen(false)}
-                                className="h-10 w-10 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-                            >
-                                <X size={20} />
-                            </Button>
                         </DialogHeader>
                     </div>
                     <div className="p-8 overflow-y-auto custom-scrollbar flex-1">

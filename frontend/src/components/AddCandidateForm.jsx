@@ -146,21 +146,30 @@ const AddCandidateForm = ({ onSuccess, onCancel }) => {
                 <div className="space-y-2 md:col-span-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Target Job / Requisition</Label>
                     <Select onValueChange={(val) => setFormData({...formData, jobId: val})} value={formData.jobId}>
-                        <SelectTrigger className="h-14 bg-background border-border/40 rounded-2xl text-[11px] font-black group-focus:ring-4 group-focus:ring-primary/5 transition-all outline-none">
+                        <SelectTrigger className="h-14 bg-background border-border/40 rounded-2xl text-[11px] font-black focus:ring-4 focus:ring-primary/5 transition-all outline-none">
                             <div className="flex items-center gap-3">
                                 <Briefcase size={16} className="text-primary/60" />
                                 <SelectValue placeholder={loadingJobs ? "Synchronizing inventory..." : "Locate job node..."} />
                             </div>
                         </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-border/40 max-h-72 shadow-2xl">
-                            {jobs.map(job => (
-                                <SelectItem key={job._id} value={job._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 focus:bg-primary/10 focus:text-primary transition-colors px-4">
-                                    <div className="flex flex-col items-start gap-1">
-                                        <span>{job.jobTitle}</span>
-                                        <span className="text-[8px] opacity-40 italic">{job.companyName} • {job.location || 'Remote'}</span>
+                        <SelectContent className="rounded-2xl border-border/40 max-h-72 shadow-2xl z-[200]">
+                            {jobs.length === 0 && !loadingJobs ? (
+                                <div className="p-8 text-center space-y-2">
+                                    <div className="w-10 h-10 rounded-xl bg-secondary/50 flex items-center justify-center mx-auto text-muted-foreground/30">
+                                        <Briefcase size={20} />
                                     </div>
-                                </SelectItem>
-                            ))}
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">No active jobs available</p>
+                                </div>
+                            ) : (
+                                jobs.map(job => (
+                                    <SelectItem key={job._id} value={job._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 focus:bg-primary/10 focus:text-primary transition-colors px-4">
+                                        <div className="flex flex-col items-start gap-1">
+                                            <span>{job.jobTitle}</span>
+                                            <span className="text-[8px] opacity-40 italic">{job.companyName} • {job.location || 'Remote'}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))
+                            )}
                         </SelectContent>
                     </Select>
                 </div>

@@ -85,7 +85,7 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
             ref={setNodeRef} 
             style={style} 
             onClick={() => onClick && onClick(referral)}
-            className={`p-5 mb-4 bg-background border border-border/50 rounded-[1.8rem] cursor-pointer hover:border-primary/40 transition-all group relative overflow-hidden ${isOverlay ? 'shadow-[0_20px_50px_rgba(6,96,252,0.15)] scale-[1.03] border-primary/40' : 'shadow-sm hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)]'}`}
+            className={`p-5 mb-4 bg-background border border-border/50 rounded-[1.8rem] cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-900/60 hover:border-primary/40 transition-all group relative overflow-hidden ${isOverlay ? 'shadow-[0_20px_50px_rgba(6,96,252,0.15)] scale-[1.03] border-primary/40' : 'shadow-sm hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)]'}`}
         >
             {/* Status & Priority Indicator Line */}
             <div className={`absolute top-0 left-0 w-2 h-full ${getStageColor(referral.status)} opacity-40 group-hover:opacity-100 transition-opacity`} />
@@ -93,40 +93,40 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete }) {
             
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3.5 overflow-hidden">
-                    <div className="w-11 h-11 rounded-2xl bg-secondary/80 border border-border/50 flex items-center justify-center font-black text-foreground shadow-sm shrink-0 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    <div className="w-11 h-11 rounded-2xl bg-secondary/80 border border-border/50 flex items-center justify-center font-black text-foreground shadow-sm shrink-0 group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                         {referral.candidateName.charAt(0)}
                     </div>
                     <div className="overflow-hidden">
                         <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-black text-foreground truncate leading-none">{referral.candidateName}</p>
+                            <p className="text-sm font-black text-foreground group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate leading-none">{referral.candidateName}</p>
                             {referral.priority === 'high' && <Star size={10} className="text-amber-500 fill-amber-500" />}
                         </div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] truncate flex items-center gap-1.5">
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] truncate flex items-center gap-1.5 group-hover:text-muted-foreground/80 transition-colors">
                             {referral.job?.companyName || 'Lead Interaction'}
                         </p>
                     </div>
                 </div>
                 <div {...attributes} {...listeners} className="p-1.5 hover:bg-secondary rounded-xl cursor-grab active:cursor-grabbing transition-colors">
-                    <GripVertical size={14} className="text-muted-foreground/40" />
+                    <GripVertical size={14} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
                 </div>
             </div>
             
             <div className="space-y-4">
-                <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-secondary/30 p-2.5 rounded-2xl border border-transparent group-hover:border-border/50 transition-colors">
+                <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-secondary/30 group-hover:bg-primary/5 p-2.5 rounded-2xl border border-transparent group-hover:border-primary/10 transition-all">
                     <Briefcase size={12} className="text-primary/60" />
-                    <span className="truncate">{referral.job?.jobTitle || 'Unassigned Role'}</span>
+                    <span className="truncate group-hover:text-foreground transition-colors">{referral.job?.jobTitle || 'Unassigned Role'}</span>
                 </div>
 
                 {/* Candidate Tags */}
                 {referral.candidateTags && referral.candidateTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                         {referral.candidateTags.slice(0, 2).map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" className="px-2 py-0 h-5 text-[8px] font-black uppercase tracking-widest bg-secondary/50 text-muted-foreground border-transparent">
+                            <Badge key={idx} variant="secondary" className="px-2 py-0 h-5 text-[8px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border-none group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                 {tag}
                             </Badge>
                         ))}
                         {referral.candidateTags.length > 2 && (
-                            <span className="text-[8px] font-black text-muted-foreground ml-1">+{referral.candidateTags.length - 2}</span>
+                            <span className="text-[8px] font-black text-muted-foreground ml-1 group-hover:text-foreground transition-colors">+{referral.candidateTags.length - 2}</span>
                         )}
                     </div>
                 )}

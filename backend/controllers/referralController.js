@@ -319,12 +319,36 @@ exports.updateReferralStatus = async (req, res) => {
 
             // Emit real-time notification to Referrer
             const io = req.app.get('io');
-            io.to(referral.referrer.toString()).emit('statusChanged', {
-                message: `Status of ${referral.candidateName} updated to ${status}`,
-                referralId: referral._id,
-                status
-            });
-        }if (comment) {
+            if (referral.referrer) {
+                io.to(referral.referrer.toString()).emit('statusChanged', {
+                    message: `Status of ${referral.candidateName} updated to ${status}`,
+                    referralId: referral._id,
+                    status
+                });
+            }
+
+            // DB Notification to trigger Admin Commission Workflows for Agent Referrals
+            if ((status === 'Selected' || status === 'Joined') && referral.sourceType === 'agent') {
+                const Notification = require('../models/Notification');
+                const User = require('../models/User');
+                const admins = await User.find({ role: 'admin' });
+                
+                const notifications = admins.map(admin => ({
+                    user: admin._id,
+                    title: `Agent Referral ${status}`,
+                    message: `Agent candidate ${referral.candidateName} has reached ${status} stage. Commission processing required.`,
+                    type: status === 'Joined' ? 'success' : 'info',
+                    link: `/admin/dashboard`
+                }));
+
+                if (notifications.length > 0) {
+                    await Notification.insertMany(notifications);
+                    io.emit('newNotification', { message: `New commission event for ${referral.candidateName}` });
+                }
+            }
+        }
+
+        if (comment) {
             referral.comments.push({
                 user: req.user.id,
                 text: comment,
