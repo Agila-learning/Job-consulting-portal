@@ -134,6 +134,17 @@ const ReferralQueue = () => {
         }
     };
 
+    const handleQuickShortlist = async (id) => {
+        const loadingToast = toast.loading('Fast-tracking candidate to shortlist...');
+        try {
+            await api.patch(`/referrals/${id}/status`, { status: 'Shortlisted', comment: 'Direct fast-track from pipeline' });
+            toast.success('Candidate Shortlisted', { id: loadingToast });
+            fetchData();
+        } catch (err) {
+            toast.error('Fast-track failed', { id: loadingToast });
+        }
+    };
+
     const handleFinanceUpdate = async (id, data) => {
         const loadingToast = toast.loading('Commiting financial reconciliation...');
         try {
@@ -378,16 +389,17 @@ const ReferralQueue = () => {
                         ) : (
                             <div className="space-y-4">
                                 {filteredList.map((row) => (
-                                     <CandidateCard 
-                                         key={row._id} 
-                                         row={row} 
-                                         isAdmin={isAdmin}
-                                         activeTab={activeTab}
-                                        onAssign={() => {
-                                            setSelectedReferral(row);
-                                            setIsAssignOpen(true);
-                                        }}
-                                        onStatus={() => {
+                                      <CandidateCard 
+                                          key={row._id} 
+                                          row={row} 
+                                          isAdmin={isAdmin}
+                                          activeTab={activeTab}
+                                         onAssign={() => {
+                                             setSelectedReferral(row);
+                                             setIsAssignOpen(true);
+                                         }}
+                                         onQuickShortlist={() => handleQuickShortlist(row._id)}
+                                         onStatus={() => {
                                             setSelectedReferral(row);
                                             setStatusData({ status: row.status, comment: '' });
                                             setIsStatusOpen(true);
@@ -500,8 +512,14 @@ const ReferralQueue = () => {
 
             {/* Quick Add Candidate (Admin) */}
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-2xl p-0 overflow-hidden outline-none">
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-2xl p-0 overflow-y-auto max-h-[95vh] outline-none">
                     <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden">
+                        <button 
+                            onClick={() => setIsAddOpen(false)}
+                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
+                        >
+                            <X size={20} />
+                        </button>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black text-foreground uppercase tracking-tight flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg">
@@ -534,8 +552,14 @@ const ReferralQueue = () => {
 
             {/* Lifecycle Status Update Dialog */}
             <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
-                <DialogContent className="max-w-xl bg-card border-border/40 rounded-[2.5rem] p-0 overflow-hidden outline-none">
-                    <div className="p-10 bg-primary/5 border-b border-border/20">
+                <DialogContent className="max-w-xl bg-card border-border/40 rounded-[2.5rem] p-0 overflow-y-auto max-h-[95vh] outline-none">
+                    <div className="p-10 bg-primary/5 border-b border-border/20 relative">
+                        <button 
+                            onClick={() => setIsStatusOpen(false)}
+                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
+                        >
+                            <X size={20} />
+                        </button>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[1.2rem] bg-indigo-500 flex items-center justify-center text-white">
@@ -678,7 +702,7 @@ const ReferralQueue = () => {
 };
 
 /* ── SUB-COMPONENT: CandidateCard ── */
-const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance, onTimeline, onDelete }) => {
+const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance, onTimeline, onQuickShortlist, onDelete }) => {
     const roleConfig = {
         'admin': { color: 'bg-rose-500/10 text-rose-600 border-rose-500/20', icon: <Shield size={10} className="mr-1.5" /> },
         'employee': { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', icon: <User size={10} className="mr-1.5" /> },
@@ -746,7 +770,8 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                         {/* Quick Desktop & Mobile Actions */}
                         <div className="flex items-center gap-3 pt-3">
                             <button 
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     const url = getFullUrl(row.resumeUrl);
                                     url ? window.open(url, '_blank') : toast.error('No document attached');
                                 }} 
@@ -756,18 +781,24 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                                 <FileText size={14} />
                             </button>
                             <button 
-                                onClick={() => row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact number available')} 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    row.phone ? window.open(`tel:${row.phone}`) : toast.info('No contact number available');
+                                }} 
                                 className="w-8 h-8 rounded-full bg-secondary hover:bg-emerald-500/20 hover:text-emerald-500 text-muted-foreground flex items-center justify-center transition-all shadow-sm"
                                 title="Quick Call"
                             >
                                 <Phone size={14} />
                             </button>
                             <button 
-                                onClick={() => toast.info('Opening interview scheduler...')} 
-                                className="w-8 h-8 rounded-full bg-secondary hover:bg-indigo-500/20 hover:text-indigo-500 text-muted-foreground flex items-center justify-center transition-all shadow-sm"
-                                title="Schedule Calendar"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onQuickShortlist(row); // Open status update directly
+                                }} 
+                                className="w-8 h-8 rounded-full bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 flex items-center justify-center transition-all shadow-sm border border-emerald-500/20"
+                                title="Move to Shortlist"
                             >
-                                <Calendar size={14} />
+                                <CheckCircle2 size={14} />
                             </button>
                         </div>
                     </div>
@@ -820,7 +851,8 @@ const CandidateCard = ({ row, isAdmin, activeTab, onAssign, onStatus, onFinance,
                             <DropdownMenuTrigger asChild>
                                 <Button 
                                     variant="ghost" 
-                                    className="h-12 w-12 rounded-[1.3rem] bg-secondary/80 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm outline-none ring-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="h-12 w-12 rounded-[1.3rem] bg-secondary/80 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 border border-border/20 shadow-sm outline-none ring-0 relative z-20"
                                 >
                                     <MoreVertical size={20} />
                                 </Button>

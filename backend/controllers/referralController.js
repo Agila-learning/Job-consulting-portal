@@ -134,7 +134,10 @@ exports.getReferrals = async (req, res) => {
             }
         } else if (req.user.role === 'team_leader') {
             // Team Leaders see candidates in their branch AND their domain
-            query.assignedTeam = req.user.team;
+            // Use regex for flexible matching (case-insensitive, trimmed)
+            if (req.user.team) {
+                query.assignedTeam = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
+            }
         }
 
         // Admin sees everything (no filter)

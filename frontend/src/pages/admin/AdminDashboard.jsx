@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Outlet } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
     LayoutDashboard, Users, UserCheck, Briefcase,
@@ -47,13 +48,8 @@ const AdminDashboard = () => {
             brandIcon={<Shield size={20} />}
             footerContent={footerContent}
         >
-            <div className="p-4 lg:p-8 space-y-10">
-                <div className="flex flex-col gap-2 text-left">
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase italic">Command<span className="text-primary not-italic">.Center</span></h2>
-                    <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em] ml-1">Real-time Global Operations Snapshot</p>
-                </div>
-                
-                <DashboardOverview />
+            <div className="p-0">
+                <Outlet />
             </div>
         </DashboardLayout>
     );

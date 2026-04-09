@@ -20,8 +20,11 @@ import {
 const Topbar = ({ title, showSidebarMobile }) => {
   const { user, logout, switchBranch } = useAuth();
   const { toggleChat, toggleNewAction, openNotifications, notifications } = useUI();
-  const navigate = useNavigate();
-  const [searchValue, setSearchValue] = useState("");
+  const handleLogout = () => {
+    logout();
+    toast.success('Securely logged out of Command Center');
+    navigate('/login');
+  };
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchValue.trim()) {
@@ -160,7 +163,7 @@ const Topbar = ({ title, showSidebarMobile }) => {
             
             <div className="py-2 px-2">
                 <div className="h-px bg-border/40 my-2 mx-2" />
-                <DropdownMenuItem onClick={logout} className="rounded-xl flex items-center gap-4 p-3.5 text-rose-500 focus:text-white focus:bg-rose-500 hover:bg-rose-500 hover:text-white cursor-pointer transition-all mt-2 shadow-sm font-black text-[10px] uppercase tracking-widest">
+                <DropdownMenuItem onClick={handleLogout} className="rounded-xl flex items-center gap-4 p-3.5 text-rose-500 focus:text-white focus:bg-rose-500 hover:bg-rose-500 hover:text-white cursor-pointer transition-all mt-2 shadow-sm font-black text-[10px] uppercase tracking-widest">
                     <LogOut size={16} />
                     <span>Logout</span>
                 </DropdownMenuItem>

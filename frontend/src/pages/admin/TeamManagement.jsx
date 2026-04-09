@@ -97,7 +97,8 @@ const TeamManagement = () => {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/users', formData);
+            const payload = { ...formData, team: formData.department };
+            await api.post('/users', payload);
             let roleLabel = 'Consultant';
             if (formData.role === 'team_leader') roleLabel = 'Team Leader';
             if (formData.role === 'agent') roleLabel = 'Agent Partner';
@@ -128,7 +129,8 @@ const TeamManagement = () => {
     const handleEdit = async (e) => {
         e.preventDefault();
         try {
-            await api.patch(`/users/${selectedUser._id}`, editFormData);
+            const payload = { ...editFormData, team: editFormData.department };
+            await api.patch(`/users/${selectedUser._id}`, payload);
             toast.success('Consultant profile synchronized');
             setIsEditOpen(false);
             fetchEmployees();
@@ -313,8 +315,14 @@ const TeamManagement = () => {
                                 Add Team Member
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden focus-visible:ring-0">
+                        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-y-auto max-h-[90vh] focus-visible:ring-0">
                             <div className="p-10 relative overflow-hidden bg-secondary/30 border-b border-border/40">
+                                <button 
+                                    onClick={() => setIsCreateOpen(false)}
+                                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
+                                >
+                                    <X size={20} />
+                                </button>
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                                 <DialogHeader className="relative z-10">
                                     <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-4 text-foreground">
@@ -497,8 +505,14 @@ const TeamManagement = () => {
 
             {/* Edit identity Dialog */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden focus-visible:ring-0">
+                <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] overflow-y-auto max-h-[90vh] focus-visible:ring-0">
                     <div className="p-10 relative overflow-hidden bg-primary/5 border-b border-border/40">
+                        <button 
+                            onClick={() => setIsEditOpen(false)}
+                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 transition-colors z-50 text-muted-foreground"
+                        >
+                            <X size={20} />
+                        </button>
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                         <DialogHeader className="relative z-10">
                             <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-4 text-foreground">

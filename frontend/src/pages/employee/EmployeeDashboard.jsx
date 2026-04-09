@@ -7,7 +7,7 @@ import {
     MessageSquare, Zap, Trophy, Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import DashboardOverview from '@/components/DashboardOverview';
 
 const EmployeeDashboard = () => {
@@ -48,20 +48,8 @@ const EmployeeDashboard = () => {
             brandIcon={<Zap size={20} className="fill-white" />}
             footerContent={footerContent}
         >
-            <div className="p-4 lg:p-8 space-y-10">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                    <div className="flex flex-col gap-2 text-left">
-                        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase italic">Operations<span className="text-primary not-italic">.Hub</span></h2>
-                        <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.3em] ml-1">Consultant Throughput & Lifecycle Metrics</p>
-                    </div>
-                    <Link to="/employee/pipeline">
-                        <Button className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105 flex gap-3">
-                            <Plus size={16} /> Refer Candidate
-                        </Button>
-                    </Link>
-                </div>
-                
-                <DashboardOverview />
+            <div className="p-0">
+                <Outlet />
             </div>
         </DashboardLayout>
     );

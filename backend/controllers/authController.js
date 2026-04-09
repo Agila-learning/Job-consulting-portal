@@ -101,6 +101,7 @@ const sendTokenResponse = (user, statusCode, res) => {
             email: user.email,
             role: user.role,
             status: user.status,
+            team: user.department || user.team,
             branchId: user.branchId?._id || user.branchId,
             branchName: user.branchId?.name || 'N/A'
         }

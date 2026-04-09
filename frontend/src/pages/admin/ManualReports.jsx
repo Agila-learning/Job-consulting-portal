@@ -21,6 +21,7 @@ const ManualReports = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [branches, setBranches] = useState([]);
     const [branchFilter, setBranchFilter] = useState('all');
+    const [generating, setGenerating] = useState(false);
 
     const fetchBranches = async () => {
         if (user?.role === 'admin') {
@@ -53,6 +54,8 @@ const ManualReports = () => {
     }, [branchFilter]);
 
     const handleGenerate = async () => {
+        if (generating) return;
+        setGenerating(true);
         const loadingToast = toast.loading('Generating fresh audit snapshot...');
         try {
             await api.post('/reports/snapshot');
@@ -60,6 +63,8 @@ const ManualReports = () => {
             fetchReports();
         } catch (err) {
             toast.error('Snapshot protocol failure', { id: loadingToast });
+        } finally {
+            setGenerating(false);
         }
     };
 
@@ -124,9 +129,11 @@ const ManualReports = () => {
                 </div>
                 <Button 
                     onClick={handleGenerate}
+                    disabled={generating}
                     className="h-12 w-full lg:w-auto px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 flex gap-3 transition-all active:scale-[0.98] justify-center"
                 >
-                    <Plus size={16} /> Generate New Snapshot
+                    {generating ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />} 
+                    {generating ? 'Processing Audit...' : 'Generate New Snapshot'}
                 </Button>
             </div>
 

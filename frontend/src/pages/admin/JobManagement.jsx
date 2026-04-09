@@ -705,7 +705,10 @@ const JobManagement = () => {
                                             {isAdmin && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <button className="h-12 w-12 flex items-center justify-center rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 active:scale-95">
+                                                        <button 
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="h-12 w-12 flex items-center justify-center rounded-2xl bg-secondary/80 dark:bg-slate-800 hover:bg-secondary dark:hover:bg-slate-700 border border-border/40 transition-all text-muted-foreground hover:text-slate-900 dark:hover:text-white shadow-sm outline-none ring-0 active:scale-95 relative z-20"
+                                                        >
                                                             <MoreVertical size={20} />
                                                         </button>
                                                     </DropdownMenuTrigger>

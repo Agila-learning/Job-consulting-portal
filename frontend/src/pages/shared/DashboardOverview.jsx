@@ -338,13 +338,15 @@ const DashboardOverview = () => {
                              </div>
                              <button 
                                 onClick={() => {
-                                    const basePath = user?.role === 'team_leader' ? '/team-leader' : (user?.role === 'employee' ? '/employee' : (user?.role === 'agent' ? '/agent' : '/admin'));
-                                    const path = user?.role === 'admin' ? '/admin/referrals' : (user?.role === 'agent' ? '/agent/referrals' : `${basePath}/pipeline`);
-                                    navigate(path);
+                                    if (user?.role === 'admin') navigate('/admin/referrals');
+                                    else if (user?.role === 'agent') navigate('/agent/referrals');
+                                    else if (user?.role === 'team_leader') navigate('/team-leader/pipeline');
+                                    else if (user?.role === 'employee') navigate('/employee/pipeline');
+                                    else toast.error('Unauthorized Node Access');
                                 }}
                                 className="h-12 w-full bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-2 group/btn"
                              >
-                                Open Referral Port <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                Open Referral Portal <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                              </button>
                          </div>
                     </div>
