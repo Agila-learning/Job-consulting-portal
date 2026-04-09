@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
+import * as XLSX from 'xlsx';
 
 const ReferralQueue = () => {
     const { user: currentUser } = useAuth();
@@ -51,7 +52,7 @@ const ReferralQueue = () => {
     const [statusData, setStatusData] = useState({ status: '', comment: '' });
     const [financeData, setFinanceData] = useState({ calculatedCommission: '', payoutStatus: '', payoutNotes: '' });
     const [branches, setBranches] = useState([]);
-    const [branchFilter, setBranchFilter] = useState('all');
+    const [branchFilter, setBranchFilter] = useState(currentUser?.role === 'admin' ? 'all' : (currentUser?.branchId || 'all'));
 
     const containerRef = useRef(null);
 
@@ -205,6 +206,31 @@ const ReferralQueue = () => {
                     >
                         <AlertCircle size={16} className="mr-2" /> Reset Protocol
                     </Button>
+                    <Button 
+                        onClick={() => {
+                            const data = referrals.map(ref => ({
+                                'Candidate Name': ref.candidateName,
+                                'Job Title': ref.job?.jobTitle || 'N/A',
+                                'Company': ref.job?.companyName || 'N/A',
+                                'Mobile': ref.mobile || 'N/A',
+                                'Status': ref.status,
+                                'Source': ref.sourceType,
+                                'Referrer': ref.referrer?.name || 'Admin',
+                                'Commission': ref.calculatedCommission || 0,
+                                'Payout Status': ref.payoutStatus,
+                                'Date': new Date(ref.createdAt).toLocaleDateString()
+                            }));
+                            const worksheet = XLSX.utils.json_to_sheet(data);
+                            const workbook = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(workbook, worksheet, 'Hiring Pipeline');
+                            XLSX.writeFile(workbook, `hiring_pipeline_${new Date().toISOString().split('T')[0]}.xlsx`);
+                            toast.success('Hiring Pipeline exported to Excel');
+                        }} 
+                        variant="outline" 
+                        className="h-12 px-6 rounded-2xl border-primary/20 bg-primary/5 text-primary font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
+                    >
+                        <FileText size={16} className="mr-2" /> Export Queue
+                    </Button>
                     <Button onClick={() => toast.info('Audit System: Distributed ledger review protocol initiated.')} variant="outline" className="h-12 px-6 rounded-2xl border-border/40 font-black text-[10px] uppercase tracking-widest gap-2">
                         <Calendar size={16} /> Audit Calendar
                     </Button>
@@ -218,9 +244,31 @@ const ReferralQueue = () => {
                 <aside className="lg:col-span-4 xl:col-span-3 space-y-6 lg:sticky lg:top-24 h-fit">
                     {/* Compact Analytics Panel */}
                     <div className="bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] p-8 shadow-sm space-y-8">
+                        {isAdmin && (
+                            <div className="space-y-6">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center gap-2">
+                                    <TrendingUp size={14} className="text-primary" /> Finance Snapshot
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl group hover:border-emerald-500/30 transition-all">
+                                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-2">Total Paid</p>
+                                        <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                            ₹{referrals.filter(r => r.payoutStatus === 'paid').reduce((acc, r) => acc + (r.calculatedCommission || 0), 0).toLocaleString()}
+                                        </h4>
+                                    </div>
+                                    <div className="p-5 bg-amber-500/5 border border-amber-500/10 rounded-3xl group hover:border-amber-500/30 transition-all">
+                                        <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest leading-none mb-2">Pending Payouts</p>
+                                        <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                            ₹{referrals.filter(r => r.payoutStatus === 'pending_approval' || r.payoutStatus === 'pending_invoice').reduce((acc, r) => acc + (r.calculatedCommission || 0), 0).toLocaleString()}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
-                                <TrendingUp size={16} className="text-primary" /> Performance Index
+                                <Activity size={16} className="text-primary" /> Performance Index
                             </h3>
                             <Badge className="bg-primary/10 text-primary border-0 text-[8px] font-black uppercase tracking-widest">Live Node</Badge>
                         </div>

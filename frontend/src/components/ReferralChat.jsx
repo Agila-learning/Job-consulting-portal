@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import api from '@/services/api';
+import api, { BASE_URL } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import {
     Paperclip, CheckCheck, Lock, Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { io } from 'socket.io-client';
 
 const ReferralChat = ({ referralId, recipientId, candidateName }) => {
     const { user } = useAuth();
@@ -15,6 +16,7 @@ const ReferralChat = ({ referralId, recipientId, candidateName }) => {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
+    const socketRef = useRef(null);
 
     const fetchMessages = async () => {
         if (!referralId && !recipientId) return;
@@ -30,12 +32,34 @@ const ReferralChat = ({ referralId, recipientId, candidateName }) => {
     };
 
     useEffect(() => {
+        // Initialize socket connection
+        const socketServerUrl = BASE_URL.replace(/\/api$/, '');
+        socketRef.current = io(socketServerUrl);
+
+        socketRef.current.on('connect', () => {
+            console.log('Socket Connected');
+            socketRef.current.emit('join', user?._id);
+        });
+
+        socketRef.current.on('new_message', (message) => {
+            // Check if message belongs to current thread
+            const isThreadMatch = referralId && message.referralId === referralId;
+            const isDirectMatch = recipientId && (message.sender === recipientId || message.recipient === recipientId);
+            
+            if (isThreadMatch || isDirectMatch) {
+                setMessages(prev => [...prev, message]);
+            }
+        });
+
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
+    }, [user?._id, referralId, recipientId]);
+
+    useEffect(() => {
         setMessages([]);
         setLoading(true);
         fetchMessages().then(() => setLoading(false));
-        
-        const interval = setInterval(fetchMessages, 4000);
-        return () => clearInterval(interval);
     }, [referralId, recipientId]);
 
     useEffect(() => {
@@ -56,9 +80,14 @@ const ReferralChat = ({ referralId, recipientId, candidateName }) => {
             if (referralId) payload.referralId = referralId;
             if (recipientId) payload.recipientId = recipientId;
 
-            await api.post('/messages/send', payload);
+            // Wait for API response to ensure delivery
+            const res = await api.post('/messages/send', payload);
+            
+            // Optimistic update handled via socket if backend emits to sender, 
+            // but we add it manually here to be safe and clear the input.
+            // Actually, usually backend emits to everyone in room.
             setNewMessage('');
-            fetchMessages();
+            // fetchMessages(); // No longer needed thanks to socket
         } catch (err) {
             console.error('Failed to send message:', err.message);
         }

@@ -190,7 +190,26 @@ const KYCSubmission = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Aadhaar Number (12 Digits)</Label>
-                                    <Input id="aadhaarNumber" pattern="[0-9]{12}" minLength={12} maxLength={12} placeholder="1234 5678 9012" className="h-14 bg-secondary/20 border-transparent focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary/20 rounded-2xl font-bold tracking-widest" value={formData.aadhaarNumber} onChange={handleChange} required />
+                                    <Input 
+                                        id="aadhaarNumber" 
+                                        type="text"
+                                        maxLength={12} 
+                                        placeholder="1234 5678 9012" 
+                                        className={`h-14 bg-secondary/20 border-transparent focus:bg-background focus:ring-2 rounded-2xl font-bold tracking-widest ${
+                                            formData.aadhaarNumber && formData.aadhaarNumber.length !== 12 ? 'border-rose-500/50 focus:ring-rose-500/10' : 'focus:ring-primary/10'
+                                        }`} 
+                                        value={formData.aadhaarNumber} 
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '');
+                                            if (val.length <= 12) {
+                                                setFormData({...formData, aadhaarNumber: val});
+                                            }
+                                        }} 
+                                        required 
+                                    />
+                                    {formData.aadhaarNumber && formData.aadhaarNumber.length !== 12 && (
+                                        <p className="text-[9px] font-bold text-rose-500 uppercase tracking-widest ml-1 animate-pulse">Must be exactly 12 digits</p>
+                                    )}
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">PAN Card Number</Label>

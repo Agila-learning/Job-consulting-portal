@@ -329,19 +329,27 @@ const CandidatePipeline = () => {
 
             {/* PROVISIONING MODAL */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110]">
-                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden">
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
                         <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
-                        <DialogHeader>
+                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
                             <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
                                     <UserPlus size={22} className="fill-white" />
                                 </div>
                                 Provision Candidate
                             </DialogTitle>
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="h-10 w-10 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
+                            >
+                                <X size={20} />
+                            </Button>
                         </DialogHeader>
                     </div>
-                    <div className="p-8">
+                    <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
                          <AddCandidateForm 
                             onSuccess={() => {
                                 setIsAddModalOpen(false);

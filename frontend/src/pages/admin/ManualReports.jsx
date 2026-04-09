@@ -127,14 +127,41 @@ const ManualReports = () => {
                     </div>
                     <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] ml-1">Administrative Performance Audits</p>
                 </div>
-                <Button 
-                    onClick={handleGenerate}
-                    disabled={generating}
-                    className="h-12 w-full lg:w-auto px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 flex gap-3 transition-all active:scale-[0.98] justify-center"
-                >
-                    {generating ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />} 
-                    {generating ? 'Processing Audit...' : 'Generate New Snapshot'}
-                </Button>
+                <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <Button 
+                        onClick={() => {
+                            const data = reports.map(r => ({
+                                'Audit ID': r.id,
+                                'Title': r.title,
+                                'Type': r.type,
+                                'Amount': r.amount,
+                                'Author': r.author,
+                                'Branch': r.branchName,
+                                'Status': r.status,
+                                'Date': r.date,
+                                'Company': r.metadata?.company || 'N/A',
+                                'Source': r.metadata?.source || 'N/A'
+                            }));
+                            const worksheet = XLSX.utils.json_to_sheet(data);
+                            const workbook = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(workbook, worksheet, 'Master Audit Ledger');
+                            XLSX.writeFile(workbook, `master_audit_${new Date().toISOString().split('T')[0]}.xlsx`);
+                            toast.success('Master Ledger exported to Excel');
+                        }}
+                        variant="outline"
+                        className="h-12 px-6 rounded-xl border-primary/20 bg-primary/5 text-primary font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm"
+                    >
+                        <Download size={16} className="mr-2" /> Master Export
+                    </Button>
+                    <Button 
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="h-12 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-xl shadow-emerald-500/20 flex gap-3 transition-all active:scale-[0.98] justify-center"
+                    >
+                        {generating ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />} 
+                        {generating ? 'Processing Audit...' : 'Generate New Snapshot'}
+                    </Button>
+                </div>
             </div>
 
             {/* Filter Bar */}

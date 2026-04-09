@@ -31,10 +31,17 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Clear localStorage and redirect to login if session expires
+            // Clear localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            
+            // Only redirect if NOT on public pages to avoid highjacking the Request Access flow
+            const publicPages = ['/login', '/register'];
+            const isPublicPage = publicPages.some(page => window.location.pathname.startsWith(page));
+            
+            if (!isPublicPage) {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
