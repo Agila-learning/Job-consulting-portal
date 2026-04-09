@@ -9,6 +9,7 @@ const {
     updateReferral, 
     bulkUpdateReferrals, 
     getReferralStats,
+    getBranchActivity,
     deleteReferral,
     syncIncentives,
     purgeMockData
@@ -38,6 +39,7 @@ router.use(protect);
 
 router.get('/', getReferrals);
 router.get('/stats', getReferralStats);
+router.get('/branch-activity', getBranchActivity);
 router.post('/', upload.single('resume'), createReferral);
 
 // Bulk actions

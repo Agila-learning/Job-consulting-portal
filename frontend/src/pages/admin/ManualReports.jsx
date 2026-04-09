@@ -14,14 +14,27 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
 const ManualReports = () => {
+    const { user } = useAuth();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [branches, setBranches] = useState([]);
+    const [branchFilter, setBranchFilter] = useState('all');
+
+    const fetchBranches = async () => {
+        if (user?.role === 'admin') {
+            try {
+                const res = await api.get('/branches');
+                setBranches(res.data.data);
+            } catch (err) {}
+        }
+    };
 
     const fetchReports = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/reports');
+            const branchQuery = branchFilter !== 'all' ? `?branchId=${branchFilter}` : '';
+            const res = await api.get(`/reports${branchQuery}`);
             setReports(res.data.data);
         } catch (err) {
             toast.error('Failed to synchronize audit archives');
@@ -31,8 +44,12 @@ const ManualReports = () => {
     };
 
     useEffect(() => {
-        fetchReports();
+        fetchBranches();
     }, []);
+
+    useEffect(() => {
+        fetchReports();
+    }, [branchFilter]);
 
     const handleGenerate = async () => {
         const loadingToast = toast.loading('Generating fresh audit snapshot...');
@@ -49,6 +66,7 @@ const ManualReports = () => {
         const data = [
             ['Audit Information', 'Value'],
             ['Audit ID', report.id],
+            ['Branch', report.branchName],
             ['Database ID', report._id],
             ['Title', report.title],
             ['Type', report.type],
@@ -123,6 +141,18 @@ const ManualReports = () => {
                     />
                 </div>
                 <div className="flex gap-3">
+                    {user?.role === 'admin' && (
+                        <select 
+                            value={branchFilter}
+                            onChange={(e) => setBranchFilter(e.target.value)}
+                            className="h-14 px-6 rounded-2xl border border-border/40 bg-background/50 font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm outline-none focus:ring-4 focus:ring-primary/5 cursor-pointer appearance-none min-w-[160px]"
+                        >
+                            <option value="all">Everywhere</option>
+                            {branches.map(b => (
+                                <option key={b._id} value={b._id}>{b.name}</option>
+                            ))}
+                        </select>
+                    )}
                     <Button onClick={fetchReports} variant="outline" className="h-14 px-6 rounded-2xl border-border/40 font-black text-[10px] uppercase tracking-widest gap-3">
                         <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh
                     </Button>
@@ -168,9 +198,14 @@ const ManualReports = () => {
                             
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <Badge className="bg-primary/5 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                                        {report.type}
-                                    </Badge>
+                                    <div className="flex gap-2">
+                                        <Badge className="bg-primary/5 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
+                                            {report.type}
+                                        </Badge>
+                                        <Badge variant="outline" className="border-indigo-500/20 text-indigo-500 bg-indigo-500/5 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">
+                                            {report.branchName}
+                                        </Badge>
+                                    </div>
                                     <div className="flex flex-col items-end">
                                         <span className="text-lg font-black text-emerald-600 tracking-tighter italic leading-none">₹{report.amount}</span>
                                         <span className="text-[7px] font-black uppercase text-muted-foreground tracking-widest mt-1 opacity-60">Verified Amount</span>

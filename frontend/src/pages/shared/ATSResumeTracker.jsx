@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { 
     BrainCircuit, Upload, Loader2, CheckCircle2, 
     XCircle, Sparkles, FileText, Info, ShieldCheck, Lock, Zap,
-    ChevronDown, Briefcase
+    ChevronDown, Briefcase, Building2
 } from 'lucide-react';
 import { 
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -13,11 +14,26 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const ATSResumeTracker = () => {
+    const { user } = useAuth();
     const [file, setFile] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [result, setResult] = useState(null);
     const [domain, setDomain] = useState("");
     const [role, setRole] = useState("");
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState(user?.branchId || "all");
+
+    useEffect(() => {
+        const fetchBranches = async () => {
+            if (user?.role === 'admin') {
+                try {
+                    const res = await api.get('/branches');
+                    setBranches(res.data.data);
+                } catch (err) {}
+            }
+        };
+        fetchBranches();
+    }, [user?.role]);
 
     const DOMAINS = [
         { id: 'tech', label: 'Technical / IT' },
@@ -83,6 +99,25 @@ const ATSResumeTracker = () => {
                     Our heuristic engine analyzes resumes in-memory for instant compatibility scoring. 
                     <span className="text-primary font-bold"> No data is stored internally.</span>
                 </p>
+
+                {user?.role === 'admin' && (
+                    <div className="flex justify-center pt-4">
+                        <Select onValueChange={setSelectedBranch} value={selectedBranch}>
+                            <SelectTrigger className="w-64 h-10 bg-background/50 border-border/40 rounded-xl font-black text-[9px] uppercase tracking-widest text-primary shadow-sm hover:scale-[1.02] transition-all">
+                                <Building2 size={14} className="mr-2" />
+                                <SelectValue placeholder="Target Branch" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border/40 shadow-2xl p-1">
+                                <SelectItem value="all" className="rounded-lg font-black text-[9px] uppercase tracking-widest py-2">Global / Default</SelectItem>
+                                {branches.map(b => (
+                                    <SelectItem key={b._id} value={b._id} className="rounded-lg font-black text-[9px] uppercase tracking-widest py-2">
+                                        {b.name} Branch
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
             </div>
 
             {/* Analysis Module */}

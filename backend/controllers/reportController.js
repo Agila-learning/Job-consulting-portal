@@ -5,14 +5,25 @@ const ManualIncentive = require('../models/ManualIncentive');
 // Route: GET /api/reports
 exports.getAuditRecords = async (req, res) => {
     try {
+        let branchId = req.query.branchId;
+        
+        // For non-admins, force their own branch
+        if (req.user.role !== 'admin') {
+            branchId = req.user.branchId;
+        }
+
+        const query = branchId ? { branchId } : {};
+
         const [referrals, grants] = await Promise.all([
-            Referral.find({ status: 'Joined' })
+            Referral.find({ ...query, status: 'Joined' })
                 .populate('referrer', 'name role')
                 .populate('job', 'jobTitle companyName')
+                .populate('branchId', 'name')
                 .sort('-updatedAt'),
-            ManualIncentive.find()
+            ManualIncentive.find(query)
                 .populate('recipient', 'name role')
                 .populate('createdBy', 'name')
+                .populate('branchId', 'name')
                 .sort('-createdAt')
         ]);
 
@@ -23,6 +34,7 @@ exports.getAuditRecords = async (req, res) => {
             id: `REF-${ref._id.toString().slice(-6).toUpperCase()}`,
             title: `${ref.candidateName} - ${ref.job?.jobTitle || 'N/A'}`,
             type: 'Commission',
+            branchName: ref.branchId?.name || 'Bangalore', // Fallback for legacy
             date: new Date(ref.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             size: '0.4 MB',
             author: ref.referrer?.name || 'System',
@@ -41,6 +53,7 @@ exports.getAuditRecords = async (req, res) => {
             id: `GRT-${grant._id.toString().slice(-6).toUpperCase()}`,
             title: grant.reason || 'Manual Incentive Grant',
             type: 'Incentive',
+            branchName: grant.branchId?.name || 'Bangalore', // Fallback for legacy
             date: new Date(grant.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             size: '0.2 MB',
             author: grant.createdBy?.name || 'Admin',

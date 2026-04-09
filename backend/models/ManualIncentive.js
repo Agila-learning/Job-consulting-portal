@@ -18,6 +18,10 @@ const manualIncentiveSchema = new mongoose.Schema({
         enum: ['pending', 'paid'], 
         default: 'pending' 
     },
+    branchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch'
+    },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

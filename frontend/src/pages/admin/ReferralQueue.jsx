@@ -58,8 +58,9 @@ const ReferralQueue = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            const branchQuery = branchFilter !== 'all' ? `?branchId=${branchFilter}` : '';
             const [refRes, empRes, branchRes] = await Promise.all([
-                api.get('/referrals'),
+                api.get(`/referrals${branchQuery}`),
                 api.get('/users?role=employee&role=agent'),
                 api.get('/branches')
             ]);
@@ -75,7 +76,7 @@ const ReferralQueue = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [branchFilter]);
 
     useEffect(() => {
         if (!loading && containerRef.current && document.querySelector('.animate-card')) {
@@ -732,6 +733,11 @@ const CandidateCard = ({ row, activeTab, onAssign, onStatus, onFinance, onTimeli
                             <Badge variant="outline" className="px-2 py-0 border-primary/20 text-primary bg-primary/5 text-[8px] font-black uppercase tracking-widest rounded-lg h-5 leading-none shadow-none">
                                 {row.job?.domain || 'Tech Node'}
                             </Badge>
+                            {row.branchId && (
+                                <Badge variant="outline" className="px-2 py-0 border-indigo-500/20 text-indigo-500 bg-indigo-500/5 text-[8px] font-black uppercase tracking-widest rounded-lg h-5 leading-none shadow-none">
+                                    {typeof row.branchId === 'object' ? row.branchId.name : 'Branch Node'}
+                                </Badge>
+                            )}
                             <span className="text-[10px] font-bold text-muted-foreground/60 tracking-tight leading-none">• {new Date(row.createdAt).toLocaleDateString()}</span>
                         </div>
                         

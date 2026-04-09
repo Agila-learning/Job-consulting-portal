@@ -17,13 +17,30 @@ exports.createReferral = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Job not found' });
         }
 
-        // 2. Determine Branch
+        // 2. Determine Branch with Intelligent Mapping
         let branchId = req.user.branchId; // Default to submitter's branch
         if (candidateData.preferredLocation) {
-            const branch = await Branch.findOne({ 
-                name: { $regex: new RegExp(`^${candidateData.preferredLocation}$`, 'i') } 
-            });
-            if (branch) branchId = branch._id;
+            const loc = candidateData.preferredLocation.toLowerCase();
+            
+            // Branch mapping keywords
+            const mapping = [
+                { branch: 'Bangalore', keywords: ['bangalore', 'bengaluru', 'madiwala', 'ecity', 'karnataka', 'ka', 'whitefield'] },
+                { branch: 'Chennai', keywords: ['chennai', 'madras', 'tn', 'tamil nadu', 'adyar', 'velachery', 'guindy'] },
+                { branch: 'Krishnagiri', keywords: ['krishnagiri', 'hosur', 'dharmapuri'] }
+            ];
+
+            const foundMapping = mapping.find(m => m.keywords.some(k => loc.includes(k)));
+            
+            if (foundMapping) {
+                const branchObj = await Branch.findOne({ name: foundMapping.branch });
+                if (branchObj) branchId = branchObj._id;
+            } else {
+                // Fallback to exact regex match
+                const branch = await Branch.findOne({ 
+                    name: { $regex: new RegExp(`^${candidateData.preferredLocation}$`, 'i') } 
+                });
+                if (branch) branchId = branch._id;
+            }
         }
 
         // 3. Find Team Leader for Auto-Assignment
@@ -120,9 +137,10 @@ exports.getReferrals = async (req, res) => {
         // Admin sees everything (no filter)
 
         const referrals = await Referral.find(query)
-            .populate('job', 'jobTitle companyName')
-            .populate('referrer', 'name email')
+            .populate('job', 'jobTitle companyName domain')
+            .populate('referrer', 'name email role')
             .populate('assignedEmployee', 'name email')
+            .populate('branchId', 'name')
             .sort('-createdAt');
 
         res.status(200).json({ success: true, count: referrals.length, data: referrals });
@@ -412,35 +430,104 @@ exports.getReferralStats = async (req, res) => {
         const stats = await Referral.aggregate([
             { $match: query },
             {
-                $group: {
-                    _id: null,
-                    totalCandidates: { $sum: 1 },
-                    hiredCount: { $sum: { $cond: [{ $eq: ["$status", "Joined"] }, 1, 0] } },
-                    interviewCount: { $sum: { $cond: [{ $eq: ["$status", "Interview Scheduled"] }, 1, 0] } },
-                    shortlistedCount: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
-                    pendingCount: { $sum: { $cond: [{ $in: ["$status", ["New Referral", "Assigned", "Screening"]] }, 1, 0] } }
+                $facet: {
+                    statusCounts: [
+                        { $group: { _id: "$status", count: { $sum: 1 } } }
+                    ],
+                    teamPerformance: [
+                        { $match: { assignedTeam: { $ne: null } } },
+                        { $group: { _id: "$assignedTeam", count: { $sum: 1 } } }
+                    ],
+                    employeePerformance: [
+                        { $match: { assignedEmployee: { $ne: null } } },
+                        { $group: { _id: "$assignedEmployee", count: { $sum: 1 } } },
+                        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+                        { $unwind: '$user' },
+                        { $project: { name: '$user.name', count: 1 } },
+                        { $sort: { count: -1 } },
+                        { $limit: 10 }
+                    ],
+                    agentPerformance: [
+                        { $match: { sourceType: 'agent', referrer: { $ne: null } } },
+                        { $group: { _id: "$referrer", count: { $sum: 1 } } },
+                        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+                        { $unwind: '$user' },
+                        { $project: { name: '$user.name', count: 1 } },
+                        { $sort: { count: -1 } },
+                        { $limit: 10 }
+                    ],
+                    followUpCounts: [
+                        { $unwind: "$followUps" },
+                        { $match: { "followUps.completed": false } },
+                        { $group: { _id: null, count: { $sum: 1 } } }
+                    ]
                 }
             }
         ]);
 
-        const activeJobs = await Job.countDocuments({ status: 'active' });
+        const activeJobs = await Job.countDocuments({ status: 'active', visibility: true });
 
-        const defaultStats = {
-            totalCandidates: 0,
-            hiredCount: 0,
-            interviewCount: 0,
-            shortlistedCount: 0,
-            activePipeline: 0
+        // Format Aggregation Results
+        const raw = stats[0];
+        const statusMap = {};
+        raw.statusCounts.forEach(s => statusMap[s._id] = s.count);
+
+        const result = {
+            totalCandidates: raw.statusCounts.reduce((acc, s) => acc + s.count, 0),
+            newLeads: statusMap['New Referral'] || 0,
+            followUpsPending: raw.followUpCounts[0]?.count || 0,
+            interviewsScheduled: statusMap['Interview Scheduled'] || 0,
+            selectedCount: statusMap['Selected'] || 0,
+            hiredCount: statusMap['Joined'] || 0,
+            rejectedCount: statusMap['Rejected'] || 0,
+            activeJobs,
+            teamPerformance: raw.teamPerformance,
+            employeePerformance: raw.employeePerformance,
+            agentPerformance: raw.agentPerformance
         };
 
-        const result = stats.length > 0 ? {
-            ...stats[0],
-            activeJobs,
-            pendingReferrals: stats[0].pendingCount,
-            activePipeline: stats[0].totalCandidates - stats[0].hiredCount
-        } : { ...defaultStats, activeJobs };
-
         res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
+// Get Branch Specific Activity
+// Route: GET /api/referrals/branch-activity
+exports.getBranchActivity = async (req, res) => {
+    try {
+        let branchId = req.query.branchId;
+        if (req.user.role !== 'admin') {
+            branchId = req.user.branchId;
+        }
+
+        const query = branchId ? { branchId } : {};
+
+        // Fetch recent activities from within Referral records
+        const activities = await Referral.aggregate([
+            { $match: query },
+            { $unwind: "$activityLogs" },
+            { $sort: { "activityLogs.timestamp": -1 } },
+            { $limit: 20 },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'activityLogs.user',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $project: {
+                    candidateName: 1,
+                    action: "$activityLogs.action",
+                    timestamp: "$activityLogs.timestamp",
+                    userName: { $arrayElemAt: ["$user.name", 0] }
+                }
+            }
+        ]);
+
+        res.status(200).json({ success: true, data: activities });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
