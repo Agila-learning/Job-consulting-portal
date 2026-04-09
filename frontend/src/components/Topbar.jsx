@@ -20,6 +20,9 @@ import {
 const Topbar = ({ title, showSidebarMobile }) => {
   const { user, logout, switchBranch } = useAuth();
   const { toggleChat, toggleNewAction, openNotifications, notifications } = useUI();
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
+
   const handleLogout = () => {
     logout();
     toast.success('Securely logged out of Command Center');
