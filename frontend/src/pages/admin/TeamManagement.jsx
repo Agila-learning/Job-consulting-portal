@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { 
     UserCheck, Building2, Smartphone, Hash,
     Users, RefreshCw, Filter, FileDown, UserPlus,
-    Mail, Edit2, Trash2, Search, Shield, ShieldCheck
+    Mail, Edit2, Trash2, Search, Shield, ShieldCheck, X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
