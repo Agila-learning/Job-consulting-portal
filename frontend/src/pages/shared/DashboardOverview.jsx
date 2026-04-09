@@ -24,7 +24,7 @@ const DashboardOverview = () => {
         pipelineVelocity: 85
     });
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = useState('all');
+    const [selectedBranch, setSelectedBranch] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

@@ -45,7 +45,7 @@ exports.login = async (req, res, next) => {
         }
 
         // Check for user
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate('branchId', 'name');
 
         if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -77,7 +77,7 @@ exports.login = async (req, res, next) => {
 // Route: GET /api/auth/me
 exports.getMe = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id).populate('branchId', 'name');
         res.status(200).json({ success: true, data: user });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -100,7 +100,9 @@ const sendTokenResponse = (user, statusCode, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            status: user.status
+            status: user.status,
+            branchId: user.branchId?._id || user.branchId,
+            branchName: user.branchId?.name || 'N/A'
         }
     });
 };

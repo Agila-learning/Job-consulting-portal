@@ -7,10 +7,15 @@ exports.getJobs = async (req, res) => {
         const { status, role } = req.query;
         let query = {};
         
-        // If not Admin, only show active and visible jobs
+        // 1. Core Filtering
         if (req.user.role !== 'admin') {
             query.status = 'active';
             query.visibility = true;
+            
+            // Internal staff only see jobs for their branch
+            if (req.user.role === 'employee' || req.user.role === 'team_leader') {
+                query.branchId = req.user.branchId;
+            }
         } else if (status) {
             query.status = status;
         }
@@ -44,6 +49,12 @@ exports.getJob = async (req, res) => {
 exports.createJob = async (req, res) => {
     try {
         req.body.createdBy = req.user.id;
+        
+        // Inherit branch if not provided (Admins can specify, others inherit)
+        if (!req.body.branchId) {
+            req.body.branchId = req.user.branchId;
+        }
+
         const job = await Job.create(req.body);
         res.status(201).json({ success: true, data: job });
     } catch (err) {

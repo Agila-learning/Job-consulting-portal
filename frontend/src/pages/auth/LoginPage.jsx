@@ -64,16 +64,30 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (user && authStatus === 'success') {
+            console.log('Login Successful. Role:', user.role);
             const timer = setTimeout(() => {
-                const redirectPath = user.role === 'admin' 
-                    ? '/admin/dashboard' 
-                    : user.role === 'team_leader'
-                    ? '/team-leader/dashboard'
-                    : user.role === 'employee' 
-                    ? '/employee/dashboard' 
-                    : '/agent/dashboard';
-                navigate(redirectPath);
-            }, 2000);
+                let redirectPath = '/login';
+                
+                switch(user.role) {
+                    case 'admin':
+                        redirectPath = '/admin/dashboard';
+                        break;
+                    case 'team_leader':
+                        redirectPath = '/team-leader/dashboard';
+                        break;
+                    case 'employee':
+                        redirectPath = '/employee/dashboard';
+                        break;
+                    case 'agent':
+                        redirectPath = '/agent/dashboard';
+                        break;
+                    default:
+                        redirectPath = '/login';
+                }
+                
+                console.log('Navigating to:', redirectPath);
+                navigate(redirectPath, { replace: true });
+            }, 1500);
             return () => clearTimeout(timer);
         }
     }, [user, navigate, authStatus]);

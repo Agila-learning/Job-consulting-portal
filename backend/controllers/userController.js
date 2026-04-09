@@ -27,6 +27,12 @@ exports.getUsers = async (req, res) => {
         }
         if (status) query.status = status;
 
+        // 3. Branch Segregation
+        if (req.user.role !== 'admin') {
+            query.branchId = req.user.branchId;
+        }
+
+        // 4. TL Reporting Logic
         if (req.user.role === 'team_leader') {
             query.reportingManager = req.user.id;
         }
@@ -65,6 +71,7 @@ exports.createUser = async (req, res) => {
             password,
             role,
             status: 'active',
+            branchId: req.user.role === 'admin' ? (additionalData.branchId || req.user.branchId) : req.user.branchId,
             ...additionalData
         });
 

@@ -34,6 +34,7 @@ const jobSchema = new mongoose.Schema({
     incentiveEmployee: { type: String },
     incentiveSlab: { type: String }, // Detailed conditions
     
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
