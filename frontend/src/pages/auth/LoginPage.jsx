@@ -12,7 +12,7 @@ import { Lock, Mail, ArrowRight, Loader2, Zap } from 'lucide-react';
 import monkeySad from '@/assets/animations/monkey_sad.png';
 import monkeySuccess from '@/assets/animations/monkey_success.png';
 import logo from '@/assets/Updated-Logo-New.jpg';
-import { Eye, EyeOff, Checkbox as CheckboxIcon } from 'lucide-react';
+import { Eye, EyeOff, CheckSquare as CheckboxIcon } from 'lucide-react';
 
 const FeedbackOverlay = ({ status }) => {
     const overlayRef = useRef(null);

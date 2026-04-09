@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { 
     Users, Briefcase, UserCheck, TrendingUp, 
     ArrowUpRight, Clock, Zap, Wallet, 
-    BarChart3, PieChart, Activity, ShieldCheck
+    BarChart3, PieChart, ShieldCheck
 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -60,20 +60,20 @@ const DashboardOverview = () => {
     const renderAdminStats = () => [
         { label: 'Global Workforce', value: stats.users, icon: <Users />, color: 'primary', trend: '+12%' },
         { label: 'Active Inventory', value: stats.totalJobs, icon: <Briefcase />, color: 'emerald', trend: '+5%' },
-        { label: 'Talent Inflow', value: stats.totalReferrals, icon: <Activity />, color: 'amber', trend: '+18%' },
+        { label: 'Talent Inflow', value: stats.totalReferrals, icon: <Zap />, color: 'amber', trend: '+18%' },
         { label: 'Revenue Pool', value: `₹${(stats.totalRevenuePool / 1000).toFixed(1)}k`, icon: <Wallet />, color: 'indigo', trend: '+24%' }
     ];
 
     const renderTLStats = () => [
         { label: 'Managed Jobs', value: stats.activeJobs, icon: <Zap />, color: 'primary' },
-        { label: 'System Pipeline', value: stats.totalPipeline, icon: <Activity />, color: 'amber' },
+        { label: 'System Pipeline', value: stats.totalPipeline, icon: <Zap />, color: 'amber' },
         { label: 'Team Conversions', value: stats.teamPlacements, icon: <ShieldCheck />, color: 'emerald' },
         { label: 'Equity Value', value: `₹${(stats.managedValue / 1000).toFixed(1)}k`, icon: <TrendingUp />, color: 'indigo' }
     ];
 
     const renderEmployeeStats = () => [
         { label: 'Assigned Talent', value: stats.assignedCandidates, icon: <UserCheck />, color: 'primary' },
-        { label: 'My Submissions', value: stats.mySubmissions, icon: <Activity />, color: 'amber' },
+        { label: 'My Submissions', value: stats.mySubmissions, icon: <Zap />, color: 'amber' },
         { label: 'Successful Hires', value: stats.successfulPlacements, icon: <ShieldCheck />, color: 'emerald' },
         { label: 'Unearned Credit', value: `₹${stats.accruedIncentives}`, icon: <Wallet />, color: 'indigo' }
     ];
@@ -127,7 +127,7 @@ const DashboardOverview = () => {
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2 leading-none">
-                                <Activity size={16} className="text-primary" /> Velocity Visualization
+                                <Zap size={16} className="text-primary" /> Velocity Visualization
                             </h3>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 leading-none">14-Day Talent Acquisition Heartbeat</p>
                         </div>

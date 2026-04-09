@@ -34,7 +34,6 @@ import AvailableJobs from './pages/agent/AvailableJobs';
 import MyReferrals from './pages/agent/MyReferrals';
 import Commissions from './pages/agent/Commissions';
 import KYCSubmission from './pages/agent/KYCSubmission';
-import CandidatePipeline from './pages/employee/CandidatePipeline';
 
 // Team Leader Pages
 import TeamLeaderDashboard from './pages/team_leader/TeamLeaderDashboard';

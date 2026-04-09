@@ -3,8 +3,8 @@ import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { 
     Briefcase, Users, CheckCircle, Clock, 
-    TrendingUp, Activity, Plus, ArrowRight,
-    Loader2, Layers, LayoutPanelLeft, Zap, Search,
+    TrendingUp, Zap, Plus, ArrowRight,
+    Loader2, Layers, LayoutPanelLeft, Search,
     UserCheck, UserMinus, MessageSquare, ListTodo,
     BarChart3, Award, History, Building2
 } from 'lucide-react';
@@ -120,7 +120,7 @@ const DashboardOverview = () => {
                                 </Badge>
                             </div>
                             <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
-                                <Activity size={12} className="text-primary animate-pulse" />
+                                    <Zap size={12} className="text-primary animate-pulse" />
                                 Branch-Specific Insights & Control Center
                             </p>
                         </div>
@@ -255,7 +255,7 @@ const DashboardOverview = () => {
                                 </div>
                             )) : (
                                 <div className="p-20 text-center space-y-4">
-                                    <Activity size={40} className="mx-auto text-muted-foreground/30" />
+                                    <Zap size={40} className="mx-auto text-muted-foreground/30" />
                                     <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">No recent branch activity found</p>
                                 </div>
                             )}

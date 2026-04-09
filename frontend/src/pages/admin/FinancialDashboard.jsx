@@ -13,7 +13,7 @@ import {
     DollarSign, ArrowUpRight, Scale, CreditCard,
     FileText, Loader2, Landmark, History, Focus,
     TrendingUp, ArrowDownRight, PieChart, BarChart3,
-    Filter, Search, Download, ChevronRight, Activity,
+    Filter, Search, Download, ChevronRight, Zap,
     Calendar, User, Building, MoreHorizontal, Plus,
     ArrowRight
 } from 'lucide-react';
@@ -405,7 +405,7 @@ const FinancialDashboard = () => {
                 {[
                     { label: 'Pending Payouts', value: stats.totalLiability, icon: Wallet, color: 'text-indigo-600', bg: 'bg-indigo-500/5', border: 'border-indigo-500/20' },
                     { label: 'Total Paid Amount', value: stats.totalPaid, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
-                    { label: 'Waiting Approval', value: stats.pendingSettlements, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
+                    { label: 'Waiting Approval', value: stats.pendingSettlements, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
                     { label: 'Monthly Earnings', value: stats.monthlyVelocity, icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-500/5', border: 'border-rose-500/20' },
                 ].map((stat, i) => (
                     <div key={i} className="group bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 relative overflow-hidden text-left">
@@ -717,7 +717,7 @@ const FinancialDashboard = () => {
                                             <div className="flex justify-between items-center group/info">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-xl bg-secondary dark:bg-slate-800 flex items-center justify-center text-muted-foreground group-hover/info:text-primary transition-colors">
-                                                        <Activity size={18} />
+                                                        <Zap size={18} />
                                                     </div>
                                                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Candidate Object</span>
                                                 </div>

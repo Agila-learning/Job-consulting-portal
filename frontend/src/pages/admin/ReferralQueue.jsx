@@ -11,11 +11,11 @@ import { toast } from 'sonner';
 import { 
     UserCheck, UserPlus, Briefcase, Mail, 
     Phone, Calendar, ArrowRight, User, 
-    MousePointer2, Hash, ExternalLink, ShieldCheck,
+    MousePointer2, Hash, ExternalLink, 
     Network, Search, ArrowUpRight, TrendingUp, Trash2,
-    Clock, MoreVertical, Shield, UserCog, Ghost, RefreshCw, Zap,
+    Clock, MoreVertical, Shield, UserCog, Ghost, RefreshCw, 
     Filter, X, CheckCircle2, Plus, Info, AlertCircle, FileText,
-    Sparkles, XCircle, Activity
+    Sparkles, XCircle, BarChart3, PieChart, Zap, ShieldCheck
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -268,7 +268,7 @@ const ReferralQueue = () => {
 
                         <div className="flex items-center justify-between">
                             <h3 className="text-xs font-black text-foreground uppercase tracking-widest flex items-center gap-2">
-                                <Activity size={16} className="text-primary" /> Performance Index
+                                <Zap size={16} className="text-primary" /> Performance Index
                             </h3>
                             <Badge className="bg-primary/10 text-primary border-0 text-[8px] font-black uppercase tracking-widest">Live Node</Badge>
                         </div>

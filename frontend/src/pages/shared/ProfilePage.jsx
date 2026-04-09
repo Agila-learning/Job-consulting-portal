@@ -6,9 +6,9 @@ import {
     Calendar, Edit3, Save, Camera, 
     CheckCircle2, AlertCircle, BarChart3, 
     TrendingUp, PieChart, DollarSign, 
-    Clock, Activity, ChevronRight, 
+    Clock, Zap, ChevronRight, 
     Lock, Bell, Globe, LogOut,
-    Briefcase, Target, Award, Zap
+    Briefcase, Target, Award
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -356,7 +356,7 @@ const ProfilePage = () => {
                                         { action: 'Identity Updated', desc: 'Modified profile settings and contact details.', time: '2 mins ago', icon: User, color: 'blue' },
                                         { action: 'Candidate Shortlisted', desc: 'Aditya Varma advanced to Tech Screen phase.', time: '45 mins ago', icon: Target, color: 'emerald' },
                                         { action: 'Bounty Reconciled', desc: 'Settlement for Senior Engineer placement cleared.', time: '3 hours ago', icon: Award, color: 'primary' },
-                                        { action: 'System Login', desc: 'New session initiated via Chrome/Windows Node.', time: '6 hours ago', icon: Activity, color: 'slate' },
+                                        { action: 'System Login', desc: 'New session initiated via Chrome/Windows Node.', time: '6 hours ago', icon: Zap, color: 'slate' },
                                         { action: 'KYC Document Upload', desc: 'Identity verification phase complete.', time: 'Yesterday', icon: Shield, color: 'emerald' },
                                     ].map((act, i) => (
                                         <div key={i} className="relative pl-14 pb-10 last:pb-0 group/stream">

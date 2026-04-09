@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { 
     DollarSign, TrendingUp, CheckCircle, Clock, 
     FileText, Upload, Send, Loader2, Landmark,
-    AlertCircle, ShieldCheck, ChevronRight, Activity, Zap, X
+    AlertCircle, ShieldCheck, ChevronRight, Zap, X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -236,7 +236,7 @@ const Commissions = () => {
                     <CardContent className="p-8 pb-10">
                         <div className="flex justify-between items-start mb-6">
                              <div className="w-14 h-14 rounded-2xl bg-secondary/80 border border-border/50 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-700 shadow-sm relative z-10">
-                                <Activity size={24} />
+                                <Zap size={24} />
                             </div>
                         </div>
                         <div className="relative z-10 space-y-1">
