@@ -21,6 +21,7 @@ const PerformanceReports = () => {
     const [topPerformers, setTopPerformers] = useState([]);
     const [branches, setBranches] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isPrinting, setIsPrinting] = useState(false);
     
     // Filters
     const [range, setRange] = useState('monthly');
@@ -52,6 +53,14 @@ const PerformanceReports = () => {
     useEffect(() => {
         fetchData();
     }, [range, selectedBranch, metric]);
+
+    const handleGeneratePDF = () => {
+        setIsPrinting(true);
+        setTimeout(() => {
+            window.print();
+            setIsPrinting(false);
+        }, 500);
+    };
 
     const stats = [
         { label: 'Outbound Velocity', value: performance?.totalCalls || 0, icon: Phone, color: 'text-blue-500', bg: 'bg-blue-500/10', trend: 'Total Calls' },
@@ -109,7 +118,10 @@ const PerformanceReports = () => {
                         <Select value={selectedBranch} onValueChange={setSelectedBranch}>
                             <SelectTrigger className="w-56 h-12 bg-background border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm">
                                 <MapPin size={14} className="text-primary mr-2" />
-                                <SelectValue placeholder="Branch Filter" />
+                                <SelectValue>
+                                    {selectedBranch === 'all' ? 'Working: All Branches' : 
+                                     (branches.find(b => b._id === selectedBranch)?.name || 'Loading Branch...')}
+                                </SelectValue>
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
                                 <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">Global (All Branches)</SelectItem>
@@ -243,8 +255,11 @@ const PerformanceReports = () => {
                                     Analyze cross-branch performance to allocate administrative resources and boost local conversion cycles.
                                 </p>
                             </div>
-                            <Button className="w-full h-14 bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl hover:bg-slate-50 transition-all border-none">
-                                Generate PDF Report
+                            <Button 
+                                onClick={handleGeneratePDF}
+                                className="w-full h-14 bg-white text-primary font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl hover:bg-slate-50 transition-all border-none"
+                            >
+                                {isPrinting ? <Loader2 size={18} className="animate-spin" /> : 'Generate PDF Report'}
                             </Button>
                         </div>
                     </div>

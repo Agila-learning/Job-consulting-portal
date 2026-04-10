@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '@/services/api';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,8 @@ const JobManagement = () => {
     const [branches, setBranches] = useState([]);
     const [branchFilter, setBranchFilter] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
+    const [searchParams] = useSearchParams();
+    const querySearch = searchParams.get('q');
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -90,6 +93,12 @@ const JobManagement = () => {
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, statusFilter, typeFilter, modeFilter]);
+
+    useEffect(() => {
+        if (querySearch) {
+            setSearchTerm(querySearch);
+        }
+    }, [querySearch]);
 
 
 

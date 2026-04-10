@@ -24,6 +24,7 @@ const TeamManagement = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [deptFilter, setDeptFilter] = useState('all');
+    const [roleFilter, setRoleFilter] = useState('all');
     
     const [formData, setFormData] = useState({
         name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: '', commissionPercentage: ''
@@ -61,7 +62,8 @@ const TeamManagement = () => {
                              emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              emp.employeeId?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesDept = deptFilter === 'all' ? true : emp.department === deptFilter;
-        return matchesSearch && matchesDept;
+        const matchesRole = roleFilter === 'all' ? true : emp.role === roleFilter;
+        return matchesSearch && matchesDept && matchesRole;
     });
 
     const handleExport = () => {
@@ -474,6 +476,19 @@ const TeamManagement = () => {
                                 <option key={dept} value={dept}>{dept.toUpperCase()}</option>
                             ))
                         }
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Team Role</Label>
+                    <select 
+                        value={roleFilter} 
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                        className="w-full h-12 pl-4 pr-10 bg-background border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest outline-none transition-all cursor-pointer shadow-sm focus:border-primary/40 focus:ring-4 focus:ring-primary/5 appearance-none"
+                    >
+                        <option value="all">All Roles</option>
+                        <option value="employee">Consultant</option>
+                        <option value="team_leader">Team Leader</option>
+                        <option value="agent">Agent Partner</option>
                     </select>
                 </div>
             </div>

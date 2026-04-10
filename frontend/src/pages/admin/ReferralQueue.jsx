@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api, { BASE_URL } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
 import * as XLSX from 'xlsx';
+import CandidateProvisioningForm from '@/components/CandidateProvisioningForm';
 
 const ReferralQueue = () => {
     const { user: currentUser } = useAuth();
@@ -55,6 +57,8 @@ const ReferralQueue = () => {
     const [branches, setBranches] = useState([]);
     const [branchFilter, setBranchFilter] = useState(currentUser?.role === 'admin' ? 'all' : (currentUser?.branchId || 'all'));
     const [viewMode, setViewMode] = useState('grid');
+    const [searchParams] = useSearchParams();
+    const querySearch = searchParams.get('q');
 
     const containerRef = useRef(null);
 
@@ -80,6 +84,12 @@ const ReferralQueue = () => {
     useEffect(() => {
         fetchData();
     }, [branchFilter]);
+
+    useEffect(() => {
+        if (querySearch) {
+            setSearchTerm(querySearch);
+        }
+    }, [querySearch]);
 
     useEffect(() => {
         if (!loading && containerRef.current && document.querySelector('.animate-card')) {
@@ -384,12 +394,14 @@ const ReferralQueue = () => {
                                 <div className="w-full sm:w-48">
                                     <Select value={branchFilter} onValueChange={setBranchFilter}>
                                         <SelectTrigger className="h-12 bg-background border-border/40 rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-sm">
-                                            <SelectValue placeholder="Branch" />
+                                            <SelectValue>
+                                                {branchFilter === 'all' ? 'Global View' : (branches.find(b => b._id === branchFilter)?.name || 'Filter Hub')}
+                                            </SelectValue>
                                         </SelectTrigger>
                                         <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
-                                            <SelectItem value="all">Everywhere</SelectItem>
+                                            <SelectItem value="all" className="font-black text-[9px] uppercase tracking-widest py-3">Global (All Districts)</SelectItem>
                                             {branches.map(b => (
-                                                <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>
+                                                <SelectItem key={b._id} value={b._id} className="font-black text-[9px] uppercase tracking-widest py-3">{b.name} Node</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -772,7 +784,7 @@ const ReferralQueue = () => {
                         </DialogHeader>
                     </div>
                     <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
-                         <AddCandidateForm 
+                         <CandidateProvisioningForm 
                             initialData={selectedReferral}
                             onSuccess={() => {
                                 setIsEditOpen(false);

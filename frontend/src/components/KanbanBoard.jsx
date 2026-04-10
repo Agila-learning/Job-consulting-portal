@@ -206,7 +206,7 @@ export function KanbanColumn({ id, title, referrals, onCardClick, onDelete, onAc
     const stageColor = getStageColor(title);
     
     return (
-        <div className="flex flex-col w-[280px] sm:w-[360px] min-w-[280px] sm:min-w-[360px] h-full bg-card/40 backdrop-blur-3xl border border-border/30 rounded-[2.2rem] sm:rounded-[2.8rem] p-4 sm:p-6 mr-4 sm:mr-6 shadow-[0_8px_40px_rgba(0,0,0,0.02)] transition-all hover:border-border/60">
+        <div className="flex flex-col w-[85vw] sm:w-[360px] min-w-[280px] sm:min-w-[360px] h-full bg-card/40 backdrop-blur-3xl border border-border/30 rounded-[2.2rem] sm:rounded-[2.8rem] p-4 sm:p-6 mr-4 sm:mr-6 shadow-[0_8px_40px_rgba(0,0,0,0.02)] transition-all hover:border-border/60">
             <div className="flex items-center justify-between mb-8 px-2">
                 <div className="flex items-center gap-3.5">
                     <div className={`w-4 h-10 rounded-lg ${stageColor} shadow-[0_8px_20px_rgba(0,0,0,0.1)] relative overflow-hidden`}>

@@ -33,7 +33,13 @@ const Topbar = ({ title, showSidebarMobile }) => {
     if (searchValue.trim()) {
       const role = user?.role || 'authorized';
       const rolePath = role === 'team_leader' ? 'team-leader' : role;
-      navigate(`/${rolePath}/referrals?q=${encodeURIComponent(searchValue.trim())}`);
+      
+      // Admin uses 'referrals' page, others use 'pipeline' or relevant search hub
+      let targetPath = `/${rolePath}/pipeline`;
+      if (role === 'admin') targetPath = `/admin/referrals`;
+      if (role === 'agent') targetPath = `/agent/pipeline`;
+      
+      navigate(`${targetPath}?q=${encodeURIComponent(searchValue.trim())}`);
       setSearchValue("");
     }
   };

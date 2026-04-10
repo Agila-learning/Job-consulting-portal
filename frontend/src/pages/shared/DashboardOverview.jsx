@@ -129,15 +129,16 @@ const DashboardOverview = () => {
 
                 <div className="flex flex-wrap items-center gap-3">
                     {user?.role === 'admin' && (
-                        <div className="relative">
-                            <select 
-                                value={selectedBranch}
-                                onChange={(e) => setSelectedBranch(e.target.value)}
-                                className="h-12 pl-10 pr-6 rounded-2xl border border-border/60 bg-background/50 font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer appearance-none"
-                            >
-                                <option value="all">Global Workspace (Total)</option>
+                        <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                            <SelectTrigger className="h-12 w-[240px] bg-background border-border/40 rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-sm">
+                                <SelectValue>
+                                    {selectedBranch === 'all' ? 'Global Workspace (Total)' : (branches.find(b => b._id === selectedBranch)?.name || 'Select Branch')}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
+                                <SelectItem value="all" className="font-black text-[9px] uppercase tracking-widest py-3">Global Workspace (Total)</SelectItem>
                                 {branches.map(branch => (
-                                    <option key={branch._id} value={branch._id}>{branch.name} Branch</option>
+                                    <SelectItem key={branch._id} value={branch._id} className="font-black text-[9px] uppercase tracking-widest py-3">{branch.name} Branch</SelectItem>
                                 ))}
                             </select>
                             <LayoutPanelLeft size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
@@ -320,6 +321,42 @@ const DashboardOverview = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* SYSTEM MANAGEMENT (ADMIN ONLY) */}
+                    {user?.role === 'admin' && (
+                        <div className="bg-rose-500/5 border border-rose-500/20 rounded-[2.5rem] p-8 space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/20">
+                                    <Settings size={20} />
+                                </div>
+                                <div className="space-y-0.5">
+                                    <h3 className="text-lg font-black text-rose-600 tracking-tight">System Utilities</h3>
+                                    <p className="text-[9px] font-black text-rose-500/60 uppercase tracking-widest">Global Maintenance Mode</p>
+                                </div>
+                            </div>
+                            <p className="text-[11px] text-rose-600/70 font-medium leading-relaxed">
+                                Use the purge protocol to permanently remove all mock data entries from the production ecosystem. This action is irreversible.
+                            </p>
+                            <Button 
+                                variant="outline" 
+                                onClick={async () => {
+                                    if (window.confirm("CRITICAL: You are about to DESTROY all mock and test data. This cannot be undone. System records will be wiped. Proceed?")) {
+                                        const loading = toast.loading("Executing Global Purge Sequence...");
+                                        try {
+                                            await api.delete('/referrals/purge-mock-data');
+                                            toast.success("Ecosystem Purged Successfully", { id: loading });
+                                            window.location.reload();
+                                        } catch (err) {
+                                            toast.error("Purge Protocol Failed", { id: loading });
+                                        }
+                                    }
+                                }}
+                                className="w-full h-12 bg-white text-rose-500 border-rose-200 hover:bg-rose-500 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all"
+                            >
+                                Execute Mock Purge
+                            </Button>
+                        </div>
+                    )}
 
                     {/* QUICK ACTION */}
                     <div className="bg-primary rounded-[2.5rem] p-8 shadow-2xl shadow-primary/20 relative overflow-hidden group border border-white/10">

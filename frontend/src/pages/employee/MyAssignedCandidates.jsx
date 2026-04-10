@@ -17,7 +17,7 @@ import {
     ChevronRight, StickyNote, CalendarClock
 } from 'lucide-react';
 import ReferralChat from '@/components/ReferralChat';
-import AddCandidateForm from '@/components/AddCandidateForm';
+import CandidateProvisioningForm from '@/components/CandidateProvisioningForm';
 
 const getStatusBadge = (status) => {
     const s = (status || '').toLowerCase();
@@ -388,7 +388,7 @@ const MyAssignedCandidates = () => {
                         </DialogHeader>
                     </div>
                     <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
-                         <AddCandidateForm 
+                         <CandidateProvisioningForm 
                             onSuccess={() => {
                                 setIsAddModalOpen(false);
                                 fetchAssigned();

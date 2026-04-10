@@ -44,7 +44,7 @@ const DashboardLayout = ({ menuItems, brandLabel, brandSubtitle, brandIcon, foot
             {/* ── Sidebar ───────────────────────────────────── */}
             <aside className={`
                 fixed lg:static top-0 left-0 h-full flex flex-col
-                w-[272px] bg-card border-r border-border/50
+                w-[272px] bg-background lg:bg-card border-r border-border/50
                 z-50 shadow-2xl lg:shadow-none
                 transition-transform duration-300 ease-in-out
                 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -141,7 +141,7 @@ const DashboardLayout = ({ menuItems, brandLabel, brandSubtitle, brandIcon, foot
                 <Topbar title={currentModule} showSidebarMobile={() => setIsMobileOpen(true)} />
 
                 <main className="flex-1 overflow-y-auto overflow-x-hidden">
-                    <div className="max-w-[1600px] mx-auto w-full p-4 sm:p-6 lg:p-10">
+                    <div className="max-w-[1600px] mx-auto w-full p-3 sm:p-6 lg:p-10">
                         <Outlet />
                     </div>
                 </main>

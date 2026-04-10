@@ -141,7 +141,7 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
 };
 
 // ── Main Form ─────────────────────────────────────────────────────────────────
-const AddCandidateForm = ({ onSuccess, onCancel, initialData }) => {
+const CandidateProvisioningForm = ({ onSuccess, onCancel, initialData }) => {
     const [jobs, setJobs] = useState([]);
     const [loadingJobs, setLoadingJobs] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -391,4 +391,4 @@ const AddCandidateForm = ({ onSuccess, onCancel, initialData }) => {
     );
 };
 
-export default AddCandidateForm;
+export default CandidateProvisioningForm;

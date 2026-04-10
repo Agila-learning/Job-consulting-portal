@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { KanbanColumn, KanbanCard } from '@/components/KanbanBoard';
 import CandidateDetailPanel from '@/components/CandidateDetailPanel';
-import AddCandidateForm from '@/components/AddCandidateForm';
+import CandidateProvisioningForm from '@/components/CandidateProvisioningForm';
 import { toast } from 'sonner';
 import { 
     UserPlus, Zap, Briefcase, FileSearch, Sparkles, BrainCircuit, Upload,
@@ -355,7 +355,7 @@ const CandidatePipeline = () => {
                         </DialogHeader>
                     </div>
                     <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
-                         <AddCandidateForm 
+                         <CandidateProvisioningForm 
                             initialData={selectedReferral}
                             onSuccess={() => {
                                 setIsEditModalOpen(false);
@@ -382,7 +382,7 @@ const CandidatePipeline = () => {
                         </DialogHeader>
                     </div>
                     <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
-                         <AddCandidateForm 
+                         <CandidateProvisioningForm 
                             onSuccess={() => {
                                 setIsAddModalOpen(false);
                                 fetchData();
