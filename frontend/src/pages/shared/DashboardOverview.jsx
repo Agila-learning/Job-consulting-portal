@@ -140,9 +140,8 @@ const DashboardOverview = () => {
                                 {branches.map(branch => (
                                     <SelectItem key={branch._id} value={branch._id} className="font-black text-[9px] uppercase tracking-widest py-3">{branch.name} Branch</SelectItem>
                                 ))}
-                            </select>
-                            <LayoutPanelLeft size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
-                        </div>
+                            </SelectContent>
+                        </Select>
                     )}
                     <Badge variant="outline" className="h-12 px-5 rounded-2xl border-border/60 bg-background/50 font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

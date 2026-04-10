@@ -10,9 +10,9 @@ router.use(protect);
 router.get('/', getJobs);
 router.get('/:id', getJob);
 
-// Modification routes restricted to Admin
-router.post('/', authorize('admin'), createJob);
-router.patch('/:id', authorize('admin'), updateJob);
-router.delete('/:id', authorize('admin'), deleteJob);
+// Modification routes restricted to Admin and Team Leader
+router.post('/', authorize('admin', 'team_leader'), createJob);
+router.patch('/:id', authorize('admin', 'team_leader'), updateJob);
+router.delete('/:id', authorize('admin', 'team_leader'), deleteJob);
 
 module.exports = router;

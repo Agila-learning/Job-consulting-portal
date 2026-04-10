@@ -49,7 +49,7 @@ const JobManagement = () => {
     const [typeFilter, setTypeFilter] = useState('all');
     const [modeFilter, setModeFilter] = useState('all');
     const [branches, setBranches] = useState([]);
-    const [branchFilter, setBranchFilter] = useState('all');
+    const [branchFilter, setBranchFilter] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams] = useSearchParams();
     const querySearch = searchParams.get('q');
@@ -281,8 +281,13 @@ const JobManagement = () => {
                         <Archive size={18} className="mr-2" />
                         Export Jobs
                     </Button>
-                        {isAdmin && (
-                        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                        {(isAdmin || user?.role === 'team_leader') && (
+                        <Dialog open={isCreateOpen} onOpenChange={(open) => {
+                            setIsCreateOpen(open);
+                            if (open && user?.role === 'team_leader' && !formData.branchId) {
+                                setFormData(prev => ({ ...prev, branchId: user.branchId }));
+                            }
+                        }}>
                             <DialogTrigger asChild>
                                 <Button className="h-12 px-8 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center outline-none">
                                     <PlusCircle size={18} className="mr-2" />
@@ -372,7 +377,7 @@ const JobManagement = () => {
                                                         <SelectValue placeholder="Select Branch" />
                                                     </SelectTrigger>
                                                     <SelectContent className="rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl z-[150]">
-                                                        {branches.map(b => (
+                                                        {branches.filter(b => isAdmin || b._id === user?.branchId).map(b => (
                                                             <SelectItem key={b._id} value={b._id} className="rounded-xl font-bold text-xs py-2.5 text-left">
                                                                 {b.name} Hub
                                                             </SelectItem>
@@ -466,7 +471,7 @@ const JobManagement = () => {
                                                     <SelectValue placeholder="Select Branch" />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl z-[150]">
-                                                    {branches.map(b => (
+                                                    {branches.filter(b => isAdmin || b._id === user?.branchId).map(b => (
                                                         <SelectItem key={b._id} value={b._id} className="rounded-xl font-bold text-xs py-2.5 text-left">
                                                             {b.name} Hub
                                                         </SelectItem>
@@ -642,9 +647,9 @@ const JobManagement = () => {
                         onChange={(e) => setBranchFilter(e.target.value)}
                         className="w-full h-12 px-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none cursor-pointer"
                     >
-                        <option value="all">Global (All)</option>
-                        {branches.map(b => (
-                            <option key={b._id} value={b._id}>{b.name}</option>
+                        {isAdmin ? <option value="all">Global (All)</option> : null}
+                        {branches.filter(b => isAdmin || b._id === user?.branchId).map(b => (
+                            <option key={b._id} value={b._id}>{b.name} Branch</option>
                         ))}
                     </select>
                 </div>
