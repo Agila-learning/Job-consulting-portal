@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
     LayoutDashboard, Users, Briefcase, 
-    ShieldCheck, Wallet, Zap, Trophy
+    ShieldCheck, Wallet, Zap, Trophy, BarChart3
 } from 'lucide-react';
 import DashboardOverview from '@/components/DashboardOverview';
 

@@ -4,7 +4,7 @@ import { useUI } from '../../context/UIContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
     LayoutDashboard, Users, Briefcase, 
-    MessageSquare, Zap, ShieldCheck, Sparkles, Plus
+    MessageSquare, Zap, ShieldCheck, Sparkles, Plus, BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, Outlet } from 'react-router-dom';

@@ -114,11 +114,14 @@ exports.getReferrals = async (req, res) => {
     try {
         let query = {};
 
-        // 1. Branch Segregation
+        // 1. Branch Segregation (Simplified for Agents)
         const { branchId } = req.query;
-        if (req.user.role !== 'admin') {
+        if (req.user.role === 'agent') {
+            // Agents always see exactly what they referred, branch check is secondary
+            query.referrer = req.user.id;
+        } else if (req.user.role !== 'admin') {
             if (!req.user.branchId) {
-                // If a non-admin has no branch assigned, they see nothing (security protocol)
+                // If a non-admin (employee/TL) has no branch assigned, they see nothing
                 query.branchId = "000000000000000000000000"; 
             } else {
                 query.branchId = req.user.branchId;
@@ -127,10 +130,8 @@ exports.getReferrals = async (req, res) => {
             query.branchId = branchId;
         }
 
-        // 2. Role-based data visibility
-        if (req.user.role === 'agent') {
-            query.referrer = req.user.id;
-        } else if (req.user.role === 'employee') {
+        // 2. Role-based data visibility (refined)
+        if (req.user.role === 'employee') {
             // Employees see what they referred OR what is assigned to them
             query.$or = [
                 { referrer: req.user.id },
@@ -462,8 +463,10 @@ exports.getReferralStats = async (req, res) => {
     try {
         let query = {};
         
-        // 1. Branch Segregation
-        if (req.user.role !== 'admin') {
+        // 1. Branch Segregation (Agent Bypass)
+        if (req.user.role === 'agent') {
+            query.referrer = req.user.id;
+        } else if (req.user.role !== 'admin') {
             if (!req.user.branchId) {
                 query.branchId = "000000000000000000000000";
             } else {
@@ -471,10 +474,8 @@ exports.getReferralStats = async (req, res) => {
             }
         }
 
-        // 2. Role Filtering
-        if (req.user.role === 'agent') {
-            query.referrer = req.user.id;
-        } else if (req.user.role === 'employee') {
+        // 2. Role Filtering (Remaining)
+        if (req.user.role === 'employee') {
             query.$or = [
                 { referrer: req.user.id },
                 { assignedEmployee: req.user.id }
