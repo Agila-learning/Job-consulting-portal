@@ -161,10 +161,7 @@ const PerformanceReports = () => {
                         <Select value={selectedBranch} onValueChange={setSelectedBranch}>
                             <SelectTrigger className="w-56 h-12 bg-background border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm">
                                 <MapPin size={14} className="text-primary mr-2" />
-                                <SelectValue>
-                                    {selectedBranch === 'all' ? 'Working: All Branches' : 
-                                     (branches.find(b => b._id === selectedBranch)?.name || 'Loading Branch...')}
-                                </SelectValue>
+                                <SelectValue placeholder="Select Branch" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
                                 <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">Global (All Branches)</SelectItem>
@@ -180,10 +177,7 @@ const PerformanceReports = () => {
                         <Select value={selectedUser} onValueChange={setSelectedUser}>
                             <SelectTrigger className="w-56 h-12 bg-background border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm">
                                 <Users size={14} className="text-primary mr-2" />
-                                <SelectValue>
-                                    {selectedUser === 'all' ? 'Agent: All Members' : 
-                                     (users.find(u => u._id === selectedUser)?.name || 'Filter User')}
-                                </SelectValue>
+                                <SelectValue placeholder="Select Member" />
                             </SelectTrigger>
                             <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
                                 <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">All Workforce Members</SelectItem>

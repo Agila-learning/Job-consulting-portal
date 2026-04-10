@@ -2,6 +2,9 @@ const Referral = require('../models/Referral');
 const Job = require('../models/Job');
 const KYC = require('../models/KYC');
 const IncentiveSlab = require('../models/IncentiveSlab');
+const Branch = require('../models/Branch');
+const mongoose = require('mongoose');
+const { sendNotification } = require('../utils/notificationHelper');
 
 // Create a new referral
 // Route: POST /api/referrals
@@ -18,7 +21,7 @@ exports.createReferral = async (req, res) => {
         }
 
         // 2. Determine Branch with Intelligent Mapping
-        let branchId = req.user.branchId; // Default to submitter's branch
+        let branchId = req.body.branchId || req.user.branchId; // Default to body or submitter
         
         // If agent has no branch, try mapping from preferredLocation
         if (candidateData.preferredLocation) {
@@ -341,33 +344,30 @@ exports.updateReferralStatus = async (req, res) => {
             }
             // --- END INCENTIVE LOGIC ---
 
-            // Emit real-time notification to Referrer
-            const io = req.app.get('io');
+            // Real-time Notification Dispatch
             if (referral.referrer) {
-                io.to(referral.referrer.toString()).emit('statusChanged', {
-                    message: `Status of ${referral.candidateName} updated to ${status}`,
-                    referralId: referral._id,
-                    status
+                await sendNotification(req.app, {
+                    userId: referral.referrer,
+                    title: 'Candidate Progress Update',
+                    message: `Progress: ${referral.candidateName} is now [${status}]`,
+                    type: status === 'Joined' ? 'success' : 'info',
+                    link: `/${req.user.role === 'agent' ? 'agent' : req.user.role === 'employee' ? 'employee' : 'admin'}/pipeline`
                 });
             }
 
-            // DB Notification to trigger Admin Commission Workflows for Agent Referrals
-            if ((status === 'Selected' || status === 'Joined') && referral.sourceType === 'agent') {
-                const Notification = require('../models/Notification');
+            // Notify Admin for High-Value Transitions
+            if (status === 'Selected' || status === 'Joined') {
                 const User = require('../models/User');
                 const admins = await User.find({ role: 'admin' });
                 
-                const notifications = admins.map(admin => ({
-                    user: admin._id,
-                    title: `Agent Referral ${status}`,
-                    message: `Agent candidate ${referral.candidateName} has reached ${status} stage. Commission processing required.`,
-                    type: status === 'Joined' ? 'success' : 'info',
-                    link: `/admin/dashboard`
-                }));
-
-                if (notifications.length > 0) {
-                    await Notification.insertMany(notifications);
-                    io.emit('newNotification', { message: `New commission event for ${referral.candidateName}` });
+                for (const admin of admins) {
+                    await sendNotification(req.app, {
+                        userId: admin._id,
+                        title: `Revenue Milestone: ${status}`,
+                        message: `Critical Transition: ${referral.candidateName} has reached [${status}] stage.`,
+                        type: status === 'Joined' ? 'success' : 'info',
+                        link: '/admin/dashboard'
+                    });
                 }
             }
         }

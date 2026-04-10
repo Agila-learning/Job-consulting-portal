@@ -21,6 +21,7 @@ import KYCManagement from './pages/admin/KYCManagement';
 import IncentiveDashboard from './pages/admin/IncentiveDashboard';
 import ScriptManagement from './pages/admin/ScriptManagement';
 import ManualReports from './pages/admin/ManualReports';
+import WorkforceLedger from './pages/admin/WorkforceLedger';
 
 // Employee Pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
@@ -73,6 +74,7 @@ function App() {
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="incentive-tracker" element={<IncentiveTracker type="admin" />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="workforce-reports" element={<WorkforceLedger />} />
                     <Route path="reports" element={<ManualReports />} />
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   </Route>
@@ -88,6 +90,7 @@ function App() {
                     <Route path="scripts" element={<ScriptManagement />} />
                     <Route path="incentives" element={<IncentiveTracker type="employee" />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="ats-tracker" element={<ATSResumeTracker />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/employee/dashboard" replace />} />
                   </Route>
@@ -118,6 +121,7 @@ function App() {
                     <Route path="jobs" element={<JobManagement />} />
                     <Route path="ats-tracker" element={<ATSResumeTracker />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="workforce-reports" element={<WorkforceLedger />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/team-leader/dashboard" replace />} />
                   </Route>

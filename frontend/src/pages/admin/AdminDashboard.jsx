@@ -27,7 +27,8 @@ const AdminDashboard = () => {
         { label: 'Finance & Insights', type: 'header' },
         { icon: <CreditCard size={18} />, label: 'Finance Hub', path: '/admin/financials' },
         { icon: <Trophy size={18} />, label: 'Incentive Slabs', path: '/admin/incentives' },
-        { icon: <BarChart3 size={18} />, label: 'Performance Tracking', path: '/admin/performance-reports' },
+        { icon: <BarChart3 size={18} />, label: 'Individual Performance', path: '/admin/performance-reports' },
+        { icon: <Users size={18} />, label: 'Workforce Ledger', path: '/admin/workforce-reports' },
         { icon: <BarChart3 size={18} />, label: 'Financial Audits', path: '/admin/reports' },
     ];
 

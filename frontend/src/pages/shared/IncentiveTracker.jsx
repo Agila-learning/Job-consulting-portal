@@ -46,6 +46,18 @@ const IncentiveTracker = ({ type = 'employee' }) => {
         multiplier: conversions.length > 5 ? '1.5x' : '1.0x'
     };
 
+    const [slabs, setSlabs] = useState([]);
+
+    useEffect(() => {
+        const fetchSlabs = async () => {
+            try {
+                const res = await api.get('/incentives/slabs?status=active');
+                setSlabs(res.data.data.filter(s => s.userRole === user?.role || user?.role === 'admin'));
+            } catch (err) {}
+        };
+        fetchSlabs();
+    }, [user?.role]);
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
@@ -93,6 +105,42 @@ const IncentiveTracker = ({ type = 'employee' }) => {
                     </div>
                 ))}
             </div>
+
+            {/* Slab Directory Hub */}
+            {slabs.length > 0 && (
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4">
+                        <div className="w-1.5 h-4 bg-amber-500 rounded-full" />
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Active Reward Policies</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {slabs.map((slab) => (
+                            <div key={slab._id} className="bg-card/40 backdrop-blur-xl border border-border/40 rounded-[2.5rem] p-8 shadow-sm group hover:border-amber-500/40 transition-all">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+                                        <Trophy size={24} />
+                                    </div>
+                                    <Badge variant="outline" className="border-amber-500/20 text-amber-600 bg-amber-500/5 font-black text-[8px] uppercase tracking-widest px-3 py-1 rounded-lg">
+                                        {slab.domain} • {slab.userRole}
+                                    </Badge>
+                                </div>
+                                <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-2 uppercase italic">{slab.title}</h4>
+                                <div className="space-y-3 mt-6">
+                                    {slab.thresholds.map((t, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30 border border-border/10">
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Target: {t.count} Joined</span>
+                                                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{t.description || 'Verified Placement'}</span>
+                                            </div>
+                                            <span className="text-sm font-black text-amber-600">₹{t.rewardValue}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Detailed Conversions List */}
