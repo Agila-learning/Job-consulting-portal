@@ -197,7 +197,7 @@ const AddCandidateForm = ({ onSuccess, onCancel, initialData }) => {
         try {
             const data = new FormData();
             data.append('candidateName', formData.candidateName);
-            data.append('candidateEmail', formData.candidateEmail);
+            data.append('email', formData.candidateEmail);
             data.append('mobile', formData.mobile);
             data.append('jobId', formData.jobId);
             data.append('experience', formData.experience);

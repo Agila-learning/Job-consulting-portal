@@ -942,8 +942,8 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                     <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center font-black text-lg sm:text-xl shadow-inner shrink-0 border border-border/20 transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 ${activeTab === 'placements' ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl shadow-emerald-500/20' : 'bg-secondary/60 text-foreground group-hover:bg-primary group-hover:text-white group-hover:shadow-xl group-hover:shadow-primary/20'}`}>
                         {row.candidateName ? row.candidateName.charAt(0) : 'C'}
                     </div>
-                    <div className="space-y-1.5 min-w-0 flex-1">
-                        <div className="flex flex-col">
+                    <div className="space-y-1.5 min-w-0 flex-1 overflow-hidden">
+                        <div className="flex flex-col min-w-0">
                             <h4 className="font-black text-foreground text-lg md:text-xl tracking-tighter leading-none mb-1 group-hover:text-primary transition-colors truncate">{row.candidateName}</h4>
                             <div className="flex items-center gap-2">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 flex items-center gap-2 leading-none">
@@ -1013,34 +1013,23 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                 </div>
 
                 {/* 2. Employment Segment */}
-                <div className="col-span-12 lg:col-span-4 space-y-4">
-                    <div className="space-y-1.5">
-                        <p className="text-xs font-black text-foreground flex items-center gap-2 leading-tight">
+                <div className="col-span-12 lg:col-span-4 space-y-4 min-w-0 overflow-hidden">
+                    <div className="space-y-1.5 min-w-0">
+                        <p className="text-xs font-black text-foreground flex items-center gap-2 leading-tight min-w-0">
                             <Briefcase size={14} className="text-primary/40 shrink-0" /> 
-                            <span className="truncate">{row.job?.jobTitle}</span>
+                            <span className="truncate block min-w-0 flex-1">{row.job?.jobTitle}</span>
                         </p>
-                        <p className="text-[11px] font-bold text-muted-foreground/60 leading-tight pl-5 truncate">
+                        <p className="text-[11px] font-bold text-muted-foreground/60 leading-tight pl-5 truncate block min-w-0">
                             {row.job?.companyName || 'Confidential Client'}
                         </p>
                     </div>
                     
-                    <div className="flex items-center gap-3 bg-secondary/30 p-3 rounded-2xl border border-border/20">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${row.assignedEmployee ? 'bg-primary/10 text-primary border-primary/20' : 'bg-secondary text-muted-foreground/40 border-border/40'}`}>
-                            {row.assignedEmployee ? <UserCheck size={14} /> : <Ghost size={14} />}
-                        </div>
-                        <div className="flex flex-col leading-none gap-1">
-                            <span className="text-[10px] font-black text-foreground truncate max-w-[120px]">
-                                {row.assignedEmployee?.name || 'Unassigned'}
-                            </span>
-                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Assigned Integration</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* 3. Action Segment */}
-                <div className="col-span-12 lg:col-span-3 flex flex-row items-center justify-between lg:justify-end gap-6 border-t lg:border-0 border-border/10 pt-6 lg:pt-0">
-                    <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
-                        <Badge variant="outline" className={`h-8 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm border flex items-center gap-2 w-fit ${stConfig.color}`}>
+                <div className="col-span-12 lg:col-span-3 flex flex-row items-center justify-between lg:justify-end gap-6 border-t lg:border-0 border-border/10 pt-6 lg:pt-0 min-w-0">
+                        <div className="flex flex-col items-end gap-3 w-full sm:w-auto min-w-0">
+                        <Badge variant="outline" className={`h-8 rounded-2xl px-4 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm border flex items-center gap-2 w-fit truncate max-w-full ${stConfig.color}`}>
                             {stConfig.icon} {row.status}
                         </Badge>
                         <div className="flex flex-col items-end leading-none">
