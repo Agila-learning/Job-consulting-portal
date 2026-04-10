@@ -40,12 +40,15 @@ const JobManagement = () => {
         rolesAndResponsibilities: '',
         experienceRequired: '',
         openings: 1,
+        branchId: '',
         visibility: true
     });
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [modeFilter, setModeFilter] = useState('all');
+    const [branches, setBranches] = useState([]);
+    const [branchFilter, setBranchFilter] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
 
     // Pagination state
@@ -55,10 +58,14 @@ const JobManagement = () => {
     const fetchJobs = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/jobs');
-            setJobs(res.data.data);
+            const [jobRes, branchRes] = await Promise.all([
+                api.get('/jobs'),
+                api.get('/branches')
+            ]);
+            setJobs(jobRes.data.data);
+            setBranches(branchRes.data.data || []);
         } catch (err) {
-            toast.error('Failed to fetch job postings');
+            toast.error('Failed to fetch job inventory');
         } finally {
             setLoading(false);
         }
@@ -70,8 +77,10 @@ const JobManagement = () => {
         const matchesStatus = statusFilter === 'all' ? true : job.status === statusFilter;
         const matchesType = typeFilter === 'all' ? true : job.jobType === typeFilter;
         const matchesMode = modeFilter === 'all' ? true : job.workMode === modeFilter;
+        const matchesBranch = branchFilter === 'all' ? true : 
+                            (typeof job.branchId === 'object' ? job.branchId?._id === branchFilter : job.branchId === branchFilter);
         
-        return matchesSearch && matchesStatus && matchesType && matchesMode;
+        return matchesSearch && matchesStatus && matchesType && matchesMode && matchesBranch;
     });
 
     const totalPages = Math.ceil(filteredJobs.length / pageSize);
@@ -161,6 +170,7 @@ const JobManagement = () => {
                 rolesAndResponsibilities: '',
                 experienceRequired: '',
                 openings: 1,
+                branchId: '',
                 visibility: true
             });
             fetchJobs();
@@ -182,6 +192,7 @@ const JobManagement = () => {
             rolesAndResponsibilities: job.rolesAndResponsibilities,
             experienceRequired: job.experienceRequired,
             openings: job.openings || 1,
+            branchId: job.branchId?._id || job.branchId || '',
             visibility: job.visibility
         });
         setIsEditOpen(true);
@@ -347,6 +358,21 @@ const JobManagement = () => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+                                            <div className="space-y-3">
+                                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Assigned Branch (Hub)</Label>
+                                                <Select onValueChange={(val) => handleSelectChange('branchId', val)} defaultValue={formData.branchId}>
+                                                    <SelectTrigger className="h-14 bg-background border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none">
+                                                        <SelectValue placeholder="Select Branch" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl z-[150]">
+                                                        {branches.map(b => (
+                                                            <SelectItem key={b._id} value={b._id} className="rounded-xl font-bold text-xs py-2.5 text-left">
+                                                                {b.name} Hub
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
                                         <div className="space-y-3">
                                             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Work Experience</Label>
@@ -426,6 +452,21 @@ const JobManagement = () => {
                                                 </SelectContent>
                                             </Select>
                                         </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Assigned Branch (Hub)</Label>
+                                            <Select onValueChange={(val) => handleSelectChange('branchId', val)} value={formData.branchId}>
+                                                <SelectTrigger className="h-14 bg-background border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none">
+                                                    <SelectValue placeholder="Select Branch" />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl z-[150]">
+                                                    {branches.map(b => (
+                                                        <SelectItem key={b._id} value={b._id} className="rounded-xl font-bold text-xs py-2.5 text-left">
+                                                            {b.name} Hub
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Work Experience</Label>
@@ -497,6 +538,8 @@ const JobManagement = () => {
                                                             <span className="flex items-center gap-2"><Building size={15} className="text-primary/70" /> {selectedJob.companyName}</span>
                                                             <span className="w-1 h-1 rounded-full bg-border/80 hidden sm:block" />
                                                             <span className="flex items-center gap-2"><MapPin size={15} className="text-primary/70" /> {selectedJob.location || 'Remote'}</span>
+                                                            <span className="w-1 h-1 rounded-full bg-border/80 hidden sm:block" />
+                                                            <span className="flex items-center gap-2"><PlusCircle size={15} className="text-primary/70" /> {typeof selectedJob.branchId === 'object' ? selectedJob.branchId.name : 'Central Node'}</span>
                                                             <span className="w-1 h-1 rounded-full bg-border/80 hidden sm:block" />
                                                             <span className="flex items-center gap-2"><Calendar size={13} className="text-muted-foreground/50" /> {new Date(selectedJob.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                                         </div>
@@ -572,7 +615,7 @@ const JobManagement = () => {
             </div>
 
             {/* Filter Section */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-card/95 dark:bg-slate-900 shadow-xl p-6 rounded-[2.5rem] border border-border/40">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 bg-card/95 dark:bg-slate-900 shadow-xl p-6 rounded-[2.5rem] border border-border/40">
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Search Jobs</Label>
                     <div className="relative group">
@@ -581,16 +624,22 @@ const JobManagement = () => {
                             placeholder="Search role/company..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="h-12 pl-11 pr-12 bg-background border-border/50 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/5 transition-all"
+                            className="h-12 pl-11 pr-4 bg-background border-border/50 rounded-xl text-xs font-bold focus:ring-4 focus:ring-primary/5 transition-all"
                         />
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all border border-primary/10"
-                        >
-                            <Search size={14} />
-                        </Button>
                     </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Branch Hub</Label>
+                    <select 
+                        value={branchFilter} 
+                        onChange={(e) => setBranchFilter(e.target.value)}
+                        className="w-full h-12 px-4 bg-background border border-border/50 rounded-xl text-xs font-bold outline-none cursor-pointer"
+                    >
+                        <option value="all">Global (All)</option>
+                        {branches.map(b => (
+                            <option key={b._id} value={b._id}>{b.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Lifecycle Status</Label>
@@ -676,6 +725,8 @@ const JobManagement = () => {
                                             <span className="flex items-center gap-2.5"><Building size={14} className="text-primary/60" /> {job.companyName}</span>
                                             <span className="hidden md:block w-1 h-1 rounded-full bg-border/60" />
                                             <span className="flex items-center gap-2.5"><MapPin size={14} className="text-primary/60" /> {job.location || 'Remote'}</span>
+                                            <span className="hidden md:block w-1 h-1 rounded-full bg-border/60" />
+                                            <span className="flex items-center gap-2.5"><PlusCircle size={14} className="text-primary/60" /> {typeof job.branchId === 'object' ? job.branchId.name : 'Central Hub'}</span>
                                             <span className="hidden md:block w-1 h-1 rounded-full bg-border/60" />
                                             <span className="flex items-center gap-2.5"><Clock size={14} className="text-primary/60" /> {job.jobType}</span>
                                         </div>

@@ -20,7 +20,7 @@ exports.getJobs = async (req, res) => {
             query.status = status;
         }
 
-        const jobs = await Job.find(query).sort('-createdAt');
+        const jobs = await Job.find(query).populate('branchId', 'name').sort('-createdAt');
         
         res.status(200).json({ success: true, count: jobs.length, data: jobs });
     } catch (err) {
@@ -32,7 +32,7 @@ exports.getJobs = async (req, res) => {
 // Route: GET /api/jobs/:id
 exports.getJob = async (req, res) => {
     try {
-        const job = await Job.findById(req.params.id);
+        const job = await Job.findById(req.params.id).populate('branchId', 'name');
 
         if (!job) {
             return res.status(404).json({ success: false, message: 'Job not found' });

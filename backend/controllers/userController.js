@@ -37,7 +37,7 @@ exports.getUsers = async (req, res) => {
             query.reportingManager = req.user.id;
         }
 
-        const users = await User.find(query).select('-password').sort('-createdAt');
+        const users = await User.find(query).populate('branchId', 'name').select('-password').sort('-createdAt');
         
         res.status(200).json({ success: true, count: users.length, data: users });
     } catch (err) {
