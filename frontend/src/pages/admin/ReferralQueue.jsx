@@ -203,23 +203,6 @@ const ReferralQueue = () => {
                         <Zap size={16} className="mr-2 fill-current" /> Sync Records
                     </Button>
                     <Button 
-                        onClick={async () => {
-                            if (window.confirm("FATAL ACTION: This will permanently purge all mock data. Proceed?")) {
-                                try {
-                                    await api.delete('/referrals/purge-mock-data');
-                                    toast.success("Ecosystem Reset Complete");
-                                    fetchData();
-                                } catch (err) {
-                                    toast.error("Purge Protocol Failed");
-                                }
-                            }
-                        }}
-                        variant="outline" 
-                        className="h-12 px-6 rounded-2xl border-rose-500/20 bg-rose-500/5 text-rose-500 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                    >
-                        <AlertCircle size={16} className="mr-2" /> Reset Protocol
-                    </Button>
-                    <Button 
                         onClick={() => {
                             const data = referrals.map(ref => ({
                                 'Candidate Name': ref.candidateName,

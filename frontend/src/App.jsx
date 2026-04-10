@@ -22,6 +22,7 @@ import IncentiveDashboard from './pages/admin/IncentiveDashboard';
 import ScriptManagement from './pages/admin/ScriptManagement';
 import ManualReports from './pages/admin/ManualReports';
 import WorkforceLedger from './pages/admin/WorkforceLedger';
+import AdminPipeline from './pages/admin/AdminPipeline';
 
 // Employee Pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
@@ -66,6 +67,7 @@ function App() {
                     <Route path="approvals" element={<AgentApprovals />} />
                     <Route path="jobs" element={<JobManagement />} />
                     <Route path="referrals" element={<ReferralQueue />} />
+                    <Route path="pipeline" element={<AdminPipeline />} />
                     <Route path="financials" element={<FinancialDashboard />} />
                     <Route path="kyc-management" element={<KYCManagement />} />
                     <Route path="incentives" element={<IncentiveDashboard />} />

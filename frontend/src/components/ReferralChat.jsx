@@ -37,7 +37,6 @@ const ReferralChat = ({ referralId, recipientId, candidateName }) => {
         socketRef.current = io(socketServerUrl);
 
         socketRef.current.on('connect', () => {
-            console.log('Socket Connected');
             socketRef.current.emit('join', user?._id);
         });
 

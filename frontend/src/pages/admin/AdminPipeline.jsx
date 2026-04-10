@@ -20,7 +20,7 @@ import CandidateProvisioningForm from '@/components/CandidateProvisioningForm';
 import { toast } from 'sonner';
 import { 
     UserPlus, Zap, Briefcase, FileSearch, Sparkles, BrainCircuit, Upload,
-    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter, X, Edit2
+    Loader2, KanbanSquare, Users, LayoutPanelLeft, Calendar, CheckCircle2, Search, Filter, X, Edit2, MapPin
 } from 'lucide-react';
 import { 
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
@@ -28,6 +28,7 @@ import {
 import { 
     Dialog, DialogContent, DialogHeader, DialogTitle 
 } from '@/components/ui/dialog';
+import { useAuth } from '@/context/AuthContext';
 
 const COLUMNS = [
     { id: 'New Referral', title: 'New' },
@@ -39,9 +40,11 @@ const COLUMNS = [
     { id: 'Rejected', title: 'Declined' },
 ];
 
-const CandidatePipeline = () => {
+const AdminPipeline = () => {
+    const { user } = useAuth();
     const [referrals, setReferrals] = useState([]);
     const [jobs, setJobs] = useState([]);
+    const [branches, setBranches] = useState([]);
     const [stats, setStats] = useState({ totalCandidates: 0, hiredCount: 0, interviewCount: 0, shortlistedCount: 0 });
     const [loading, setLoading] = useState(true);
     const [activeId, setActiveId] = useState(null);
@@ -53,6 +56,7 @@ const CandidatePipeline = () => {
     // Filters
     const [searchTerm, setSearchTerm] = useState('');
     const [jobFilter, setJobFilter] = useState('all');
+    const [branchFilter, setBranchFilter] = useState('all');
     const [priorityFilter, setPriorityFilter] = useState('all');
 
     // ATS State
@@ -75,25 +79,20 @@ const CandidatePipeline = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [refRes, statRes, jobRes] = await Promise.allSettled([
-                api.get('/referrals'),
-                api.get('/referrals/stats'),
-                api.get('/jobs')
+            const branchQuery = branchFilter !== 'all' ? `?branchId=${branchFilter}` : '';
+            const [refRes, statRes, jobRes, branchRes] = await Promise.all([
+                api.get(`/referrals${branchQuery}`),
+                api.get(`/referrals/stats${branchQuery}`),
+                api.get(`/jobs${branchQuery}`),
+                api.get('/branches')
             ]);
             
-            if (refRes.status === 'fulfilled') {
-                setReferrals(refRes.value.data?.data || []);
-            }
-            
-            if (statRes.status === 'fulfilled') {
-                setStats(statRes.value.data?.data || { totalCandidates: 0, hiredCount: 0, interviewCount: 0, shortlistedCount: 0 });
-            }
-
-            if (jobRes.status === 'fulfilled') {
-                setJobs(jobRes.value.data?.data || []);
-            }
+            setReferrals(refRes.data?.data || []);
+            setStats(statRes.data?.data || { totalCandidates: 0, hiredCount: 0, interviewCount: 0, shortlistedCount: 0 });
+            setJobs(jobRes.data?.data || []);
+            setBranches(branchRes.data?.data || []);
         } catch (err) {
-            toast.error('Pipeline synchronization lag');
+            toast.error('Global pipeline synchronization failure');
         } finally {
             setLoading(false);
         }
@@ -101,7 +100,7 @@ const CandidatePipeline = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [branchFilter]);
 
     const filteredReferrals = (referrals || []).filter(r => {
         if (!r) return false;
@@ -134,14 +133,15 @@ const CandidatePipeline = () => {
 
         if (activeReferral && activeReferral.status !== overColumnId) {
             try {
+                // Optimistic update
                 setReferrals(prev => prev.map(r => 
                     r._id === active.id ? { ...r, status: overColumnId } : r
                 ));
 
                 await api.patch(`/referrals/${active.id}/status`, { status: overColumnId });
-                toast.success(`Pipeline level updated: ${overColumnId}`);
+                toast.success(`Pipeline level synchronized: ${overColumnId}`);
             } catch (err) {
-                toast.error(err.response?.data?.message || 'Sync failure');
+                toast.error(err.response?.data?.message || 'State transition failed');
                 fetchData(); 
             }
         }
@@ -149,13 +149,13 @@ const CandidatePipeline = () => {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to PERMANENTLY delete this candidate?')) {
+        if (window.confirm('IRREVERSIBLE ACTION: Purge candidate from master ledger?')) {
             try {
                 await api.delete(`/referrals/${id}`);
-                toast.success('Candidate purged from pipeline');
+                toast.success('Node Purged Successfully');
                 fetchData();
             } catch (err) {
-                toast.error('Deletion failed');
+                toast.error('Purge Protocol Failed');
             }
         }
     };
@@ -164,10 +164,8 @@ const CandidatePipeline = () => {
         setSelectedReferral(referral);
         if (action === 'edit') {
             setIsEditModalOpen(true);
-        } else if (action === 'status') {
-            setIsPanelOpen(true); // Detail panel already has status update
-        } else if (action === 'timeline') {
-            setIsPanelOpen(true); // Detail panel has timeline
+        } else {
+            setIsPanelOpen(true);
         }
     };
 
@@ -190,24 +188,22 @@ const CandidatePipeline = () => {
                 toast.error(res.data.message || 'Analysis failed');
             }
         } catch (err) {
-            console.error('ATS Error:', err);
             toast.error(err.response?.data?.message || 'ATS engine synchronization failure');
         } finally {
             setIsAnalyzing(false);
         }
     };
 
-    if (loading) {
+    if (loading && referrals.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-[70vh] gap-8 relative overflow-hidden bg-background">
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-[100px] animate-pulse" />
-                <div className="relative z-10 w-24 h-24 rounded-[2.5rem] bg-card border border-border/40 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex items-center justify-center">
+                <div className="relative z-10 w-24 h-24 rounded-[2.5rem] bg-card border border-border/40 shadow-xl flex items-center justify-center">
                     <Loader2 size={36} className="text-primary animate-spin" />
-                    <Zap size={18} className="text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                 </div>
                 <div className="text-center relative z-10 space-y-3">
-                    <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] leading-none">Accessing Central Pipeline</p>
-                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.1em] opacity-60">Synchronizing Distributed Object State...</p>
+                    <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] leading-none">Syncing Global Pipeline</p>
+                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.1em] opacity-60">Handshaking with Branch Nodes...</p>
                 </div>
             </div>
         );
@@ -215,16 +211,16 @@ const CandidatePipeline = () => {
 
     return (
         <div className="h-full flex flex-col space-y-10 animate-in fade-in duration-700 pb-10">
-            {/* Board Header */}
+            {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
                 <div className="space-y-2">
                     <div className="flex items-center gap-4">
-                        <div className="w-9 h-9 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm">
-                            <KanbanSquare size={20} />
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-sm">
+                            <KanbanSquare size={22} />
                         </div>
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none uppercase italic">Hiring<span className="text-primary not-italic">.Pipeline</span></h2>
+                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none uppercase italic">Global<span className="text-primary not-italic">.Pipeline</span></h2>
                     </div>
-                    <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] ml-1">Candidate Orchestration Domain</p>
+                    <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.25em] ml-1">Universal Talent Registry Orbit</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <Button 
@@ -232,7 +228,7 @@ const CandidatePipeline = () => {
                         variant="ghost"
                         className="h-12 px-6 bg-secondary/50 hover:bg-secondary text-primary font-black text-[10px] uppercase tracking-widest rounded-xl border border-primary/10 flex gap-3 transition-all"
                     >
-                        <Sparkles size={16} className="animate-pulse" /> ATS AI Filter
+                        <Sparkles size={16} /> ATS Analysis
                     </Button>
                     <Button 
                         onClick={() => setIsAddModalOpen(true)}
@@ -243,64 +239,61 @@ const CandidatePipeline = () => {
                 </div>
             </div>
 
-            {/* BOARD STATS HUD */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* PIPELINE HUD */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 {[
-                    { label: 'Total Volume', value: stats.totalCandidates || 0, icon: Users, color: 'bg-blue-500', trend: 'Global' },
-                    { label: 'Shortlisted', value: stats.shortlistedCount || 0, icon: LayoutPanelLeft, color: 'bg-indigo-500', trend: 'Active' },
-                    { label: 'Interviews', value: stats.interviewCount || 0, icon: Calendar, color: 'bg-amber-500', trend: 'Live' },
-                    { label: 'Successful Hires', value: stats.hiredCount || 0, icon: CheckCircle2, color: 'bg-emerald-500', trend: 'Targets' },
+                    { label: 'Global Volume', value: stats.totalCandidates || 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/5' },
+                    { label: 'Screened Match', value: stats.shortlistedCount || 0, icon: LayoutPanelLeft, color: 'text-indigo-500', bg: 'bg-indigo-500/5' },
+                    { label: 'Live Interviews', value: stats.interviewCount || 0, icon: Calendar, color: 'text-amber-500', bg: 'bg-amber-500/5' },
+                    { label: 'Targets Met', value: stats.hiredCount || 0, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/5' },
                 ].map((stat, i) => (
-                    <div key={i} className="group bg-card/40 backdrop-blur-xl border border-border/40 rounded-[2.5rem] p-7 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden text-left">
-                        <div className={`absolute top-0 right-0 w-32 h-32 ${stat.color}/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none`} />
-                        <div className="flex justify-between items-start relative z-10 mb-5 text-slate-900 dark:text-white">
-                            <div className={`p-4 rounded-2xl ${stat.color}/10 ${stat.color.replace('bg-', 'text-')} border ${stat.color.replace('bg-', 'border-')}/20 shadow-sm transition-transform group-hover:scale-110 duration-500`}>
-                                <stat.icon size={22} />
+                    <div key={i} className="bg-card/40 backdrop-blur-xl border border-border/40 rounded-[2rem] p-6 shadow-sm transition-all relative overflow-hidden group">
+                        <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700`} />
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} border border-current opacity-20`}>
+                                <stat.icon size={20} />
                             </div>
-                            <Badge variant="outline" className="rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-widest border-primary/10 text-primary/80 bg-primary/5 flex gap-1.5 items-center">
-                                {stat.trend}
-                            </Badge>
-                        </div>
-                        <div className="relative z-10 transition-transform group-hover:translate-x-1 duration-300">
-                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em] mb-2 leading-none opacity-70">{stat.label}</p>
-                            <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">{stat.value}</h3>
+                            <div className="text-right">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1 opacity-60 leading-none">{stat.label}</p>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{stat.value}</h3>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* FILTERS & ENGINE CONTROLS */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 bg-card/50 backdrop-blur-3xl border border-border/40 rounded-[2rem] lg:rounded-[3rem] p-4 lg:p-6 shadow-sm">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 bg-card/60 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] p-5 shadow-sm">
                 <div className="flex-1 relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors duration-300" size={18} />
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors" size={18} />
                     <input 
                         type="text" 
-                        placeholder="Search candidates by name or identity..."
+                        placeholder="Search candidate registry by name or email hash..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-14 pl-14 pr-6 bg-background dark:bg-slate-900/60 border border-border/40 focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl text-[13px] font-black text-slate-900 dark:text-white outline-none transition-all placeholder:font-bold placeholder:text-muted-foreground/30 shadow-inner"
+                        className="w-full h-14 pl-14 pr-6 bg-background/50 border border-border/40 focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl text-[13px] font-black outline-none transition-all placeholder:text-muted-foreground/30"
                     />
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <Select onValueChange={setPriorityFilter} value={priorityFilter}>
-                        <SelectTrigger className="w-full sm:w-48 h-14 bg-background dark:bg-slate-900/60 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
-                             <div className="flex items-center gap-3"><Filter size={14} className="text-primary/60" /><SelectValue placeholder="Priority" /></div>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <Select onValueChange={setBranchFilter} value={branchFilter}>
+                        <SelectTrigger className="w-full sm:w-48 h-14 bg-background/50 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none shadow-sm">
+                             <div className="flex items-center gap-3"><MapPin size={14} className="text-primary" /><SelectValue placeholder="Branch" /></div>
                         </SelectTrigger>
-                        <SelectContent className="rounded-[2.2rem] border-border/40 bg-card/95 backdrop-blur-3xl shadow-2xl p-2 z-[100] outline-none">
-                            <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1">All Priorities</SelectItem>
-                            <SelectItem value="high" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 text-rose-600 bg-rose-500/5">Flash High</SelectItem>
-                            <SelectItem value="medium" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 text-amber-600 bg-amber-500/5">Operational</SelectItem>
-                            <SelectItem value="low" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1 text-emerald-600 bg-emerald-500/5">Baseline</SelectItem>
+                        <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
+                            <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">Global View</SelectItem>
+                            {branches.map(b => (
+                                <SelectItem key={b._id} value={b._id} className="font-black text-[10px] uppercase tracking-widest py-3">{b.name}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                     <Select onValueChange={setJobFilter} value={jobFilter}>
-                        <SelectTrigger className="w-full sm:w-64 h-14 bg-background dark:bg-slate-900/60 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-900 dark:text-white shadow-sm focus:ring-primary/5 transition-all outline-none">
-                             <div className="flex items-center gap-3"><Briefcase size={14} className="text-primary/60" /><SelectValue placeholder="Job View" /></div>
+                        <SelectTrigger className="w-full sm:w-56 h-14 bg-background/50 border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none shadow-sm">
+                             <div className="flex items-center gap-3"><Briefcase size={14} className="text-primary" /><SelectValue placeholder="Job Context" /></div>
                         </SelectTrigger>
-                        <SelectContent className="rounded-[2.2rem] border-border/40 bg-card/95 backdrop-blur-3xl shadow-2xl p-2 z-[100] max-h-80 outline-none">
-                            <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1">All Jobs</SelectItem>
+                        <SelectContent className="rounded-2xl border-border/40 shadow-2xl max-h-80">
+                            <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">All Job Roles</SelectItem>
                             {jobs.map(job => (
-                                <SelectItem key={job._id} value={job._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 my-1">
+                                <SelectItem key={job._id} value={job._id} className="font-black text-[10px] uppercase tracking-widest py-3">
                                     {job.jobTitle}
                                 </SelectItem>
                             ))}
@@ -310,8 +303,7 @@ const CandidatePipeline = () => {
             </div>
 
             {/* Pipeline Canvas */}
-            <div className="flex-1 overflow-x-auto custom-scrollbar flex items-start gap-0 pb-12 w-full h-[calc(100vh-480px)] min-h-[650px] relative scroll-smooth">
-                 <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            <div className="flex-1 overflow-x-auto custom-scrollbar flex items-start gap-0 pb-12 w-full h-[calc(100vh-450px)] min-h-[600px] relative scroll-smooth px-2">
                 <DndContext 
                     sensors={sensors}
                     collisionDetection={closestCorners}
@@ -351,12 +343,11 @@ const CandidatePipeline = () => {
 
             {/* EDIT MODAL */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
-                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
-                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-2xl p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 flex-shrink-0">
+                        <DialogHeader>
                             <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-[1.2rem] bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                                <div className="w-12 h-12 rounded-[1.2rem] bg-amber-500 flex items-center justify-center text-white shadow-lg">
                                     <Edit2 size={22} className="fill-white" />
                                 </div>
                                 Edit Candidate
@@ -378,12 +369,11 @@ const CandidatePipeline = () => {
 
             {/* PROVISIONING MODAL */}
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
-                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
-                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-2xl p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 flex-shrink-0">
+                        <DialogHeader>
                             <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                                <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg">
                                     <UserPlus size={22} className="fill-white" />
                                 </div>
                                 Provision Candidate
@@ -405,7 +395,7 @@ const CandidatePipeline = () => {
             {/* ATS AI MODAL */}
             <Dialog open={isATSModalOpen} onOpenChange={setIsATSModalOpen}>
                 <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto bg-card border-border/40 rounded-[2.5rem] shadow-2xl p-0 outline-none z-[120]">
-                    <div className="p-8 border-b border-border/30 bg-primary/5 relative overflow-hidden">
+                    <div className="p-8 border-b border-border/30 bg-primary/5">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
                                 <BrainCircuit size={24} className="text-primary" />
@@ -438,7 +428,6 @@ const CandidatePipeline = () => {
                                             Change File
                                         </button>
                                     )}
-                                    {!atsFile && <p className="text-[10px] text-muted-foreground/40 mt-2">Support: PDF, DOCX, TXT</p>}
                                 </div>
                                 <Button 
                                     onClick={runATSAnalysis}
@@ -481,4 +470,4 @@ const CandidatePipeline = () => {
     );
 };
 
-export default CandidatePipeline;
+export default AdminPipeline;

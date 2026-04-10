@@ -23,7 +23,7 @@ export const SocketProvider = ({ children, user }) => {
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
-            console.log('Socket Connected: ', newSocket.id);
+            setIsConnected(true);
             newSocket.emit('join', user._id);
         });
 

@@ -193,9 +193,9 @@ const DashboardOverview = () => {
                         </div>
                         
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                            {['IT', 'BDA', 'Consulting', 'Credit card', 'Administration', 'HR', 'Insurance', 'Marketing', 'Manufacturing', 'Banking'].map(team => {
-                                const teamStat = stats.teamPerformance?.find(t => t._id === team);
-                                const count = teamStat ? teamStat.count : 0;
+                            {(stats.teamPerformance && stats.teamPerformance.length > 0) ? stats.teamPerformance.map(teamStat => {
+                                const team = teamStat._id;
+                                const count = teamStat.count;
                                 const percentage = stats.totalCandidates > 0 ? (count / stats.totalCandidates) * 100 : 0;
 
                                 return (
@@ -212,7 +212,11 @@ const DashboardOverview = () => {
                                         </div>
                                     </div>
                                 );
-                            })}
+                            }) : (
+                                <div className="col-span-full py-10 text-center opacity-40">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No Department Data Synced</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

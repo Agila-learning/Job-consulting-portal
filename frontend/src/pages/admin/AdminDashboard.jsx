@@ -21,6 +21,7 @@ const AdminDashboard = () => {
         { label: 'Recruitment', type: 'header' },
         { icon: <Briefcase size={18} />, label: 'Job Inventory', path: '/admin/jobs' },
         { icon: <Users size={18} />, label: 'Hiring Pipeline', path: '/admin/referrals' },
+        { icon: <BarChart3 size={18} />, label: 'Global Pipeline', path: '/admin/pipeline' },
         { icon: <Sparkles size={18} />, label: 'ATS Screening', path: '/admin/ats-tracker' },
         { icon: <BookOpen size={18} />, label: 'Recruitment Scripts', path: '/admin/scripts' },
         
