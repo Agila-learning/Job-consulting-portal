@@ -19,6 +19,8 @@ exports.createReferral = async (req, res) => {
 
         // 2. Determine Branch with Intelligent Mapping
         let branchId = req.user.branchId; // Default to submitter's branch
+        
+        // If agent has no branch, try mapping from preferredLocation
         if (candidateData.preferredLocation) {
             const loc = candidateData.preferredLocation.toLowerCase();
             
@@ -41,6 +43,12 @@ exports.createReferral = async (req, res) => {
                 });
                 if (branch) branchId = branch._id;
             }
+        }
+
+        // Final fallback: if branchId is still null, use a system default
+        if (!branchId) {
+            const defaultBranch = await Branch.findOne({});
+            if (defaultBranch) branchId = defaultBranch._id;
         }
 
         // 3. Find Team Leader for Auto-Assignment
@@ -656,6 +664,28 @@ exports.syncIncentives = async (req, res) => {
         });
     } catch (err) {
         console.error('Incentive Sync Failure:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// Increment calls made (Activity Tracking)
+// Route: PATCH /api/referrals/:id/increment-calls
+exports.incrementCalls = async (req, res) => {
+    try {
+        const referral = await Referral.findById(req.params.id);
+        if (!referral) {
+            return res.status(404).json({ success: false, message: 'Candidate not found' });
+        }
+
+        referral.totalCalls = (referral.totalCalls || 0) + 1;
+        referral.activityLogs.push({
+            action: 'Outbound call logged',
+            user: req.user.id
+        });
+
+        await referral.save();
+        res.status(200).json({ success: true, count: referral.totalCalls });
+    } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
 };

@@ -12,7 +12,8 @@ const {
     getBranchActivity,
     deleteReferral,
     syncIncentives,
-    purgeMockData
+    purgeMockData,
+    incrementCalls
 } = require('../controllers/referralController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -51,6 +52,7 @@ router.delete('/purge-mock-data', authorize('admin'), purgeMockData);
 router.patch('/:id/assign', authorize('admin'), assignReferral);
 
 // Status and general updates
+router.patch('/:id/increment-calls', incrementCalls);
 router.patch('/:id/status', authorize('admin', 'employee', 'team_leader'), updateReferralStatus);
 router.patch('/:id', authorize('admin', 'employee', 'team_leader'), updateReferral);
 router.delete('/:id', authorize('admin', 'team_leader'), deleteReferral);

@@ -42,6 +42,7 @@ import TeamLeaderDashboard from './pages/team_leader/TeamLeaderDashboard';
 import DashboardOverview from './pages/shared/DashboardOverview';
 import ATSResumeTracker from './pages/shared/ATSResumeTracker';
 import ProfilePage from './pages/shared/ProfilePage';
+import PerformanceReports from './pages/shared/PerformanceReports';
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
                     <Route path="ats-tracker" element={<ATSResumeTracker />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="incentive-tracker" element={<IncentiveTracker type="admin" />} />
+                    <Route path="performance-reports" element={<PerformanceReports />} />
                     <Route path="reports" element={<ManualReports />} />
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   </Route>
@@ -85,6 +87,7 @@ function App() {
                     <Route path="jobs" element={<JobManagement />} />
                     <Route path="scripts" element={<ScriptManagement />} />
                     <Route path="incentives" element={<IncentiveTracker type="employee" />} />
+                    <Route path="performance-reports" element={<PerformanceReports />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/employee/dashboard" replace />} />
                   </Route>
@@ -100,6 +103,7 @@ function App() {
                     <Route path="commissions" element={<Commissions />} />
                     <Route path="kyc" element={<KYCSubmission />} />
                     <Route path="incentives" element={<IncentiveTracker type="agent" />} />
+                    <Route path="performance-reports" element={<PerformanceReports />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/agent/dashboard" replace />} />
                   </Route>
@@ -113,6 +117,7 @@ function App() {
                     <Route path="pipeline" element={<CandidatePipeline />} />
                     <Route path="jobs" element={<JobManagement />} />
                     <Route path="ats-tracker" element={<ATSResumeTracker />} />
+                    <Route path="performance-reports" element={<PerformanceReports />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/team-leader/dashboard" replace />} />
                   </Route>

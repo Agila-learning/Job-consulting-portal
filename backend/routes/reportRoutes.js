@@ -1,13 +1,12 @@
 const express = require('express');
-const router = express.Router();
+const { getPerformanceReports, getTopPerformers } = require('../controllers/reportController');
 const { protect, authorize } = require('../middleware/authMiddleware');
-const { getAuditRecords, generateSnapshot } = require('../controllers/reportController');
 
-// All role visibility
+const router = express.Router();
+
 router.use(protect);
 
-// Admin-only auditing
-router.get('/', authorize('admin'), getAuditRecords);
-router.post('/snapshot', authorize('admin'), generateSnapshot);
+router.get('/performance', getPerformanceReports);
+router.get('/top-performers', getTopPerformers);
 
 module.exports = router;

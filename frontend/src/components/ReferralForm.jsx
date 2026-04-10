@@ -14,7 +14,7 @@ const ReferralForm = ({ job, onSuccess }) => {
         mobile: '',
         email: '',
         experience: '',
-        currentLocation: '',
+        preferredLocation: '',
         resume: null, // For file upload
         resumeUrl: '', // For link
         skills: '',
@@ -150,16 +150,16 @@ const ReferralForm = ({ job, onSuccess }) => {
                 </div>
 
                 <div className="space-y-2.5">
-                    <Label htmlFor="currentLocation" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Current Location</Label>
+                    <Label htmlFor="preferredLocation" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Preferred Job Location</Label>
                     <div className="relative group">
                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                         <Input 
-                            id="currentLocation" 
+                            id="preferredLocation" 
                             required 
-                            value={formData.currentLocation} 
+                            value={formData.preferredLocation} 
                             onChange={handleChange} 
                             className="pl-11 h-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-2 focus:ring-primary/10 focus:border-primary/20 rounded-xl font-medium" 
-                            placeholder="City, State" 
+                            placeholder="e.g. Bangalore" 
                         />
                     </div>
                 </div>

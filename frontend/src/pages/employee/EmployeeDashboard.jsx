@@ -20,6 +20,7 @@ const EmployeeDashboard = () => {
         { icon: <Briefcase size={18} />, label: 'Hiring Pipeline', path: '/employee/pipeline' },
         { icon: <Zap size={18} />, label: 'Job Inventory', path: '/employee/jobs' },
         { icon: <Trophy size={18} />, label: 'My Rewards', path: '/employee/incentives' },
+        { icon: <BarChart3 size={18} />, label: 'Analytics & Reports', path: '/employee/performance-reports' },
         { icon: <BookOpen size={18} />, label: 'Recruitment Scripts', path: '/employee/scripts' },
         {
             icon: <MessageSquare size={18} />,

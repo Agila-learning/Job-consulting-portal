@@ -55,6 +55,7 @@ const referralSchema = new mongoose.Schema({
     dropReason: { type: String },
     
     // Financial Tracking
+    totalCalls: { type: Number, default: 0 },
     calculatedCommission: { type: String }, // Locked in amount
     payoutStatus: { 
         type: String, 

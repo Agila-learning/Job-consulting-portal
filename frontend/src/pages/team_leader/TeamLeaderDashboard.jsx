@@ -20,6 +20,7 @@ const TeamLeaderDashboard = () => {
         { icon: <Briefcase size={18} />, label: 'Hiring Pipeline', path: '/team-leader/pipeline' },
         { icon: <Sparkles size={18} />, label: 'ATS Screening', path: '/team-leader/ats-tracker' },
         { icon: <Zap size={18} />, label: 'Job Inventory', path: '/team-leader/jobs' },
+        { icon: <BarChart3 size={18} />, label: 'Analytics & Reports', path: '/team-leader/performance-reports' },
         {
             icon: <MessageSquare size={18} />,
             label: 'Support Chat',

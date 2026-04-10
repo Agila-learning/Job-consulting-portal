@@ -1,90 +1,135 @@
 const Referral = require('../models/Referral');
-const ManualIncentive = require('../models/ManualIncentive');
+const User = require('../models/User');
+const Branch = require('../models/Branch');
+const mongoose = require('mongoose');
 
-// Get all audit records (Referrals + Manual Grants)
-// Route: GET /api/reports
-exports.getAuditRecords = async (req, res) => {
+// Get Performance Reports (Aggregated KPIs)
+// Route: GET /api/reports/performance
+exports.getPerformanceReports = async (req, res) => {
     try {
-        let branchId = req.query.branchId;
-        
-        // For non-admins, force their own branch
+        const { range, branchId } = req.query;
+        let query = {};
+
+        // 1. Branch Filter
         if (req.user.role !== 'admin') {
-            branchId = req.user.branchId;
-        } else if (branchId === 'all') {
-            branchId = null;
+            query.branchId = req.user.branchId;
+        } else if (branchId && branchId !== 'all') {
+            query.branchId = new mongoose.Types.ObjectId(branchId);
         }
 
-        const query = branchId ? { branchId } : {};
+        // 2. Time Range Filter
+        const now = new Date();
+        let startDate = new Date(0); // Default to all time
 
-        const [referrals, grants] = await Promise.all([
-            Referral.find({ ...query, status: 'Joined' })
-                .populate('referrer', 'name role')
-                .populate('job', 'jobTitle companyName')
-                .populate('branchId', 'name')
-                .sort('-updatedAt'),
-            ManualIncentive.find(query)
-                .populate('recipient', 'name role')
-                .populate('createdBy', 'name')
-                .populate('branchId', 'name')
-                .sort('-createdAt')
+        if (range === 'daily') {
+            startDate = new Date(now.setHours(0, 0, 0, 0));
+        } else if (range === 'weekly') {
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start
+            startDate = new Date(now.setDate(diff));
+            startDate.setHours(0, 0, 0, 0);
+        } else if (range === 'monthly') {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        }
+
+        query.createdAt = { $gte: startDate };
+
+        // 3. Aggregate Stats
+        const stats = await Referral.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: null,
+                    totalCalls: { $sum: { $ifNull: ["$totalCalls", 0] } },
+                    totalCandidates: { $sum: 1 },
+                    shortlisted: { $sum: { $cond: [{ $eq: ["$status", "Shortlisted"] }, 1, 0] } },
+                    selected: { $sum: { $cond: [{ $eq: ["$status", "Selected"] }, 1, 0] } },
+                    joined: { $sum: { $cond: [{ $eq: ["$status", "Joined"] }, 1, 0] } }
+                }
+            }
         ]);
 
-        // Format referrals into audit format
-        const referralReports = referrals.map(ref => ({
-            _id: ref._id,
-            entryType: 'referral',
-            id: `REF-${ref._id.toString().slice(-6).toUpperCase()}`,
-            title: `${ref.candidateName} - ${ref.job?.jobTitle || 'N/A'}`,
-            type: 'Commission',
-            branchName: ref.branchId?.name || 'Bangalore', // Fallback for legacy
-            date: new Date(ref.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            size: '0.4 MB',
-            author: ref.referrer?.name || 'System',
-            amount: ref.calculatedCommission || '0',
-            status: ref.payoutStatus,
-            metadata: {
-                company: ref.job?.companyName,
-                source: ref.sourceType
-            }
-        }));
+        const result = stats[0] || {
+            totalCalls: 0,
+            totalCandidates: 0,
+            shortlisted: 0,
+            selected: 0,
+            joined: 0
+        };
 
-        // Format grants into audit format
-        const grantReports = grants.map(grant => ({
-            _id: grant._id,
-            entryType: 'manual',
-            id: `GRT-${grant._id.toString().slice(-6).toUpperCase()}`,
-            title: grant.reason || 'Manual Incentive Grant',
-            type: 'Incentive',
-            branchName: grant.branchId?.name || 'Bangalore', // Fallback for legacy
-            date: new Date(grant.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            size: '0.2 MB',
-            author: grant.createdBy?.name || 'Admin',
-            amount: grant.amount,
-            status: 'Approved',
-            metadata: {
-                recipient: grant.recipient?.name || 'Team Grant',
-                type: grant.type
-            }
-        }));
-
-        const allReports = [...referralReports, ...grantReports].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        res.status(200).json({ 
-            success: true, 
-            count: allReports.length, 
-            data: allReports 
-        });
+        res.status(200).json({ success: true, data: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, message: err.message });
     }
 };
 
-// Placeholder for generating a PDF/CSV file on the server if needed
-exports.generateSnapshot = async (req, res) => {
+// Get Top Performers
+// Route: GET /api/reports/top-performers
+exports.getTopPerformers = async (req, res) => {
     try {
-        // Logic to generate a physical file
-        res.status(200).json({ success: true, message: 'Snapshot generation initiated' });
+        const { range, branchId } = req.query;
+        let query = { status: 'Joined' }; // Top performers based on conversions
+
+        if (req.user.role !== 'admin') {
+            query.branchId = req.user.branchId;
+        } else if (branchId && branchId !== 'all') {
+            query.branchId = new mongoose.Types.ObjectId(branchId);
+        }
+
+        // Time Range
+        const now = new Date();
+        let startDate = new Date(0);
+        if (range === 'daily') startDate = new Date(now.setHours(0, 0, 0, 0));
+        else if (range === 'weekly') {
+            const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1);
+            startDate = new Date(now.setDate(diff));
+            startDate.setHours(0, 0, 0, 0);
+        } else if (range === 'monthly') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        query.createdAt = { $gte: startDate };
+
+        const performers = await Referral.aggregate([
+            { $match: query },
+            { $match: { assignedEmployee: { $ne: null } } },
+            {
+                $group: {
+                    _id: "$assignedEmployee",
+                    joinedCount: { $sum: 1 },
+                    branchId: { $first: "$branchId" }
+                }
+            },
+            { $sort: { joinedCount: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            { $unwind: "$user" },
+            {
+                $lookup: {
+                    from: 'branches',
+                    localField: 'branchId',
+                    foreignField: '_id',
+                    as: 'branch'
+                }
+            },
+            { $unwind: { path: "$branch", preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    name: "$user.name",
+                    email: "$user.email",
+                    joinedCount: 1,
+                    branch: "$branch.name"
+                }
+            }
+        ]);
+
+        res.status(200).json({ success: true, data: performers });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, message: err.message });
     }
 };

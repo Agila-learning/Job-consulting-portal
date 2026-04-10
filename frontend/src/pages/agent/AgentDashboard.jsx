@@ -19,6 +19,7 @@ const AgentDashboard = () => {
         { icon: <ShieldCheck size={18} />, label: 'KYC Status', path: '/agent/kyc' },
         { icon: <Wallet size={18} />, label: 'Commissions', path: '/agent/commissions' },
         { icon: <Trophy size={18} />, label: 'Earnings Hub', path: '/agent/incentives' },
+        { icon: <BarChart3 size={18} />, label: 'Analytics & Reports', path: '/agent/performance-reports' },
     ];
 
     const footerContent = (

@@ -407,19 +407,29 @@ const CandidatePipeline = () => {
                     <div className="p-8 space-y-6">
                         {!atsResult ? (
                             <div className="space-y-6">
-                                <div className="relative border-2 border-dashed border-border/40 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center hover:bg-primary/5 transition-all cursor-pointer group">
-                                    <input 
-                                        type="file" 
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                        onChange={(e) => setATSFile(e.target.files[0])}
-                                    />
-                                    <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all mb-4">
-                                        <Upload size={24} />
+                                <div className={`relative border-2 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all group ${atsFile ? 'bg-primary/5 border-primary/30' : 'border-border/40 hover:bg-primary/5'}`}>
+                                    {!atsFile && (
+                                        <input 
+                                            type="file" 
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                            onChange={(e) => setATSFile(e.target.files[0])}
+                                        />
+                                    )}
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all mb-4 ${atsFile ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white'}`}>
+                                        {atsFile ? <FileSearch size={24} /> : <Upload size={24} />}
                                     </div>
-                                    <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                                    <p className={`text-xs font-black uppercase tracking-widest ${atsFile ? 'text-primary' : 'text-muted-foreground'}`}>
                                         {atsFile ? atsFile.name : 'Drop Candidate Resume Here'}
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground/40 mt-2">Support: PDF, DOCX, TXT</p>
+                                    {atsFile && (
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setATSFile(null); }}
+                                            className="mt-3 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 transition-colors relative z-20"
+                                        >
+                                            Change File
+                                        </button>
+                                    )}
+                                    {!atsFile && <p className="text-[10px] text-muted-foreground/40 mt-2">Support: PDF, DOCX, TXT</p>}
                                 </div>
                                 <Button 
                                     onClick={runATSAnalysis}

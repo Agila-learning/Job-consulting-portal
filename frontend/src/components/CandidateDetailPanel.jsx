@@ -101,10 +101,35 @@ const CandidateDetailPanel = ({ isOpen, onClose, referral, onUpdate }) => {
                                     <h2 className="text-2xl font-black tracking-tight text-foreground">{referral.candidateName}</h2>
                                     {getPriorityBadge(referral.priority)}
                                 </div>
-                                <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-bold text-xs">
+                                </div>
+                                <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-bold text-xs mt-2">
                                     <span className="flex items-center gap-1.5"><Mail size={14} className="text-primary/60" /> {referral.candidateEmail}</span>
-                                    <span className="w-1 h-1 rounded-full bg-border" />
-                                    <span className="flex items-center gap-1.5"><Phone size={14} className="text-primary/60" /> {referral.candidatePhone}</span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-border" />
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex items-center gap-1.5 hover:text-primary transition-colors cursor-pointer" onClick={() => window.open(`tel:${referral.mobile}`)}>
+                                            <Phone size={14} className="text-primary/60" /> {referral.mobile}
+                                        </span>
+                                        <Button 
+                                            size="sm"
+                                            variant="outline"
+                                            disabled={loading}
+                                            onClick={async () => {
+                                                setLoading(true);
+                                                try {
+                                                    await api.patch(`/referrals/${referral._id}/increment-calls`);
+                                                    toast.success('Call experience logged');
+                                                    onUpdate();
+                                                } catch (err) {
+                                                    toast.error('Logging failure');
+                                                } finally {
+                                                    setLoading(false);
+                                                }
+                                            }}
+                                            className="h-7 px-2.5 rounded-lg border-primary/20 bg-primary/5 text-primary text-[9px] font-black uppercase tracking-wider hover:bg-primary hover:text-white transition-all flex gap-1.5"
+                                        >
+                                            <Phone size={10} /> Log Call ({referral.totalCalls || 0})
+                                        </Button>
+                                    </div>
                                 </div>
                                 <div className="pt-2">
                                     <Badge className="bg-primary hover:bg-primary/90 text-white font-black text-[9px] uppercase tracking-[0.2em] px-3 py-1.5 rounded-xl shadow-lg shadow-primary/20">
