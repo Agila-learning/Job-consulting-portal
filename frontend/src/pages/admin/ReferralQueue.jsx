@@ -16,8 +16,16 @@ import {
     Clock, Shield, UserCog, Ghost, RefreshCw, 
     Filter, X, CheckCircle2, Plus, Info, AlertCircle, FileText,
     Sparkles, XCircle, BarChart3, PieChart, Zap, ShieldCheck,
-    LayoutGrid, List, ChevronRight, Edit2
+    LayoutGrid, List, ChevronRight, Edit2, MoreVertical, Settings
 } from 'lucide-react';
+import { 
+    DropdownMenu, 
+    DropdownMenuContent, 
+    DropdownMenuItem, 
+    DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import gsap from 'gsap';
 import * as XLSX from 'xlsx';
@@ -1038,30 +1046,43 @@ const CandidateCard = ({ row, isAdmin, activeTab, viewMode, onAssign, onStatus, 
                         </div>
                     </div>
 
-                    <div className="flex lg:flex-col items-center gap-2">
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={onAssign} title="Reassign Agent" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-primary/10 hover:text-primary transition-all">
-                                <UserPlus size={16} />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={onStatus} title="Advance Pipeline" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-indigo-500/10 hover:text-indigo-600 transition-all">
-                                <RefreshCw size={16} />
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {isAdmin && (
-                                <Button variant="ghost" size="icon" onClick={onFinance} title="Financial Setup" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-emerald-500/10 hover:text-emerald-600 transition-all">
-                                    <TrendingUp size={16} />
+                    <div className="flex items-center gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-primary/10 hover:text-primary transition-all">
+                                    <MoreVertical size={16} />
                                 </Button>
-                            )}
-                            <Button variant="ghost" size="icon" onClick={onTimeline} title="Timeline Logs" className="h-10 w-10 rounded-xl bg-secondary/80 border border-border/40 hover:bg-slate-500/10 hover:text-slate-900 transition-all">
-                                <Calendar size={16} />
-                            </Button>
-                            {isAdmin && (
-                                <Button variant="ghost" size="icon" onClick={onDelete} title="Purge Record" className="h-10 w-10 rounded-xl bg-rose-500/5 border border-rose-500/20 hover:bg-rose-600 hover:text-white text-rose-600 transition-all">
-                                    <Trash2 size={16} />
-                                </Button>
-                            )}
-                        </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-2xl border-border/40 rounded-2xl p-2 shadow-2xl">
+                                <DropdownMenuLabel>Candidate Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={onAssign} className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-primary/5 hover:text-primary">
+                                    <UserPlus size={16} className="text-primary" />
+                                    <span className="font-bold text-xs uppercase tracking-widest">Reassign Agent</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={onStatus} className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-indigo-500/5 hover:text-indigo-600">
+                                    <RefreshCw size={16} className="text-indigo-600" />
+                                    <span className="font-bold text-xs uppercase tracking-widest">Advance Pipeline</span>
+                                </DropdownMenuItem>
+                                {isAdmin && (
+                                    <DropdownMenuItem onClick={onFinance} className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-emerald-500/5 hover:text-emerald-600">
+                                        <TrendingUp size={16} className="text-emerald-600" />
+                                        <span className="font-bold text-xs uppercase tracking-widest">Financial Setup</span>
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={onTimeline} className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-slate-500/5 hover:text-slate-900">
+                                    <Calendar size={16} className="text-slate-900" />
+                                    <span className="font-bold text-xs uppercase tracking-widest">Timeline Logs</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {isAdmin && (
+                                    <DropdownMenuItem onClick={onDelete} className="gap-3 cursor-pointer py-3 rounded-xl hover:bg-rose-500/10 text-rose-600 hover:text-rose-700">
+                                        <Trash2 size={16} />
+                                        <span className="font-bold text-xs uppercase tracking-widest">Purge Record</span>
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>

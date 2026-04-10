@@ -216,14 +216,12 @@ const AvailableJobs = () => {
                                         if (open) setSelectedJob(job);
                                     }}
                                 >
-                                    <DialogTrigger 
-                                        render={
-                                            <Button className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 group/btn">
-                                                <PlusCircle size={16} className="group-hover/btn:rotate-90 transition-transform duration-300" />
-                                                Refer a Candidate
-                                            </Button>
-                                        } 
-                                    />
+                                    <DialogTrigger asChild>
+                                        <Button className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 group/btn">
+                                            <PlusCircle size={16} className="group-hover/btn:rotate-90 transition-transform duration-300" />
+                                            Refer a Candidate
+                                        </Button>
+                                    </DialogTrigger>
                                     <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-2xl border-border/40 rounded-[2.5rem] p-0 overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
                                         <div className="p-10 border-b border-border/40 bg-secondary/30 relative">
                                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />

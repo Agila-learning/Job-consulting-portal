@@ -124,14 +124,12 @@ const ScriptManagement = () => {
                     </div>
                     {user.role === 'admin' && (
                         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                            <DialogTrigger 
-                                render={
-                                    <Button className="h-12 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.03] active:scale-[0.98]">
-                                        <PlusCircle size={18} className="mr-2" />
-                                        Create Template
-                                    </Button>
-                                } 
-                            />
+                            <DialogTrigger asChild>
+                                <Button className="h-12 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.03] active:scale-[0.98]">
+                                    <PlusCircle size={18} className="mr-2" />
+                                    Create Template
+                                </Button>
+                            </DialogTrigger>
                             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto custom-scrollbar bg-card/95 backdrop-blur-3xl border-border/40 rounded-[3rem] p-0 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] focus-visible:ring-0">
                                 <div className="p-10 relative overflow-hidden bg-secondary/30 border-b border-border/40">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />

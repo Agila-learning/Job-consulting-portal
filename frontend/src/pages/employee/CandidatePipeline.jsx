@@ -407,10 +407,10 @@ const CandidatePipeline = () => {
                     <div className="p-8 space-y-6">
                         {!atsResult ? (
                             <div className="space-y-6">
-                                <div className="border-2 border-dashed border-border/40 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center hover:bg-primary/5 transition-all cursor-pointer group">
+                                <div className="relative border-2 border-dashed border-border/40 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center hover:bg-primary/5 transition-all cursor-pointer group">
                                     <input 
                                         type="file" 
-                                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                                         onChange={(e) => setATSFile(e.target.files[0])}
                                     />
                                     <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all mb-4">

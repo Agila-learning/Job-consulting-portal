@@ -100,7 +100,7 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete, onAction })
                     </div>
                     <div className="overflow-hidden">
                         <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-black text-foreground group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate leading-none">{referral.candidateName}</p>
+                            <p className="text-sm font-black text-foreground group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate leading-none flex-1 min-w-0">{referral.candidateName}</p>
                             {referral.priority === 'high' && <Star size={10} className="text-amber-500 fill-amber-500" />}
                         </div>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] truncate flex items-center gap-1.5 group-hover:text-muted-foreground/80 transition-colors">
@@ -116,7 +116,7 @@ export function KanbanCard({ referral, isOverlay, onClick, onDelete, onAction })
             <div className="space-y-4">
                 <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-secondary/30 group-hover:bg-primary/5 p-2.5 rounded-2xl border border-transparent group-hover:border-primary/10 transition-all">
                     <Briefcase size={12} className="text-primary/60" />
-                    <span className="truncate group-hover:text-foreground transition-colors">{referral.job?.jobTitle || 'Unassigned Role'}</span>
+                    <span className="truncate group-hover:text-foreground transition-colors block min-w-0 flex-1">{referral.job?.jobTitle || 'Unassigned Role'}</span>
                 </div>
 
                 {/* Candidate Tags */}
