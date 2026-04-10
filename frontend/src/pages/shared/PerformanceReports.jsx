@@ -5,7 +5,8 @@ import {
     BarChart3, Award, TrendingUp, Users, 
     CheckCircle2, Clock, Phone, Building2,
     Calendar, Filter, ChevronRight, Loader2,
-    ArrowUpRight, Target, Sparkles, MapPin
+    ArrowUpRight, Target, Sparkles, MapPin,
+    Plus, X, ShieldCheck
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,18 @@ const PerformanceReports = () => {
     const [branches, setBranches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isPrinting, setIsPrinting] = useState(false);
+    const [logs, setLogs] = useState([]);
+    const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [selectedUser, setSelectedUser] = useState('all');
+    const [users, setUsers] = useState([]);
+    const [newLog, setNewLog] = useState({
+        date: new Date().toISOString().split('T')[0],
+        callsCount: 0,
+        conversionsCount: 0,
+        rejectionsCount: 0,
+        notes: ''
+    });
     
     // Filters
     const [range, setRange] = useState('monthly');
@@ -34,15 +47,23 @@ const PerformanceReports = () => {
             const query = `?range=${range}&branchId=${selectedBranch}`;
             const topQuery = `${query}&metric=${metric}`;
             
-            const [perfRes, topRes, branchRes] = await Promise.all([
+            const [perfRes, topRes, branchRes, logRes] = await Promise.all([
                 api.get(`/reports/performance${query}`),
                 api.get(`/reports/top-performers${topQuery}`),
-                user?.role === 'admin' ? api.get('/branches') : Promise.resolve({ data: { data: [] } })
+                user?.role === 'admin' ? api.get('/branches') : Promise.resolve({ data: { data: [] } }),
+                api.get(`/performance-logs${query}${selectedUser !== 'all' ? `&userId=${selectedUser}` : ''}`)
             ]);
 
             setPerformance(perfRes.data.data);
             setTopPerformers(topRes.data.data);
+            setLogs(logRes.data.data);
             if (user?.role === 'admin') setBranches(branchRes.data.data);
+
+            // Fetch users for filtering if Admin/TL
+            if (user?.role === 'admin' || user?.role === 'team_leader') {
+                const userRes = await api.get(`/users?role=employee,team_leader,agent${selectedBranch !== 'all' ? `&branchId=${selectedBranch}` : ''}`);
+                setUsers(userRes.data.data);
+            }
         } catch (err) {
             toast.error('Failed to sync performance metadata');
         } finally {
@@ -52,7 +73,7 @@ const PerformanceReports = () => {
 
     useEffect(() => {
         fetchData();
-    }, [range, selectedBranch, metric]);
+    }, [range, selectedBranch, metric, selectedUser]);
 
     const handleGeneratePDF = () => {
         setIsPrinting(true);
@@ -60,6 +81,28 @@ const PerformanceReports = () => {
             window.print();
             setIsPrinting(false);
         }, 500);
+    };
+
+    const handleLogSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.post('/performance-logs', newLog);
+            toast.success('Performance report archived successfully');
+            setIsLogModalOpen(false);
+            setNewLog({
+                date: new Date().toISOString().split('T')[0],
+                callsCount: 0,
+                conversionsCount: 0,
+                rejectionsCount: 0,
+                notes: ''
+            });
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Report archiving failed');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const stats = [
@@ -130,6 +173,35 @@ const PerformanceReports = () => {
                                 ))}
                             </SelectContent>
                         </Select>
+                    )}
+
+                    {/* User Filter (Admin/TL Only) */}
+                    {(user?.role === 'admin' || user?.role === 'team_leader') && (
+                        <Select value={selectedUser} onValueChange={setSelectedUser}>
+                            <SelectTrigger className="w-56 h-12 bg-background border-border/40 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm">
+                                <Users size={14} className="text-primary mr-2" />
+                                <SelectValue>
+                                    {selectedUser === 'all' ? 'Agent: All Members' : 
+                                     (users.find(u => u._id === selectedUser)?.name || 'Filter User')}
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
+                                <SelectItem value="all" className="font-black text-[10px] uppercase tracking-widest py-3">All Workforce Members</SelectItem>
+                                {users.map(u => (
+                                    <SelectItem key={u._id} value={u._id} className="font-black text-[10px] uppercase tracking-widest py-3">{u.name} ({u.role})</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+
+                    {/* Manual Report Toggle */}
+                    {user?.role !== 'admin' && (
+                        <Button 
+                            onClick={() => setIsLogModalOpen(true)}
+                            className="h-12 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/20 flex gap-3 transition-all"
+                        >
+                            <Plus size={16} /> Log Daily Productivity
+                        </Button>
                     )}
                 </div>
             </div>
@@ -280,6 +352,169 @@ const PerformanceReports = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Daily Operational Logs Table */}
+            <div className="bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="space-y-1">
+                        <h3 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-3 italic">
+                            Operational<span className="text-primary not-italic">.Ledger</span>
+                        </h3>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Manual throughput archives per individual agent</p>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-border/30">
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Log Date</th>
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">User Node</th>
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Calls</th>
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Converted</th>
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rejected</th>
+                                <th className="pb-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Notes / Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/20">
+                            {logs.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="py-20 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest opacity-40 italic">
+                                        No operational archives found for current filters
+                                    </td>
+                                </tr>
+                            ) : (
+                                logs.map((log) => (
+                                    <tr key={log._id} className="group hover:bg-primary/5 transition-colors">
+                                        <td className="py-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                                    <Calendar size={14} />
+                                                </div>
+                                                <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
+                                                    {new Date(log.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="py-5">
+                                            <div className="flex flex-col">
+                                                <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{log.user?.name}</span>
+                                                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">{log.user?.role}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-5">
+                                            <Badge variant="outline" className="h-7 px-3 rounded-lg border-blue-500/20 text-blue-500 bg-blue-500/5 font-black text-[10px]">
+                                                {log.callsCount} Calls
+                                            </Badge>
+                                        </td>
+                                        <td className="py-5">
+                                            <Badge variant="outline" className="h-7 px-3 rounded-lg border-emerald-500/20 text-emerald-500 bg-emerald-500/5 font-black text-[10px]">
+                                                {log.conversionsCount} Converted
+                                            </Badge>
+                                        </td>
+                                        <td className="py-5">
+                                            <Badge variant="outline" className="h-7 px-3 rounded-lg border-rose-500/20 text-rose-500 bg-rose-500/5 font-black text-[10px]">
+                                                {log.rejectionsCount} Rejected
+                                            </Badge>
+                                        </td>
+                                        <td className="py-5">
+                                            <p className="text-[10px] font-medium text-muted-foreground max-w-xs truncate italic">
+                                                {log.notes || '---'}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Log Modal */}
+            {isLogModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="w-full max-w-md bg-card border border-border/40 rounded-[3rem] shadow-2xl overflow-hidden p-8 space-y-8 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <h3 className="text-2xl font-black text-foreground tracking-tight italic">
+                                    Archive<span className="text-primary not-italic">.Productivity</span>
+                                </h3>
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Log your daily throughput metrics</p>
+                            </div>
+                            <Button onClick={() => setIsLogModalOpen(false)} variant="ghost" size="icon" className="rounded-full hover:bg-rose-500/10 hover:text-rose-500 h-10 w-10">
+                                <X size={20} />
+                            </Button>
+                        </div>
+
+                        <form onSubmit={handleLogSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Reporting Date</label>
+                                    <input 
+                                        type="date"
+                                        required
+                                        value={newLog.date}
+                                        onChange={(e) => setNewLog({...newLog, date: e.target.value})}
+                                        className="h-14 w-full px-6 bg-secondary/30 border border-border/40 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-primary/5 transition-all appearance-none"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Total Calls Done</label>
+                                        <input 
+                                            type="number"
+                                            required
+                                            min="0"
+                                            value={newLog.callsCount}
+                                            onChange={(e) => setNewLog({...newLog, callsCount: parseInt(e.target.value)})}
+                                            className="h-14 w-full px-6 bg-secondary/30 border border-border/40 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-primary/5 transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Total Converted</label>
+                                        <input 
+                                            type="number"
+                                            required
+                                            min="0"
+                                            value={newLog.conversionsCount}
+                                            onChange={(e) => setNewLog({...newLog, conversionsCount: parseInt(e.target.value)})}
+                                            className="h-14 w-full px-6 bg-secondary/30 border border-border/40 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-primary/5 transition-all text-emerald-600"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Total Rejected</label>
+                                    <input 
+                                        type="number"
+                                        required
+                                        min="0"
+                                        value={newLog.rejectionsCount}
+                                        onChange={(e) => setNewLog({...newLog, rejectionsCount: parseInt(e.target.value)})}
+                                        className="h-14 w-full px-6 bg-secondary/30 border border-border/40 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-primary/5 transition-all text-rose-500"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Log Insights / Notes</label>
+                                    <textarea 
+                                        placeholder="Add any context regarding today's performance..."
+                                        value={newLog.notes}
+                                        onChange={(e) => setNewLog({...newLog, notes: e.target.value})}
+                                        className="h-32 w-full p-6 bg-secondary/30 border border-border/40 rounded-[2rem] text-xs font-medium outline-none focus:ring-4 focus:ring-primary/5 transition-all resize-none"
+                                    />
+                                </div>
+                            </div>
+                            <Button 
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-[11px] uppercase tracking-widest rounded-3xl shadow-2xl shadow-primary/20 transition-all flex items-center justify-center gap-3"
+                            >
+                                {submitting ? <Loader2 className="animate-spin" /> : <ShieldCheck size={18} />}
+                                {submitting ? 'Archiving Records...' : 'Commit Performance Archive'}
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

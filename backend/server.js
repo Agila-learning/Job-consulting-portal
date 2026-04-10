@@ -59,6 +59,7 @@ app.use('/api/incentives', require('./routes/incentiveRoutes'));
 app.use('/api/ats', require('./routes/atsRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/performance-logs', require('./routes/performanceLogRoutes'));
 
 const http = require('http');
 const socketIo = require('socket.io');
