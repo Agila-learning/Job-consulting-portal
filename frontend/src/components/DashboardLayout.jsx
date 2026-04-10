@@ -285,7 +285,7 @@ const DashboardLayout = ({ menuItems, brandLabel, brandSubtitle, brandIcon, foot
                                 closeNewAction(); 
                                 const rolePath = user.role?.replace('_', '-');
                                 const target = user.role === 'agent' ? `/${rolePath}/jobs` : 
-                                               user.role === 'employee' ? `/${rolePath}/assigned-candidates' : 
+                                               user.role === 'employee' ? `/${rolePath}/pipeline` : 
                                                `/${rolePath}/pipeline`;
                                 
                                 navigate(target);

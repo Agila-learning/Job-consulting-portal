@@ -17,6 +17,7 @@ import {
     ChevronRight, StickyNote, CalendarClock
 } from 'lucide-react';
 import ReferralChat from '@/components/ReferralChat';
+import AddCandidateForm from '@/components/AddCandidateForm';
 
 const getStatusBadge = (status) => {
     const s = (status || '').toLowerCase();
@@ -49,6 +50,7 @@ const MyAssignedCandidates = () => {
     const [loading, setLoading] = useState(true);
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [updateData, setUpdateData] = useState({ status: '', comment: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -217,18 +219,14 @@ const MyAssignedCandidates = () => {
                     >
                         <FileText size={18} /> Download Database
                     </Button>
-                    <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-                        <Button 
-                            className="h-12 px-8 rounded-2xl bg-primary text-white font-black text-[10px] uppercase tracking-[0.15em] gap-3 shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all border-0"
-                            onClick={() => {
-                                setSelectedReferral(null);
-                                setUpdateData({ status: 'New Referral', comment: '' });
-                                setIsUpdateOpen(true);
-                            }}
-                        >
-                            <UserPlus size={18} /> Provision Direct
-                        </Button>
-                    </Dialog>
+                    <Button 
+                        className="h-12 px-8 rounded-2xl bg-primary text-white font-black text-[10px] uppercase tracking-[0.15em] gap-3 shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all border-0"
+                        onClick={() => {
+                            setIsAddModalOpen(true);
+                        }}
+                    >
+                        <UserPlus size={18} /> Provision Direct
+                    </Button>
                 </div>
             </div>
 
@@ -371,6 +369,32 @@ const MyAssignedCandidates = () => {
                                 />
                             </div>
                         </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            
+            {/* ADD CANDIDATE MODAL */}
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                <DialogContent className="max-w-2xl bg-card border-border/40 rounded-[2.8rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] p-0 overflow-hidden outline-none z-[110] flex flex-col max-h-[90vh]">
+                    <div className="p-8 border-b border-border/30 bg-secondary/10 relative overflow-hidden flex-shrink-0">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
+                        <DialogHeader className="flex flex-row items-center justify-between space-y-0 text-left">
+                            <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-[1.2rem] bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                                    <UserPlus size={22} className="fill-white" />
+                                </div>
+                                Provision Direct
+                            </DialogTitle>
+                        </DialogHeader>
+                    </div>
+                    <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+                         <AddCandidateForm 
+                            onSuccess={() => {
+                                setIsAddModalOpen(false);
+                                fetchAssigned();
+                            }}
+                            onCancel={() => setIsAddModalOpen(false)}
+                         />
                     </div>
                 </DialogContent>
             </Dialog>
