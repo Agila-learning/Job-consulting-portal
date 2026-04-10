@@ -4,7 +4,7 @@ const User = require('../models/User');
 // Route: GET /api/users
 exports.getUsers = async (req, res) => {
     try {
-        const { role, status } = req.query;
+        const { role, status, branchId } = req.query;
         let query = {};
         
         if (role) {
@@ -30,10 +30,13 @@ exports.getUsers = async (req, res) => {
         // 3. Branch Segregation
         if (req.user.role !== 'admin') {
             query.branchId = req.user.branchId;
+        } else if (branchId && branchId !== 'all') {
+            query.branchId = branchId;
         }
 
-        // 4. TL Reporting Logic
-        if (req.user.role === 'team_leader') {
+        // 4. TL Visibility Logic (Broadened to Branch-wide)
+        // If a specific reporting scope is requested, we can apply it
+        if (req.user.role === 'team_leader' && req.query.scope === 'direct') {
             query.reportingManager = req.user.id;
         }
 

@@ -147,10 +147,15 @@ exports.getReferrals = async (req, res) => {
                 delete query.$or;
             }
         } else if (req.user.role === 'team_leader') {
-            // Team Leaders see candidates in their branch AND their domain
-            // Use regex for flexible matching (case-insensitive, trimmed)
+            // Team Leaders see candidates in their branch AND (their domain OR unassigned)
             if (req.user.team) {
-                query.assignedTeam = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
+                const teamRegex = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
+                query.$or = [
+                    { assignedTeam: teamRegex },
+                    { assignedTeam: { $exists: false } },
+                    { assignedTeam: null },
+                    { assignedTeam: "" }
+                ];
             }
         }
 
@@ -464,6 +469,7 @@ exports.getReferralStats = async (req, res) => {
         let query = {};
         
         // 1. Branch Segregation (Agent Bypass)
+        const { branchId } = req.query;
         if (req.user.role === 'agent') {
             query.referrer = req.user.id;
         } else if (req.user.role !== 'admin') {
@@ -472,6 +478,8 @@ exports.getReferralStats = async (req, res) => {
             } else {
                 query.branchId = req.user.branchId;
             }
+        } else if (branchId && branchId !== 'all') {
+            query.branchId = branchId;
         }
 
         // 2. Role Filtering (Remaining)

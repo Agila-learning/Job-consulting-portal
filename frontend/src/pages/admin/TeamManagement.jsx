@@ -34,7 +34,7 @@ const TeamManagement = () => {
     });
 
     const [branches, setBranches] = useState([]);
-    const [branchFilter, setBranchFilter] = useState('all');
+    const [branchFilter, setBranchFilter] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
 
     const fetchBranches = async () => {
         try {
@@ -446,8 +446,8 @@ const TeamManagement = () => {
                         onChange={(e) => setBranchFilter(e.target.value)}
                         className="w-full h-12 pl-4 pr-10 bg-background border border-border/50 rounded-xl text-xs font-black uppercase tracking-widest outline-none transition-all cursor-pointer shadow-sm focus:border-primary/40 focus:ring-4 focus:ring-primary/5 appearance-none"
                     >
-                        <option value="all">Global (Everywhere)</option>
-                        {branches.map(b => (
+                        {user?.role === 'admin' ? <option value="all">Global (Everywhere)</option> : null}
+                        {branches.filter(b => user?.role === 'admin' || b._id === user?.branchId).map(b => (
                             <option key={b._id} value={b._id}>{b.name.toUpperCase()}</option>
                         ))}
                     </select>

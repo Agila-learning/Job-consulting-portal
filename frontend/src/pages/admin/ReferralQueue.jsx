@@ -66,9 +66,10 @@ const ReferralQueue = () => {
         setLoading(true);
         try {
             const branchQuery = branchFilter !== 'all' ? `?branchId=${branchFilter}` : '';
+            const userBranchQuery = branchFilter !== 'all' ? `&branchId=${branchFilter}` : '';
             const [refRes, empRes, branchRes] = await Promise.all([
                 api.get(`/referrals${branchQuery}`),
-                api.get('/users?role=employee&role=agent'),
+                api.get(`/users?role=employee,agent${userBranchQuery}`),
                 api.get('/branches')
             ]);
             setReferrals(refRes.data.data);
