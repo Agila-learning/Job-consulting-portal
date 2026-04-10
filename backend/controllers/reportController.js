@@ -67,26 +67,36 @@ exports.getPerformanceReports = async (req, res) => {
 // Route: GET /api/reports/top-performers
 exports.getTopPerformers = async (req, res) => {
     try {
-        const { range, branchId } = req.query;
-        let query = { status: 'Joined' }; // Top performers based on conversions
+        const { range, branchId, metric = 'conversions' } = req.query;
+        let query = {};
 
+        // 1. Branch Filter
         if (req.user.role !== 'admin') {
             query.branchId = req.user.branchId;
         } else if (branchId && branchId !== 'all') {
             query.branchId = new mongoose.Types.ObjectId(branchId);
         }
 
-        // Time Range
+        // 2. Time Range Filter
         const now = new Date();
         let startDate = new Date(0);
         if (range === 'daily') startDate = new Date(now.setHours(0, 0, 0, 0));
         else if (range === 'weekly') {
-            const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1);
-            startDate = new Date(now.setDate(diff));
+            const tempDate = new Date();
+            const diff = tempDate.getDate() - tempDate.getDay() + (tempDate.getDay() === 0 ? -6 : 1);
+            startDate = new Date(tempDate.setDate(diff));
             startDate.setHours(0, 0, 0, 0);
         } else if (range === 'monthly') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
         query.createdAt = { $gte: startDate };
+
+        // 3. Metric Specific Filter (Optional for some metrics)
+        if (metric === 'conversions') {
+            query.status = 'Joined';
+        } else if (metric === 'shortlisted') {
+            query.status = 'Shortlisted';
+        }
+        // 'referrals' metric doesn't need a status filter
 
         const performers = await Referral.aggregate([
             { $match: query },
@@ -94,11 +104,11 @@ exports.getTopPerformers = async (req, res) => {
             {
                 $group: {
                     _id: "$assignedEmployee",
-                    joinedCount: { $sum: 1 },
+                    count: { $sum: 1 },
                     branchId: { $first: "$branchId" }
                 }
             },
-            { $sort: { joinedCount: -1 } },
+            { $sort: { count: -1 } },
             { $limit: 10 },
             {
                 $lookup: {
@@ -122,8 +132,9 @@ exports.getTopPerformers = async (req, res) => {
                 $project: {
                     name: "$user.name",
                     email: "$user.email",
-                    joinedCount: 1,
-                    branch: "$branch.name"
+                    count: 1,
+                    branch: "$branch.name",
+                    metric: { $literal: metric }
                 }
             }
         ]);

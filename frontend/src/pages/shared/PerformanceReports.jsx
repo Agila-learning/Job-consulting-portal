@@ -25,14 +25,17 @@ const PerformanceReports = () => {
     // Filters
     const [range, setRange] = useState('monthly');
     const [selectedBranch, setSelectedBranch] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
+    const [metric, setMetric] = useState('conversions');
 
     const fetchData = async () => {
         setLoading(true);
         try {
             const query = `?range=${range}&branchId=${selectedBranch}`;
+            const topQuery = `${query}&metric=${metric}`;
+            
             const [perfRes, topRes, branchRes] = await Promise.all([
                 api.get(`/reports/performance${query}`),
-                api.get(`/reports/top-performers${query}`),
+                api.get(`/reports/top-performers${topQuery}`),
                 user?.role === 'admin' ? api.get('/branches') : Promise.resolve({ data: { data: [] } })
             ]);
 
@@ -48,7 +51,7 @@ const PerformanceReports = () => {
 
     useEffect(() => {
         fetchData();
-    }, [range, selectedBranch]);
+    }, [range, selectedBranch, metric]);
 
     const stats = [
         { label: 'Outbound Velocity', value: performance?.totalCalls || 0, icon: Phone, color: 'text-blue-500', bg: 'bg-blue-500/10', trend: 'Total Calls' },
@@ -56,6 +59,13 @@ const PerformanceReports = () => {
         { label: 'Selection Win', value: performance?.selected || 0, icon: Award, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: 'Offers' },
         { label: 'Conversion Yield', value: performance?.joined || 0, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: 'Joined' },
     ];
+
+    const getMetricLabel = (m) => {
+        if (m === 'conversions') return 'Joined';
+        if (m === 'shortlisted') return 'Shortlists';
+        if (m === 'referrals') return 'Referrals';
+        return 'Score';
+    };
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700 pb-20">
@@ -148,11 +158,28 @@ const PerformanceReports = () => {
                                 <Award size={24} className="text-amber-500" />
                                 Top Performers <span className="text-primary italic">.Elite</span>
                             </h3>
-                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Highest conversion throughput per cycle</p>
+                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Highest {getMetricLabel(metric).toLowerCase()} throughput per cycle</p>
                         </div>
-                        <Badge className="bg-amber-500 text-white font-black text-[10px] uppercase tracking-widest py-1.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 italic">
-                            Top 10 Leaders
-                        </Badge>
+                        <div className="flex bg-secondary/50 p-1 rounded-2xl border border-border/30">
+                            {[
+                                { id: 'conversions', label: 'Joined' },
+                                { id: 'shortlisted', label: 'Short' },
+                                { id: 'referrals', label: 'All' }
+                            ].map((m) => (
+                                <button
+                                    key={m.id}
+                                    onClick={() => setMetric(m.id)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all",
+                                        metric === m.id 
+                                            ? "bg-primary text-white shadow-lg" 
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {m.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="space-y-4 pt-6 relative z-10">
@@ -189,8 +216,8 @@ const PerformanceReports = () => {
                                     </div>
                                     <div className="flex items-center gap-8">
                                         <div className="text-right">
-                                            <p className="text-2xl font-black text-primary leading-none">{p.joinedCount}</p>
-                                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mr-0.5">Joined</p>
+                                            <p className="text-2xl font-black text-primary leading-none">{p.count}</p>
+                                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mr-0.5">{getMetricLabel(metric)}</p>
                                         </div>
                                         <div className="p-3 bg-secondary/50 rounded-xl group-hover:bg-primary/10 transition-colors">
                                             <ChevronRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />

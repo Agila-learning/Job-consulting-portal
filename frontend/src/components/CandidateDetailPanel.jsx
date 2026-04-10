@@ -101,7 +101,6 @@ const CandidateDetailPanel = ({ isOpen, onClose, referral, onUpdate }) => {
                                     <h2 className="text-2xl font-black tracking-tight text-foreground">{referral.candidateName}</h2>
                                     {getPriorityBadge(referral.priority)}
                                 </div>
-                                </div>
                                 <div className="flex flex-wrap items-center gap-4 text-muted-foreground font-bold text-xs mt-2">
                                     <span className="flex items-center gap-1.5"><Mail size={14} className="text-primary/60" /> {referral.candidateEmail}</span>
                                     <span className="w-1.5 h-1.5 rounded-full bg-border" />

@@ -14,7 +14,7 @@ const referralSchema = new mongoose.Schema({
     noticePeriod: { type: String },
     skills: { type: [String] },
     job: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
-    sourceType: { type: String, enum: ['employee', 'agent', 'self'], required: true },
+    sourceType: { type: String, enum: ['employee', 'agent', 'self', 'team_leader', 'admin'], default: 'self' },
     referrer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     assignedEmployee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch' },
