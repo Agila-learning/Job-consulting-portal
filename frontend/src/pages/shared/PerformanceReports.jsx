@@ -35,6 +35,8 @@ const PerformanceReports = () => {
         rejectionsCount: 0,
         notes: ''
     });
+
+    const ledgerRef = React.useRef(null);
     
     // Filters
     const [range, setRange] = useState('monthly');
@@ -121,10 +123,10 @@ const PerformanceReports = () => {
     };
 
     const stats = [
-        { label: 'Outbound Velocity', value: performance?.totalCalls || 0, icon: Phone, color: 'text-blue-500', bg: 'bg-blue-500/10', trend: 'Total Calls' },
-        { label: 'Shortlist Rate', value: performance?.shortlisted || 0, icon: Target, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: 'Screened' },
-        { label: 'Selection Win', value: performance?.selected || 0, icon: Award, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: 'Offers' },
-        { label: 'Conversion Yield', value: performance?.joined || 0, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: 'Joined' },
+        { id: 'calls', label: 'Outbound Velocity', value: performance?.totalCalls || 0, icon: Phone, color: 'text-blue-500', bg: 'bg-blue-500/10', trend: 'Total Calls' },
+        { id: 'shortlisted', label: 'Shortlist Rate', value: performance?.shortlisted || 0, icon: Target, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: 'Screened' },
+        { id: 'selected', label: 'Selection Win', value: performance?.selected || 0, icon: Award, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: 'Offers' },
+        { id: 'joined', label: 'Conversion Yield', value: performance?.joined || 0, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: 'Joined' },
     ];
 
     const getMetricLabel = (m) => {
@@ -218,7 +220,19 @@ const PerformanceReports = () => {
             {/* Metric Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <div key={i} className="group bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all relative overflow-hidden">
+                    <div 
+                        key={i} 
+                        onClick={() => {
+                            if (stat.id === 'calls') {
+                                ledgerRef.current?.scrollIntoView({ behavior: 'smooth' });
+                            } else {
+                                const rolePath = user?.role === 'team_leader' ? 'team-leader' : (user?.role === 'employee' ? 'employee' : (user?.role === 'agent' ? 'agent' : 'admin'));
+                                const path = user?.role === 'admin' ? '/admin/referrals' : `/${rolePath}/pipeline`;
+                                navigate(path);
+                            }
+                        }}
+                        className="group bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all relative overflow-hidden cursor-pointer"
+                    >
                         <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg.replace('/10', '/5')} rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:scale-125 transition-transform duration-700`} />
                         <div className="flex items-center justify-between mb-6">
                             <div className={cn("p-4 rounded-2xl shadow-sm border", stat.bg, stat.color, stat.bg.replace('bg-', 'border-'))}>
@@ -363,7 +377,7 @@ const PerformanceReports = () => {
             </div>
 
             {/* Daily Operational Logs Table */}
-            <div className="bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
+            <div ref={ledgerRef} className="bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[3rem] p-10 shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                     <div className="space-y-1">
                         <h3 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-3 italic">
@@ -442,8 +456,8 @@ const PerformanceReports = () => {
             {/* Log Modal */}
             {isLogModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="w-full max-w-md bg-card border border-border/40 rounded-[3rem] shadow-2xl overflow-hidden p-8 space-y-8 animate-in zoom-in-95 duration-300">
-                        <div className="flex items-center justify-between">
+                    <div className="w-full max-w-md bg-card border border-border/40 rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+                        <div className="p-8 border-b border-border/20 flex items-center justify-between flex-shrink-0">
                             <div className="space-y-1">
                                 <h3 className="text-2xl font-black text-foreground tracking-tight italic">
                                     Archive<span className="text-primary not-italic">.Productivity</span>
@@ -454,6 +468,8 @@ const PerformanceReports = () => {
                                 <X size={20} />
                             </Button>
                         </div>
+
+                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8">
 
                         <form onSubmit={handleLogSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 gap-6">
@@ -521,6 +537,7 @@ const PerformanceReports = () => {
                                 {submitting ? 'Archiving Records...' : 'Commit Performance Archive'}
                             </Button>
                         </form>
+                        </div>
                     </div>
                 </div>
             )}
