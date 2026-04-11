@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     kycVerifiedAt: { type: Date },
     
     profileImage: { type: String },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // For Employee -> Agent referrals
     lastLogin: { type: Date },
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });

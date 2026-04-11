@@ -36,6 +36,7 @@ const DashboardOverview = () => {
     });
     const [activities, setActivities] = useState([]);
     const [branches, setBranches] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('all');
     const [loading, setLoading] = useState(true);
 
@@ -59,6 +60,10 @@ const DashboardOverview = () => {
             // Fetch Activities
             const activityRes = await api.get(`/referrals/branch-activity${branchQuery}`);
             setActivities(activityRes.data.data);
+
+            // Fetch Announcements
+            const announceRes = await api.get('/announcements');
+            setAnnouncements(announceRes.data.data);
 
         } catch (err) {
             console.error('Failed to fetch dashboard data');
@@ -128,6 +133,33 @@ const DashboardOverview = () => {
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700 pb-10">
+            {/* ANNOUNCEMENT BANNER */}
+            {announcements.length > 0 && (
+                <div className="relative overflow-hidden bg-primary/10 border border-primary/20 rounded-[2rem] p-4 flex items-center gap-6 group">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 shrink-0 z-10">
+                        <Zap size={18} className="animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Station Protocol</span>
+                    </div>
+                    <div className="flex-1 overflow-hidden relative h-6">
+                        <div className="absolute inset-0 flex items-center animate-marquee whitespace-nowrap">
+                            {announcements.map((ann, i) => (
+                                <div key={i} className="inline-flex items-center gap-4 mx-8">
+                                    <Badge variant="outline" className={cn(
+                                        "text-[9px] font-black uppercase border-none",
+                                        ann.priority === 'high' ? "text-rose-500 bg-rose-500/10 italic" : "text-primary bg-primary/10"
+                                    )}>
+                                        [{ann.priority}]
+                                    </Badge>
+                                    <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight italic">
+                                        {ann.title}: <span className="not-italic font-bold text-muted-foreground ml-2">{ann.message}</span>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* BRANCH HEADER */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 px-1">
                 <div className="space-y-3">

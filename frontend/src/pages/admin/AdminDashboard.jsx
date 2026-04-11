@@ -17,6 +17,7 @@ const AdminDashboard = () => {
         { icon: <Users size={18} />, label: 'Our Team', path: '/admin/team' },
         { icon: <UserCheck size={18} />, label: 'Agent Approvals', path: '/admin/approvals' },
         { icon: <ShieldAlert size={18} />, label: 'Verification Center', path: '/admin/kyc-management' },
+        { icon: <BarChart3 size={18} />, label: 'Operations Hub', path: '/admin/daily-reports' },
         
         { label: 'Recruitment', type: 'header' },
         { icon: <Briefcase size={18} />, label: 'Job Inventory', path: '/admin/jobs' },

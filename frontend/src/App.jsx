@@ -28,6 +28,7 @@ import AdminPipeline from './pages/admin/AdminPipeline';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 import MyAssignedCandidates from './pages/employee/MyAssignedCandidates';
 import CandidatePipeline from './pages/employee/CandidatePipeline';
+import ReferAgent from './pages/employee/ReferAgent';
 import IncentiveTracker from './pages/shared/IncentiveTracker';
 
 // Agent Pages
@@ -45,6 +46,7 @@ import DashboardOverview from './pages/shared/DashboardOverview';
 import ATSResumeTracker from './pages/shared/ATSResumeTracker';
 import ProfilePage from './pages/shared/ProfilePage';
 import PerformanceReports from './pages/shared/PerformanceReports';
+import DailyReportHub from './pages/shared/DailyReportHub';
 
 function App() {
   return (
@@ -76,6 +78,7 @@ function App() {
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="incentive-tracker" element={<IncentiveTracker type="admin" />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="daily-reports" element={<DailyReportHub />} />
                     <Route path="workforce-reports" element={<WorkforceLedger />} />
                     <Route path="reports" element={<ManualReports />} />
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -93,6 +96,7 @@ function App() {
                     <Route path="incentives" element={<IncentiveTracker type="employee" />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
                     <Route path="ats-tracker" element={<ATSResumeTracker />} />
+                    <Route path="refer-agent" element={<ReferAgent />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/employee/dashboard" replace />} />
                   </Route>
@@ -123,6 +127,7 @@ function App() {
                     <Route path="jobs" element={<JobManagement />} />
                     <Route path="ats-tracker" element={<ATSResumeTracker />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="daily-reports" element={<DailyReportHub />} />
                     <Route path="workforce-reports" element={<WorkforceLedger />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/team-leader/dashboard" replace />} />

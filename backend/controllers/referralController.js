@@ -66,6 +66,11 @@ exports.createReferral = async (req, res) => {
             assignedEmployee = teamLeader._id;
         }
 
+        // Special Attribution: If Agent was referred by an Employee
+        if (req.user.role === 'agent' && req.user.referredBy) {
+            assignedEmployee = req.user.referredBy;
+        }
+
         // Handle persistent resume upload
         let resumeUrl = candidateData.resumeUrl || '';
         if (req.file) {
@@ -323,7 +328,12 @@ exports.updateReferralStatus = async (req, res) => {
                 if (status === 'Joined' && referral.referrer) {
                     const User = require('../models/User');
                     const referrer = await User.findById(referral.referrer);
-                    if (referrer) {
+                    
+                    // Special Rule: If Agent was referred by an Employee, Agent gets NO incentive 
+                    // (The incentive was already credited to the referring employee in step 1)
+                    if (referrer && referrer.role === 'agent' && referrer.referredBy) {
+                        console.log(`[INCENTIVE] Suppressing Agent incentive for ${referrer.name} - credited to referred Employee.`);
+                    } else if (referrer) {
                         const rule = await IncentiveRule.findOne({ 
                             role: referrer.role === 'agent' ? 'agent' : 'employee', 
                             event: 'Joining', 

@@ -4,7 +4,7 @@ import { useUI } from '../../context/UIContext';
 import DashboardLayout from '@/components/DashboardLayout';
 import { 
     LayoutDashboard, Users, Briefcase, BookOpen, 
-    MessageSquare, Zap, Trophy, Plus, BarChart3, Sparkles
+    MessageSquare, Zap, Trophy, Plus, BarChart3, Sparkles, UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, Outlet } from 'react-router-dom';
@@ -21,6 +21,7 @@ const EmployeeDashboard = () => {
         { icon: <Zap size={18} />, label: 'Job Inventory', path: '/employee/jobs' },
         { icon: <Sparkles size={18} />, label: 'ATS Screening', path: '/employee/ats-tracker' },
         { icon: <Trophy size={18} />, label: 'My Rewards', path: '/employee/incentives' },
+        { icon: <UserPlus size={18} />, label: 'Network Expansion', path: '/employee/refer-agent' },
         { icon: <BarChart3 size={18} />, label: 'Daily Analytics', path: '/employee/performance-reports' },
         { icon: <BookOpen size={18} />, label: 'Recruitment Scripts', path: '/employee/scripts' },
         {

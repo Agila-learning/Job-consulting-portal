@@ -5,7 +5,7 @@ const branchSchema = new mongoose.Schema({
         type: String, 
         required: true, 
         unique: true,
-        enum: ['Bangalore', 'Chennai', 'Krishnagiri'] 
+        enum: ['Bangalore', 'Chennai', 'Krishnagiri', 'Thirupattur'] 
     },
     location: { type: String },
     status: { 
