@@ -242,6 +242,8 @@ const PerformanceReports = () => {
             {/* Metric Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
+                    <div
+                        key={stat.id}
                         onClick={() => {
                             if (stat.id === 'calls') {
                                 ledgerRef.current?.scrollIntoView({ behavior: 'smooth' });
