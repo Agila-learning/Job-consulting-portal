@@ -38,7 +38,14 @@ const PerformanceReports = () => {
     
     // Filters
     const [range, setRange] = useState('monthly');
-    const [selectedBranch, setSelectedBranch] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
+    const [selectedBranch, setSelectedBranch] = useState('all');
+
+    // Initial branch lock for non-admins
+    useEffect(() => {
+        if (user && selectedBranch === 'all' && user.role !== 'admin') {
+            setSelectedBranch(user.branchId || 'all');
+        }
+    }, [user, selectedBranch]);
     const [metric, setMetric] = useState('conversions');
 
     const fetchData = async () => {
@@ -57,7 +64,15 @@ const PerformanceReports = () => {
             setPerformance(perfRes.data.data);
             setTopPerformers(topRes.data.data);
             setLogs(logRes.data.data);
-            if (user?.role === 'admin') setBranches(branchRes.data.data);
+            
+            // For admins, get all branches. For others, get their own branch info.
+            if (user?.role === 'admin') {
+                setBranches(branchRes.data.data);
+            } else if (user?.branchId) {
+                // Fetch branch info for the header even if not admin
+                const myBranchRes = await api.get('/branches');
+                setBranches(myBranchRes.data.data.filter(b => b._id === user.branchId));
+            }
 
             // Fetch users for filtering if Admin/TL
             if (user?.role === 'admin' || user?.role === 'team_leader') {

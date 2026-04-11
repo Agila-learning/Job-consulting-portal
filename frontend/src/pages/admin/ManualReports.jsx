@@ -23,13 +23,23 @@ const ManualReports = () => {
     const [branchFilter, setBranchFilter] = useState('all');
     const [generating, setGenerating] = useState(false);
 
-    const fetchBranches = async () => {
-        if (user?.role === 'admin') {
-            try {
-                const res = await api.get('/branches');
-                setBranches(res.data.data);
-            } catch (err) {}
+    // Initial branch lock for non-admins
+    useEffect(() => {
+        if (user && branchFilter === 'all' && user.role !== 'admin') {
+            setBranchFilter(user.branchId || 'all');
         }
+    }, [user, branchFilter]);
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            const data = res.data.data;
+            if (user?.role === 'admin') {
+                setBranches(data);
+            } else {
+                setBranches(data.filter(b => b._id === user?.branchId));
+            }
+        } catch (err) {}
     };
 
     const fetchReports = async () => {

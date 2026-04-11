@@ -30,6 +30,13 @@ const WorkforceLedger = () => {
         searchTerm: ''
     });
 
+    // Handle initial branch lock for non-admins
+    useEffect(() => {
+        if (user && filters.branchId === 'all' && user.role !== 'admin') {
+            setFilters(prev => ({ ...prev, branchId: user.branchId || 'all' }));
+        }
+    }, [user, filters.branchId]);
+
     const [departments, setDepartments] = useState([]);
 
     const fetchData = async () => {
@@ -124,14 +131,16 @@ const WorkforceLedger = () => {
                     />
                 </div>
 
-                <Select value={filters.branchId} onValueChange={(v) => setFilters({...filters, branchId: v})}>
-                    <SelectTrigger className="h-14 bg-background border-none rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-none">
+                <Select value={filters.branchId} onValueChange={(v) => setFilters({...filters, branchId: v})} disabled={user?.role !== 'admin'}>
+                    <SelectTrigger className={`h-14 bg-background border-none rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-none ${user?.role !== 'admin' ? 'opacity-70 cursor-not-allowed' : ''}`}>
                         <MapPin size={14} className="text-primary mr-2" />
                         <SelectValue placeholder="Branch" />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-border/40 p-1">
-                        <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">Global (All Branches)</SelectItem>
-                        {branches.map(b => (
+                        {user?.role === 'admin' && (
+                            <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">Global (All Branches)</SelectItem>
+                        )}
+                        {branches.filter(b => user?.role === 'admin' || b._id === user?.branchId).map(b => (
                             <SelectItem key={b._id} value={b._id} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">{b.name}</SelectItem>
                         ))}
                     </SelectContent>

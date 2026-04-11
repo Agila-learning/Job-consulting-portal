@@ -15,7 +15,17 @@ export const AuthProvider = ({ children }) => {
             if (token) {
                 try {
                     const res = await api.get('/auth/me');
-                    setUser(res.data.data);
+                    const userData = res.data.data;
+                    
+                    // Standardize branchId to always be a string ID for consistent filtering
+                    const standardizedUser = {
+                        ...userData,
+                        id: userData._id, // Add id alias for consistency
+                        branchId: userData.branchId?._id || userData.branchId,
+                        branchName: userData.branchId?.name || 'N/A'
+                    };
+                    
+                    setUser(standardizedUser);
                 } catch (err) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');

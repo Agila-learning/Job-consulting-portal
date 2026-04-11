@@ -34,8 +34,15 @@ const DashboardOverview = () => {
     });
     const [activities, setActivities] = useState([]);
     const [branches, setBranches] = useState([]);
-    const [selectedBranch, setSelectedBranch] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
+    const [selectedBranch, setSelectedBranch] = useState('all');
     const [loading, setLoading] = useState(true);
+
+    // Initial branch lock for non-admins
+    useEffect(() => {
+        if (user && selectedBranch === 'all' && user.role !== 'admin') {
+            setSelectedBranch(user.branchId || 'all');
+        }
+    }, [user, selectedBranch]);
 
     const currentBranchName = branches.find(b => b._id === selectedBranch)?.name || 'All Branches';
 

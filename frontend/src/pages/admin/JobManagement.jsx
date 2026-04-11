@@ -49,7 +49,7 @@ const JobManagement = () => {
     const [typeFilter, setTypeFilter] = useState('all');
     const [modeFilter, setModeFilter] = useState('all');
     const [branches, setBranches] = useState([]);
-    const [branchFilter, setBranchFilter] = useState(user?.role === 'admin' ? 'all' : (user?.branchId || 'all'));
+    const [branchFilter, setBranchFilter] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams] = useSearchParams();
     const querySearch = searchParams.get('q');
@@ -80,8 +80,10 @@ const JobManagement = () => {
         const matchesStatus = statusFilter === 'all' ? true : job.status === statusFilter;
         const matchesType = typeFilter === 'all' ? true : job.jobType === typeFilter;
         const matchesMode = modeFilter === 'all' ? true : job.workMode === modeFilter;
-        const matchesBranch = branchFilter === 'all' ? true : 
-                            (typeof job.branchId === 'object' ? job.branchId?._id === branchFilter : job.branchId === branchFilter);
+        
+        // Handle branchId as both object and string ID for maximum robustness
+        const jobBranchId = typeof job.branchId === 'object' ? job.branchId?._id : job.branchId;
+        const matchesBranch = branchFilter === 'all' ? true : jobBranchId === branchFilter;
         
         return matchesSearch && matchesStatus && matchesType && matchesMode && matchesBranch;
     });
@@ -145,6 +147,13 @@ const JobManagement = () => {
     useEffect(() => {
         fetchJobs();
     }, []);
+
+    // Ensure branchFilter is normalized when user data loads
+    useEffect(() => {
+        if (user && branchFilter === 'all' && user.role !== 'admin') {
+            setBranchFilter(user.branchId || 'all');
+        }
+    }, [user, branchFilter]);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
