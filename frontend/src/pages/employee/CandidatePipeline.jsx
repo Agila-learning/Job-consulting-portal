@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -102,6 +104,24 @@ const CandidatePipeline = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (socket) {
+            const handleSync = () => {
+                console.log('Real-time sync triggered: Candidate Pipeline');
+                fetchData();
+            };
+
+            socket.on('newReferral', handleSync);
+            socket.on('statusChanged', handleSync);
+            
+            return () => {
+                socket.off('newReferral', handleSync);
+                socket.off('statusChanged', handleSync);
+            };
+        }
+    }, [socket]);
 
     const filteredReferrals = (referrals || []).filter(r => {
         if (!r) return false;

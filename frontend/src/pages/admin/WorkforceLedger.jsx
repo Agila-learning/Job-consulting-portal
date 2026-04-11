@@ -53,10 +53,11 @@ const WorkforceLedger = () => {
             setLogs(logRes.data.data);
             setBranches(branchRes.data.data);
             
-            // Extract unique departments
+            // Extract unique departments and normalize
             const uniqueDepts = [...new Set(userRes.data.data
-                .map(u => u.department)
-                .filter(d => d && d.trim() !== ''))];
+                .map(u => u.department?.trim())
+                .filter(d => d && d !== ''))]
+                .sort((a, b) => a.localeCompare(b));
             setDepartments(uniqueDepts);
 
         } catch (err) {
@@ -167,10 +168,10 @@ const WorkforceLedger = () => {
                 <Select value={filters.department} onValueChange={(v) => setFilters({...filters, department: v})}>
                     <SelectTrigger className="h-14 bg-background border-none rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-none">
                         <Briefcase size={14} className="text-primary mr-2" />
-                        <SelectValue placeholder="Department" />
+                        <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-border/40 p-1">
-                        <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">All Departments</SelectItem>
+                        <SelectItem value="all" className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">All Types</SelectItem>
                         {departments.map(d => (
                             <SelectItem key={d} value={d} className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3">{d}</SelectItem>
                         ))}

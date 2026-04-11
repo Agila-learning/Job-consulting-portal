@@ -242,14 +242,14 @@ const PerformanceReports = () => {
             {/* Metric Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <div 
-                        key={i} 
                         onClick={() => {
                             if (stat.id === 'calls') {
                                 ledgerRef.current?.scrollIntoView({ behavior: 'smooth' });
                             } else {
                                 const rolePath = user?.role === 'team_leader' ? 'team-leader' : (user?.role === 'employee' ? 'employee' : (user?.role === 'agent' ? 'agent' : 'admin'));
+                                // Ensure path is consistent with App.jsx
                                 const path = user?.role === 'admin' ? '/admin/referrals' : `/${rolePath}/pipeline`;
+                                console.log('Redirecting to:', path);
                                 navigate(path);
                             }
                         }}
@@ -477,8 +477,8 @@ const PerformanceReports = () => {
 
             {/* Log Modal */}
             {isLogModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="w-full max-w-md bg-card border border-border/40 rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto">
+                    <div className="w-full max-w-md bg-card border border-border/40 rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[95vh] my-auto">
                         <div className="p-8 border-b border-border/20 flex items-center justify-between flex-shrink-0">
                             <div className="space-y-1">
                                 <h3 className="text-2xl font-black text-foreground tracking-tight italic">
@@ -492,7 +492,7 @@ const PerformanceReports = () => {
                         </div>
 
                         {/* FIX: Ensure body is scrollable and form doesn't overflow */}
-                        <div className="p-8 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 space-y-8 min-h-0">
+                        <div className="p-8 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 space-y-8 min-h-0 max-h-[calc(95vh-120px)]">
                             <form onSubmit={handleLogSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
