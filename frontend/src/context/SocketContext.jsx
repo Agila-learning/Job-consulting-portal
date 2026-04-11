@@ -9,12 +9,14 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children, user }) => {
     const [socket, setSocket] = useState(null);
+    const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
         if (!user) {
             if (socket) {
                 socket.disconnect();
                 setSocket(null);
+                setIsConnected(false);
             }
             return;
         }
@@ -25,6 +27,10 @@ export const SocketProvider = ({ children, user }) => {
         newSocket.on('connect', () => {
             setIsConnected(true);
             newSocket.emit('join', user._id);
+        });
+
+        newSocket.on('disconnect', () => {
+            setIsConnected(false);
         });
 
         // Global Listeners
@@ -55,7 +61,7 @@ export const SocketProvider = ({ children, user }) => {
     }, [user]);
 
     return (
-        <SocketContext.Provider value={socket}>
+        <SocketContext.Provider value={{ socket, isConnected }}>
             {children}
         </SocketContext.Provider>
     );

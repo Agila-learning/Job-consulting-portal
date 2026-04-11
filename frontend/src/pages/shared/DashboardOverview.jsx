@@ -6,7 +6,7 @@ import {
     TrendingUp, Zap, Plus, ArrowRight,
     Loader2, Layers, LayoutPanelLeft, Search,
     UserCheck, UserMinus, MessageSquare, ListTodo,
-    BarChart3, Award, History, Building2
+    BarChart3, Award, History, Building2, Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
