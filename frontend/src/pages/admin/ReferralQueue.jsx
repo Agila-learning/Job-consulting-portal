@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api, { BASE_URL } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -91,6 +92,27 @@ const ReferralQueue = () => {
             setSearchTerm(querySearch);
         }
     }, [querySearch]);
+
+    // Socket Integration for Real-time Updates
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (socket) {
+            const handleSync = () => {
+                console.log('Real-time sync triggered: Referral Queue');
+                fetchData();
+            };
+
+            socket.on('newReferral', handleSync);
+            socket.on('statusChanged', handleSync);
+            socket.on('assignmentNotification', handleSync);
+
+            return () => {
+                socket.off('newReferral', handleSync);
+                socket.off('statusChanged', handleSync);
+                socket.off('assignmentNotification', handleSync);
+            };
+        }
+    }, [socket]);
 
     useEffect(() => {
         if (!loading && containerRef.current && document.querySelector('.animate-card')) {

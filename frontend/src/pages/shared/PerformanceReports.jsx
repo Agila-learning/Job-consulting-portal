@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
+import { useNavigate } from 'react-router-dom';
 import { 
     BarChart3, Award, TrendingUp, Users, 
     CheckCircle2, Clock, Phone, Building2,
     Calendar, Filter, ChevronRight, Loader2,
     ArrowUpRight, Target, Sparkles, MapPin,
-    Plus, X, ShieldCheck
+    Plus, X, ShieldCheck, Edit2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,7 @@ import { toast } from 'sonner';
 
 const PerformanceReports = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [performance, setPerformance] = useState(null);
     const [topPerformers, setTopPerformers] = useState([]);
     const [branches, setBranches] = useState([]);
@@ -91,6 +94,25 @@ const PerformanceReports = () => {
     useEffect(() => {
         fetchData();
     }, [range, selectedBranch, metric, selectedUser]);
+
+    // Socket Integration for Real-time Updates
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (socket) {
+            const handleSync = () => {
+                console.log('Real-time sync triggered: Performance Reports');
+                fetchData();
+            };
+
+            socket.on('newPerformanceLog', handleSync);
+            socket.on('statusChanged', handleSync);
+
+            return () => {
+                socket.off('newPerformanceLog', handleSync);
+                socket.off('statusChanged', handleSync);
+            };
+        }
+    }, [socket]);
 
     const handleGeneratePDF = () => {
         setIsPrinting(true);
@@ -469,9 +491,9 @@ const PerformanceReports = () => {
                             </Button>
                         </div>
 
-                        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-
-                        <form onSubmit={handleLogSubmit} className="space-y-6">
+                        {/* FIX: Ensure body is scrollable and form doesn't overflow */}
+                        <div className="p-8 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 space-y-8 min-h-0">
+                            <form onSubmit={handleLogSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-2">Reporting Date</label>

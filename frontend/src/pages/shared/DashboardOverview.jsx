@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { 
     Briefcase, Users, CheckCircle, Clock, 
     TrendingUp, Zap, Plus, ArrowRight,
@@ -46,47 +47,60 @@ const DashboardOverview = () => {
 
     const currentBranchName = branches.find(b => b._id === selectedBranch)?.name || 'All Branches';
 
+    const fetchAllData = async () => {
+        try {
+            const branchQuery = selectedBranch !== 'all' ? `?branchId=${selectedBranch}` : '';
+            
+            // Fetch Stats
+            const statsRes = await api.get(`/referrals/stats${branchQuery}`);
+            setStats(statsRes.data.data);
+
+            // Fetch Activities
+            const activityRes = await api.get(`/referrals/branch-activity${branchQuery}`);
+            setActivities(activityRes.data.data);
+
+        } catch (err) {
+            console.error('Failed to fetch dashboard data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data.data);
+        } catch (err) {
+            console.error('Failed to fetch branches');
+        }
+    };
+
     useEffect(() => {
-        const fetchBranches = async () => {
-            if (user?.role === 'admin') {
-                try {
-                    const res = await api.get('/branches');
-                    setBranches(res.data.data);
-                } catch (err) {
-                    console.error('Failed to fetch branches');
-                }
-            } else {
-                // For non-admins, we might want to still show their branch name
-                try {
-                    const res = await api.get('/branches');
-                    setBranches(res.data.data);
-                } catch (err) {}
-            }
-        };
-
-        const fetchAllData = async () => {
-            setLoading(true);
-            try {
-                const branchQuery = selectedBranch !== 'all' ? `?branchId=${selectedBranch}` : '';
-                
-                // Fetch Stats
-                const statsRes = await api.get(`/referrals/stats${branchQuery}`);
-                setStats(statsRes.data.data);
-
-                // Fetch Activities
-                const activityRes = await api.get(`/referrals/branch-activity${branchQuery}`);
-                setActivities(activityRes.data.data);
-
-            } catch (err) {
-                console.error('Failed to fetch dashboard data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
+        setLoading(true);
         fetchBranches();
         fetchAllData();
     }, [selectedBranch, user?.role]);
+
+    // Socket Integration for Real-time Updates
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (socket) {
+            const handleSync = () => {
+                console.log('Real-time sync triggered: Dashboard Stats');
+                fetchAllData();
+            };
+
+            socket.on('newReferral', handleSync);
+            socket.on('statusChanged', handleSync);
+            socket.on('newPerformanceLog', handleSync);
+
+            return () => {
+                socket.off('newReferral', handleSync);
+                socket.off('statusChanged', handleSync);
+                socket.off('newPerformanceLog', handleSync);
+            };
+        }
+    }, [socket]);
 
     if (loading) {
         return (

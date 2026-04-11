@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
 import { 
     BarChart3, Calendar, Search, Filter,
     Briefcase, Users, MapPin, Download,
@@ -68,6 +69,23 @@ const WorkforceLedger = () => {
     useEffect(() => {
         fetchData();
     }, [filters.branchId, filters.startDate, filters.endDate]);
+
+    // Socket Integration for Real-time Updates
+    const { socket } = useSocket();
+    useEffect(() => {
+        if (socket) {
+            const handleSync = () => {
+                console.log('Real-time sync triggered: Workforce Ledger');
+                fetchData();
+            };
+
+            socket.on('newPerformanceLog', handleSync);
+
+            return () => {
+                socket.off('newPerformanceLog', handleSync);
+            };
+        }
+    }, [socket]);
 
     const filteredLogs = logs.filter(log => {
         const matchesSearch = log.user?.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||

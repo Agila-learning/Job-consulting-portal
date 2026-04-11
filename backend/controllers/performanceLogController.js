@@ -39,6 +39,16 @@ exports.createPerformanceLog = async (req, res) => {
             success: true,
             data: log
         });
+
+        // Emit real-time update
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('newPerformanceLog', {
+                message: `${req.user.name} logged daily productivity: ${callsCount} calls, ${conversionsCount} conversions`,
+                userId: req.user.id,
+                branchId: req.user.branchId
+            });
+        }
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
