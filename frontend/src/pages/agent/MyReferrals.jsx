@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNavigate } from 'react-router-dom';
 import ReferralChat from '@/components/ReferralChat';
+import ReferralForm from '@/components/ReferralForm';
 
 const MyReferrals = () => {
     const navigate = useNavigate();
@@ -26,6 +27,7 @@ const MyReferrals = () => {
     const [loading, setLoading] = useState(true);
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -112,7 +114,7 @@ const MyReferrals = () => {
 
                 <div className="flex flex-wrap items-center gap-4">
                     <Button 
-                        onClick={() => navigate('/agent/jobs')} 
+                        onClick={() => setIsAddModalOpen(true)} 
                         className="h-10 px-6 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 border-0"
                     >
                         <Plus size={16} />
@@ -192,6 +194,29 @@ const MyReferrals = () => {
                     </DialogContent>
                 </Dialog>
             )}
+
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-2xl border-border/40 rounded-[2.5rem] p-0 overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
+                    <div className="p-10 border-b border-border/40 bg-secondary/30 relative">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                        <DialogTitle className="text-2xl font-black tracking-tight leading-none text-foreground flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                                <Plus size={20} />
+                                </div>
+                                Submit New Referral
+                        </DialogTitle>
+                        <p className="text-sm text-muted-foreground mt-4 font-medium">Capture candidate intelligence for any active mandate.</p>
+                    </div>
+                    <div className="p-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        <ReferralForm 
+                            onSuccess={() => {
+                                setIsAddModalOpen(false);
+                                fetchReferrals();
+                            }} 
+                        />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

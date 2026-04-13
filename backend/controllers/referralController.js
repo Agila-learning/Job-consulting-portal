@@ -166,15 +166,8 @@ exports.getReferrals = async (req, res) => {
                 Object.assign(query, selfInterestQuery);
             }
         } else if (req.user.role === 'team_leader') {
-            if (req.user.team) {
-                const teamRegex = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
-                query.$or = [
-                    { assignedTeam: teamRegex },
-                    { assignedTeam: { $exists: false } },
-                    { assignedTeam: null },
-                    { assignedTeam: "" }
-                ];
-            }
+            // Team Leaders see ALL candidates in their branch as requested
+            // Domain restriction (assignedTeam) is removed for full branch visibility
         }
 
         const referrals = await Referral.find(query)
@@ -520,10 +513,7 @@ exports.getReferralStats = async (req, res) => {
                 delete query.$or;
             }
         } else if (req.user.role === 'team_leader') {
-            // Team Leaders only see their domain's stats within their branch
-            if (req.user.team) {
-                query.assignedTeam = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
-            }
+            // Team Leaders only see their branch's stats (full branch as requested)
         }
 
         const stats = await Referral.aggregate([
@@ -603,6 +593,17 @@ exports.getBranchActivity = async (req, res) => {
         }
 
         const query = branchId ? { branchId } : {};
+        
+        // Role-based activity isolation
+        if (req.user.role === 'employee' || req.user.role === 'agent') {
+            query.$or = [
+                { referrer: req.user.id },
+                { assignedEmployee: req.user.id }
+            ];
+        } else if (req.user.role === 'team_leader' && req.user.team) {
+            // Optional: Further restrict TLs to their domain activity if needed
+            // Currently they see all activity in their branch as requested
+        }
 
         // Fetch recent activities from within Referral records
         const activities = await Referral.aggregate([
