@@ -113,6 +113,7 @@ function App() {
                     <Route path="kyc" element={<KYCSubmission />} />
                     <Route path="incentives" element={<IncentiveTracker type="agent" />} />
                     <Route path="performance-reports" element={<PerformanceReports />} />
+                    <Route path="ats-tracker" element={<ATSResumeTracker />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route index element={<Navigate to="/agent/dashboard" replace />} />
                   </Route>

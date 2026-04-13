@@ -80,7 +80,7 @@ exports.getPerformanceLogs = async (req, res) => {
             }
         } else if (req.user.role === 'team_leader') {
             query.branchId = req.user.branchId;
-            if (userId) {
+            if (userId && userId !== 'all') {
                 query.user = userId;
             }
         } else {
@@ -96,7 +96,7 @@ exports.getPerformanceLogs = async (req, res) => {
         }
 
         const logs = await PerformanceLog.find(query)
-            .populate('user', 'name role email')
+            .populate('user', 'name role email department')
             .populate('branchId', 'name')
             .sort({ date: -1 })
             .limit(100);
