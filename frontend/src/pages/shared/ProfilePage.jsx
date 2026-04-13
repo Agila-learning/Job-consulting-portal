@@ -420,7 +420,13 @@ const ProfilePage = () => {
                                             </div>
                                          </div>
                                          <p className="text-[12px] font-medium text-muted-foreground leading-relaxed px-1 group-hover:text-amber-500 transition-colors">You last changed your password <span className="font-black italic">14 days ago</span>. We recommend quarterly resets.</p>
-                                         <Button variant="outline" className="w-full h-14 bg-transparent border-rose-500/20 text-rose-500 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all">Password Update Protocol</Button>
+                                         {user?.role === 'admin' ? (
+                                             <Button variant="outline" className="w-full h-14 bg-transparent border-rose-500/20 text-rose-500 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all">Password Update Protocol</Button>
+                                         ) : (
+                                             <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20">
+                                                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic">Note: Your mobile number is your permanent access credential and cannot be changed.</p>
+                                             </div>
+                                         )}
                                     </div>
 
                                     <div className="bg-slate-900 rounded-[3rem] p-6 lg:p-10 space-y-8 shadow-2xl shadow-black/40 relative overflow-hidden">

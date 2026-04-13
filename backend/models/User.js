@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, unique: true, sparse: true }, // Optional but unique
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'employee', 'agent', 'team_leader'], required: true },
     status: { type: String, enum: ['pending', 'active', 'inactive', 'rejected'], default: 'active' },
@@ -11,7 +11,17 @@ const userSchema = new mongoose.Schema({
     
     // Employee Specific
     employeeId: { type: String },
-    mobile: { type: String },
+    mobile: { 
+        type: String, 
+        required: true, 
+        unique: true,
+        validate: {
+            validator: function(v) {
+                return /^\d{10}$/.test(v); // Exactly 10 digits
+            },
+            message: props => `${props.value} is not a valid 10-digit mobile number!`
+        }
+    },
     designation: { type: String },
     department: { type: String },
     team: { type: String }, // e.g. IT, Non-IT, Banking

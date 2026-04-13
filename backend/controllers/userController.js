@@ -48,30 +48,43 @@ exports.getUsers = async (req, res) => {
     }
 };
 
-// Create a new employee (Admin only)
+// Create a new employee/TL/Agent (Admin only)
 // Route: POST /api/users
 exports.createUser = async (req, res) => {
     try {
-        const { name, email, password, role, ...additionalData } = req.body;
+        const { name, email, mobile, role, ...additionalData } = req.body;
 
         // Validation: Only admin can create users, and only roles 'employee' or 'agent'
-        if (role === 'admin') {
-            return res.status(400).json({ success: false, message: 'Cannot create another admin via this route' });
+        if (role === 'admin' && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Cannot create another admin via this route' });
         }
         
         if (req.user.role === 'team_leader' && role !== 'employee') {
             return res.status(403).json({ success: false, message: 'Team Leaders can only provision Employee accounts.' });
         }
 
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
+        // Validate mobile
+        if (!mobile || !/^\d{10}$/.test(mobile)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit mobile number' });
         }
 
+        const userExists = await User.findOne({ 
+            $or: [
+                { mobile },
+                { email: email || '___never_match___' }
+            ]
+        });
+
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'User with this mobile or email already exists' });
+        }
+
+        // Auto-set password to mobile for everyone created here
         const user = await User.create({
             name,
             email,
-            password,
+            mobile,
+            password: mobile,
             role,
             status: 'active',
             branchId: req.user.role === 'admin' ? (additionalData.branchId || req.user.branchId) : req.user.branchId,

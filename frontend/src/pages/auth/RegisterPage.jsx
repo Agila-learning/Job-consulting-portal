@@ -55,10 +55,9 @@ const RegisterPage = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: '',
         role: 'agent', // Fixed for this page
         mobile: '',
-        location: ''
+        branchId: ''
     });
     const [localError, setLocalError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,8 +65,19 @@ const RegisterPage = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const { register, user } = useAuth();
     const navigate = useNavigate();
+    const [branches, setBranches] = useState([]);
     const containerRef = useRef(null);
     const formRef = useRef(null);
+
+    useEffect(() => {
+        const fetchBranches = async () => {
+            try {
+                const res = await api.get('/branches');
+                setBranches(res.data.data);
+            } catch (err) {}
+        };
+        fetchBranches();
+    }, []);
 
     useEffect(() => {
         // Only auto-redirect if specifically in a success state or fresh context
@@ -102,6 +112,14 @@ const RegisterPage = () => {
         e.preventDefault();
         setLocalError('');
         setIsSubmitting(true);
+
+        // Validation: 10 digit mobile
+        if (!/^\d{10}$/.test(formData.mobile)) {
+            setLocalError('Mobile number must be exactly 10 digits.');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             await register(formData);
             setAuthStatus('success');
@@ -218,26 +236,29 @@ const RegisterPage = () => {
                             </div>
 
                             <div className="space-y-2.5">
-                                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Security Matrix (Password)</Label>
+                                <Label htmlFor="mobile" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Verified Mobile Node</Label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
-                                    <Input id="password" type="password" placeholder="••••••••••••" className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm" required value={formData.password} onChange={handleChange} />
+                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
+                                    <Input id="mobile" placeholder="10 Digits Only" className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm" required value={formData.mobile} onChange={handleChange} />
                                 </div>
                             </div>
 
                             <div className="space-y-2.5">
-                                <Label htmlFor="mobile" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Verified Mobile Node</Label>
-                                <div className="relative group">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
-                                    <Input id="mobile" placeholder="+91 90000 00000" className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm" required value={formData.mobile} onChange={handleChange} />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2.5 md:col-span-2">
-                                <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Operational Location</Label>
+                                <Label htmlFor="branchId" className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Operational Branch</Label>
                                 <div className="relative group">
                                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
-                                    <Input id="location" placeholder="Bangalore, Karnataka, India" className="h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold placeholder:text-muted-foreground/30 transition-all outline-none text-sm" required value={formData.location} onChange={handleChange} />
+                                    <select 
+                                        id="branchId" 
+                                        value={formData.branchId} 
+                                        onChange={handleChange} 
+                                        className="w-full h-16 pl-12 bg-secondary/20 border-transparent focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/20 rounded-2xl font-bold transition-all outline-none text-sm appearance-none cursor-pointer"
+                                        required
+                                    >
+                                        <option value="">Select Branch Hub</option>
+                                        {branches.map(b => (
+                                            <option key={b._id} value={b._id}>{b.name.toUpperCase()}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         </div>

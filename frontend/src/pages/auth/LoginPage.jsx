@@ -54,7 +54,7 @@ const FeedbackOverlay = ({ status }) => {
 };
 
 const LoginPage = () => {
-    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [formData, setFormData] = useState({ identifier: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [localError, setLocalError] = useState('');
@@ -147,8 +147,17 @@ const LoginPage = () => {
         e.preventDefault();
         setLocalError('');
         setIsSubmitting(true);
+
+        // Validation: If identifier is numeric, it must be 10 digits
+        const isNumeric = /^\d+$/.test(formData.identifier);
+        if (isNumeric && formData.identifier.length !== 10) {
+            setLocalError('Mobile number must be exactly 10 digits.');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
-            await login(formData.email, formData.password);
+            await login(formData.identifier, formData.password);
             setAuthStatus('success');
             
             // System Exit Animation
@@ -288,23 +297,23 @@ const LoginPage = () => {
                         )}
                         
                         <div className="space-y-6">
-                            {/* Floating Label Email Input */}
+                            {/* Floating Label Identity Input */}
                             <div className="relative group/input">
                                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-all duration-300 z-10" />
                                 <Input 
-                                    id="email" 
-                                    type="email" 
+                                    id="identifier" 
+                                    type="text" 
                                     placeholder=" " 
                                     className="peer h-16 pl-14 pr-6 bg-secondary/30 border-border/20 focus:bg-background focus:ring-4 focus:ring-primary/5 focus:border-primary/40 rounded-2xl font-bold transition-all outline-none text-sm group-focus-within/input:scale-[1.02] shadow-sm"
                                     required
-                                    value={formData.email}
+                                    value={formData.identifier}
                                     onChange={handleChange}
                                 />
                                 <Label 
-                                    htmlFor="email" 
+                                    htmlFor="identifier" 
                                     className="absolute left-14 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60 pointer-events-none transition-all peer-focus:top-3 peer-focus:text-[9px] peer-[:not(:placeholder-shown)]:top-3 peer-[:not(:placeholder-shown)]:text-[9px] peer-focus:text-primary"
                                 >
-                                    Universal Identity
+                                    Email (Admin) or Mobile
                                 </Label>
                             </div>
 

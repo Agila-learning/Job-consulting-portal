@@ -27,7 +27,7 @@ const TeamManagement = () => {
     const [roleFilter, setRoleFilter] = useState('all');
     
     const [formData, setFormData] = useState({
-        name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: '', commissionPercentage: ''
+        name: '', email: '', mobile: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: '', commissionPercentage: ''
     });
     const [editFormData, setEditFormData] = useState({
         name: '', email: '', designation: '', department: '', employeeId: '', branchId: '', commissionPercentage: ''
@@ -98,6 +98,13 @@ const TeamManagement = () => {
 
     const handleCreate = async (e) => {
         e.preventDefault();
+        
+        // Validation: 10 digit mobile
+        if (!/^\d{10}$/.test(formData.mobile)) {
+            toast.error('Mobile number must be exactly 10 digits.');
+            return;
+        }
+
         try {
             const payload = { ...formData, team: formData.department };
             await api.post('/users', payload);
@@ -107,7 +114,7 @@ const TeamManagement = () => {
             
             toast.success(`${roleLabel} provisioned successfully`);
             setIsCreateOpen(false);
-            setFormData({ name: '', email: '', password: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee' });
+            setFormData({ name: '', email: '', mobile: '', designation: '', department: 'Consulting', employeeId: '', role: 'employee', branchId: '', commissionPercentage: '' });
             fetchEmployees();
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to provision consultant');
@@ -369,8 +376,8 @@ const TeamManagement = () => {
                                         <Input id="employeeId" required value={formData.employeeId} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="FIC-EMP-00X" />
                                     </div>
                                     <div className="space-y-3">
-                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</Label>
-                                        <Input id="password" type="password" required value={formData.password} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="Temporary Passcode" />
+                                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Mobile Access Key</Label>
+                                        <Input id="mobile" required value={formData.mobile} onChange={handleChange} className="h-14 bg-background border border-border/50 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-2xl font-bold px-4 shadow-sm outline-none" placeholder="10 Digits (Identity & Pass)" />
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Domain / Department</Label>

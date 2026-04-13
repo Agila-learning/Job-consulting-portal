@@ -1,31 +1,51 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// Register User
+// Register User (For Agents/Public Self-Service)
 // Route: POST /api/auth/register
 exports.register = async (req, res, next) => {
     try {
-        const { name, email, password, role, ...additionalData } = req.body;
+        const { name, email, mobile, role, ...additionalData } = req.body;
 
-        // Check if user already exists
-        const userExists = await User.findOne({ email });
+        // Validation: 10 digit mobile
+        if (!mobile || !/^\d{10}$/.test(mobile)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit mobile number' });
+        }
+
+        // Check if user already exists (by mobile or email)
+        const userExists = await User.findOne({ 
+            $or: [
+                { mobile },
+                { email: email || '___never_match___' }
+            ]
+        });
 
         if (userExists) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
+            return res.status(400).json({ success: false, message: 'User with this mobile or email already exists' });
         }
 
         // Create user
-        // Note: New Agents are set to 'pending' as per plan
+        // Default password is mobile for non-admins
+        const userPassword = mobile; 
         const status = role === 'agent' ? 'pending' : 'active';
 
         const user = await User.create({
             name,
             email,
-            password,
+            mobile,
+            password: userPassword,
             role,
             status,
             ...additionalData
         });
+
+        // For registration, we don't send token if it's an agent pending approval
+        if (status === 'pending') {
+            return res.status(201).json({
+                success: true,
+                message: 'Registration successful. Please wait for admin approval.'
+            });
+        }
 
         sendTokenResponse(user, 201, res);
     } catch (err) {
@@ -37,18 +57,34 @@ exports.register = async (req, res, next) => {
 // Route: POST /api/auth/login
 exports.login = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, identifier, mobile, password } = req.body;
+        const loginId = identifier || email || mobile;
 
-        // Validate email & password
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Please provide an email and password' });
+        // Validate identifier & password
+        if (!loginId || !password) {
+            return res.status(400).json({ success: false, message: 'Please provide credentials and password' });
         }
 
-        // Check for user
-        const user = await User.findOne({ email }).populate('branchId', 'name');
+        // Check for user (by email or mobile)
+        const user = await User.findOne({ 
+            $or: [{ email: loginId }, { mobile: loginId }] 
+        }).populate('branchId', 'name');
 
         if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // Check user status
+        if (user.status !== 'active') {
+            const statusMessages = {
+                pending: 'Your account is pending admin approval.',
+                inactive: 'Your account has been deactivated. Please contact support.',
+                rejected: 'Your registration request was declined.'
+            };
+            return res.status(403).json({ 
+                success: false, 
+                message: statusMessages[user.status] || 'Account restricted.' 
+            });
         }
 
         // Check if password matches
