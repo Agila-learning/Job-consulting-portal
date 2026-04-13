@@ -174,8 +174,13 @@ const CandidateProvisioningForm = ({ onSuccess, onCancel, initialData }) => {
                 setBranches(branchRes.data.data || []);
                 
                 // Set default branch if not admin and not editing
-                if (!initialData && !isAdmin && currentUser?.branchId) {
-                    setFormData(prev => ({ ...prev, branchId: currentUser.branchId }));
+                if (!initialData && !isAdmin) {
+                    if (currentUser?.branchId) {
+                        setFormData(prev => ({ ...prev, branchId: currentUser.branchId }));
+                    } else {
+                        // If no branch assigned, we don't block, just ensure metadata loads
+                        console.warn('Consultant provisioning without explicit branch context');
+                    }
                 }
             } catch (err) {
                 toast.error('Failed to load provisioning metadata');
@@ -216,6 +221,11 @@ const CandidateProvisioningForm = ({ onSuccess, onCancel, initialData }) => {
                 });
                 toast.success('Candidate profile synchronized');
             } else {
+                // Ensure branchId is sent if available
+                if (formData.branchId) {
+                    data.append('branchId', formData.branchId);
+                }
+                
                 data.append('sourceType', isAdmin ? 'self' : currentUser?.role || 'employee');
                 await api.post('/referrals', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }

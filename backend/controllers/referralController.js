@@ -120,20 +120,17 @@ exports.createReferral = async (req, res) => {
     }
 };
 
-// Get referrals with role-based filtering
-// Route: GET /api/referrals
 exports.getReferrals = async (req, res) => {
     try {
         let query = {};
 
-        // 1. Branch Segregation (Simplified for Agents)
+        // 1. Branch Segregation
         const { branchId } = req.query;
         if (req.user.role === 'agent') {
-            // Agents always see exactly what they referred, branch check is secondary
             query.referrer = req.user.id;
         } else if (req.user.role !== 'admin') {
             if (!req.user.branchId) {
-                // If a non-admin (employee/TL) has no branch assigned, they see nothing
+                // Dummy ID to isolate users without a branch, but we'll bypass this for assignments
                 query.branchId = "000000000000000000000000"; 
             } else {
                 query.branchId = req.user.branchId;
@@ -142,24 +139,33 @@ exports.getReferrals = async (req, res) => {
             query.branchId = branchId;
         }
 
-        // 2. Role-based data visibility (refined)
+        // 2. Role-based data visibility
         if (req.user.role === 'employee') {
             // Employees see what they referred OR what is assigned to them
-            query.$or = [
-                { referrer: req.user.id },
-                { assignedEmployee: req.user.id }
-            ];
-            // If branch filter is active, we must ensure it's still applied
+            const selfInterestQuery = {
+                $or: [
+                    { referrer: req.user.id },
+                    { assignedEmployee: req.user.id }
+                ]
+            };
+
             if (query.branchId) {
-                query.$and = [
-                    { branchId: query.branchId },
-                    { $or: query.$or }
-                ];
-                delete query.branchId;
-                delete query.$or;
+                // Priority: If the candidate is directly assigned to them, 
+                // they should see it regardless of branch isolation status
+                if (query.branchId === "000000000000000000000000") {
+                    Object.assign(query, selfInterestQuery);
+                    delete query.branchId;
+                } else {
+                    query.$and = [
+                        { branchId: query.branchId },
+                        selfInterestQuery
+                    ];
+                    delete query.branchId;
+                }
+            } else {
+                Object.assign(query, selfInterestQuery);
             }
         } else if (req.user.role === 'team_leader') {
-            // Team Leaders see candidates in their branch AND (their domain OR unassigned)
             if (req.user.team) {
                 const teamRegex = { $regex: new RegExp(`^\\s*${req.user.team.trim()}\\s*$`, 'i') };
                 query.$or = [
@@ -171,15 +177,13 @@ exports.getReferrals = async (req, res) => {
             }
         }
 
-        // Admin sees everything (no filter)
-
         const referrals = await Referral.find(query)
             .populate('job', 'jobTitle companyName domain')
             .populate('referrer', 'name email role')
             .populate('assignedEmployee', 'name email')
             .populate('branchId', 'name')
-            .sort('-createdAt');
-
+            .sort('-updatedAt');
+        
         res.status(200).json({ success: true, count: referrals.length, data: referrals });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
