@@ -10,45 +10,48 @@ const { sendNotification } = require('../utils/notificationHelper');
 // Route: POST /api/referrals
 exports.createReferral = async (req, res) => {
     try {
-        const { jobId, ...candidateData } = req.body;
         const User = require('../models/User');
         const Branch = require('../models/Branch');
-        
+
         // 1. Check if job exists
+        const { jobId } = req.body;
         const job = await Job.findById(jobId);
         if (!job) {
             return res.status(404).json({ success: false, message: 'Job not found' });
         }
 
-        // 2. Determine Branch with Intelligent Mapping
-        let branchId = req.body.branchId || req.user.branchId; // Default to body or submitter
+        // 2. Data Normalization
+        let { skills, ...candidateData } = req.body;
         
-        // If agent has no branch, try mapping from preferredLocation
-        if (candidateData.preferredLocation) {
-            const loc = candidateData.preferredLocation.toLowerCase();
-            
-            // Branch mapping keywords
-            const mapping = [
-                { branch: 'Bangalore', keywords: ['bangalore', 'bengaluru', 'madiwala', 'ecity', 'karnataka', 'ka', 'whitefield'] },
-                { branch: 'Chennai', keywords: ['chennai', 'madras', 'tn', 'tamil nadu', 'adyar', 'velachery', 'guindy'] },
-                { branch: 'Krishnagiri', keywords: ['krishnagiri', 'hosur', 'dharmapuri'] }
-            ];
-
-            const foundMapping = mapping.find(m => m.keywords.some(k => loc.includes(k)));
-            
-            if (foundMapping) {
-                const branchObj = await Branch.findOne({ name: foundMapping.branch });
-                if (branchObj) branchId = branchObj._id;
-            } else {
-                // Fallback to exact regex match
-                const branch = await Branch.findOne({ 
-                    name: { $regex: new RegExp(`^${candidateData.preferredLocation}$`, 'i') } 
-                });
-                if (branch) branchId = branch._id;
+        // Handle skills string/array transformation
+        let normalizedSkills = [];
+        if (skills) {
+            if (typeof skills === 'string') {
+                normalizedSkills = skills.split(',').map(s => s.trim()).filter(Boolean);
+            } else if (Array.isArray(skills)) {
+                normalizedSkills = skills.map(s => s.toString().trim()).filter(Boolean);
             }
         }
 
-        // Final fallback: if branchId is still null, use a system default
+        // Determine Branch with Intelligent Mapping
+        let branchId = req.body.branchId || req.user.branchId; 
+        
+        if (candidateData.preferredLocation && !branchId) {
+            const loc = candidateData.preferredLocation.toLowerCase();
+            const mapping = [
+                { branch: 'Bangalore', keywords: ['bangalore', 'bengaluru', 'madiwala', 'ecity', 'karnataka', 'ka', 'whitefield'] },
+                { branch: 'Chennai', keywords: ['chennai', 'madras', 'tn', 'tamil nadu', 'adyar', 'velachery', 'guindy'] },
+                { branch: 'Krishnagiri', keywords: ['krishnagiri', 'hosur', 'dharmapuri'] },
+                { branch: 'Thirupattur', keywords: ['thirupattur', 'tp', 'vaniyambadi', 'jolarpettai'] }
+            ];
+
+            const foundMapping = mapping.find(m => m.keywords.some(k => loc.includes(k)));
+            if (foundMapping) {
+                const branchObj = await Branch.findOne({ name: foundMapping.branch });
+                if (branchObj) branchId = branchObj._id;
+            }
+        }
+
         if (!branchId) {
             const defaultBranch = await Branch.findOne({});
             if (defaultBranch) branchId = defaultBranch._id;
@@ -80,6 +83,7 @@ exports.createReferral = async (req, res) => {
         // 4. Create Referral
         const referral = await Referral.create({
             ...candidateData,
+            skills: normalizedSkills,
             resumeUrl,
             job: jobId,
             branchId,

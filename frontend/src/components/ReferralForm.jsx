@@ -36,7 +36,7 @@ const ReferralForm = ({ job, onSuccess }) => {
             Object.keys(formData).forEach(key => {
                 if (key === 'skills') {
                     if (formData.skills) {
-                        data.append('skills', formData.skills.split(',').map(s => s.trim()));
+                        data.append('skills', formData.skills);
                     }
                 } else if (key !== 'resume' && formData[key]) {
                     data.append(key, formData[key]);

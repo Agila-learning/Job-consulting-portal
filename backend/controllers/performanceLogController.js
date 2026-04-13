@@ -25,9 +25,17 @@ exports.createPerformanceLog = async (req, res) => {
             });
         }
 
+        // Determine Branch
+        let branchId = req.user.branchId;
+        if (!branchId) {
+            const Branch = require('../models/Branch');
+            const defaultBranch = await Branch.findOne({});
+            if (defaultBranch) branchId = defaultBranch._id;
+        }
+
         const log = await PerformanceLog.create({
             user: req.user.id,
-            branchId: req.user.branchId,
+            branchId: branchId,
             date: logDate,
             callsCount: callsCount || 0,
             conversionsCount: conversionsCount || 0,
