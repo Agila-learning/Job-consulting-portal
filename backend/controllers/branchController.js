@@ -4,7 +4,9 @@ const Branch = require('../models/Branch');
 // Route: GET /api/branches
 exports.getBranches = async (req, res) => {
     try {
-        const branches = await Branch.find({ status: 'active' }).sort('name');
+        const branches = await Branch.find({ 
+            status: { $in: ['active', null, undefined] } 
+        }).sort('name');
         res.status(200).json({ success: true, count: branches.length, data: branches });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

@@ -75,7 +75,7 @@ exports.getPerformanceLogs = async (req, res) => {
             if (branchId && branchId !== 'all') {
                 query.branchId = branchId;
             }
-            if (userId) {
+            if (userId && userId !== 'all') {
                 query.user = userId;
             }
         } else if (req.user.role === 'team_leader') {
