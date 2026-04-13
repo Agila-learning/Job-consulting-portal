@@ -186,7 +186,7 @@ exports.getReferrals = async (req, res) => {
     }
 };
 
-// Assign referral to employee (Admin only)
+// Assign referral to employee (Admin & Team Leader)
 // Route: PATCH /api/referrals/:id/assign
 exports.assignReferral = async (req, res) => {
     try {
@@ -195,6 +195,11 @@ exports.assignReferral = async (req, res) => {
 
         if (!referral) {
             return res.status(404).json({ success: false, message: 'Referral not found' });
+        }
+
+        // TL Authorization: Can only assign if candidate is in their branch
+        if (req.user.role === 'team_leader' && referral.branchId?.toString() !== req.user.branchId?.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized to assign candidates outside your branch.' });
         }
 
         referral.assignedEmployee = employeeId;
@@ -210,10 +215,12 @@ exports.assignReferral = async (req, res) => {
 
         // Emit real-time notification to Assigned Employee
         const io = req.app.get('io');
-        io.to(assignedEmployee).emit('assignmentNotification', {
-            message: `New candidate ${referral.candidateName} assigned to you`,
-            referralId: referral._id
-        });
+        if (io && employeeId) {
+            io.to(employeeId).emit('assignmentNotification', {
+                message: `New candidate ${referral.candidateName} assigned to you`,
+                referralId: referral._id
+            });
+        }
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
@@ -235,16 +242,14 @@ exports.updateReferralStatus = async (req, res) => {
         if (payoutNotes) referral.payoutNotes = payoutNotes;
         if (calculatedCommission !== undefined) referral.calculatedCommission = calculatedCommission;
 
-        // Permission check: admin, team_leader, or assigned employee
-        // Permission check: admin, team_leader, or assigned employee
+        // Permission check: admin, team_leader (of same branch), or assigned employee
         const userRole = req.user.role;
         const userId = req.user.id.toString();
         const assignedId = referral.assignedEmployee?.toString();
+        const isBranchMatch = referral.branchId?.toString() === req.user.branchId?.toString();
         
-        console.log(`[AUTH CHECK] User: ${userId}, Role: ${userRole}, Assigned: ${assignedId}`);
-
         const isAuthorized = userRole === 'admin' || 
-                           userRole === 'team_leader' || 
+                           (userRole === 'team_leader' && isBranchMatch) || 
                            assignedId === userId;
                            
         if (!isAuthorized) {

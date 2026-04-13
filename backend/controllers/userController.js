@@ -29,7 +29,12 @@ exports.getUsers = async (req, res) => {
 
         // 3. Branch Segregation
         if (req.user.role !== 'admin') {
-            query.branchId = req.user.branchId;
+            if (req.user.branchId) {
+                query.branchId = req.user.branchId;
+            } else {
+                // If user has no branchId, they might see nothing or global. 
+                // For colleagues, we let them see all if they are a 'floating' user
+            }
         } else if (branchId && branchId !== 'all') {
             query.branchId = branchId;
         }

@@ -48,8 +48,8 @@ router.patch('/bulk-update', authorize('admin', 'employee', 'team_leader'), bulk
 router.patch('/sync-incentives', authorize('admin'), syncIncentives);
 router.delete('/purge-mock-data', authorize('admin'), purgeMockData);
 
-// Assignment only for Admins
-router.patch('/:id/assign', authorize('admin'), assignReferral);
+// Assignment for Admins and Team Leaders
+router.patch('/:id/assign', authorize('admin', 'team_leader'), assignReferral);
 
 // Status and general updates
 router.patch('/:id/increment-calls', incrementCalls);

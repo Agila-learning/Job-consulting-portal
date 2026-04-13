@@ -14,7 +14,10 @@ exports.getJobs = async (req, res) => {
             
             // Internal staff only see jobs for their branch
             if (req.user.role === 'employee' || req.user.role === 'team_leader') {
-                query.branchId = req.user.branchId;
+                if (req.user.branchId) {
+                    query.branchId = req.user.branchId;
+                }
+                // If no branchId, they see all active/visible jobs (Global)
             }
         } else if (status) {
             query.status = status;
