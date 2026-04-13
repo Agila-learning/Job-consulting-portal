@@ -12,13 +12,8 @@ exports.getJobs = async (req, res) => {
             query.status = 'active';
             query.visibility = true;
             
-            // Internal staff only see jobs for their branch
-            if (req.user.role === 'employee' || req.user.role === 'team_leader') {
-                if (req.user.branchId) {
-                    query.branchId = req.user.branchId;
-                }
-                // If no branchId, they see all active/visible jobs (Global)
-            }
+            // Internal staff can see all active mandates for recruitment
+            // branchId filtering removed to allow cross-branch referrals as requested
         } else if (status) {
             query.status = status;
         }

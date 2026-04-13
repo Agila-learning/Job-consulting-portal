@@ -21,8 +21,23 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
     const selectedJob = jobs.find(j => j._id === value);
     const filtered = jobs.filter(j =>
         j.jobTitle.toLowerCase().includes(search.toLowerCase()) ||
-        (j.companyName || '').toLowerCase().includes(search.toLowerCase())
+        (j.companyName || '').toLowerCase().includes(search.toLowerCase()) ||
+        (j.domain || '').toLowerCase().includes(search.toLowerCase())
     );
+
+    // Group jobs by domain
+    const groups = filtered.reduce((acc, job) => {
+        const domain = job.domain || 'General Openings';
+        if (!acc[domain]) acc[domain] = [];
+        acc[domain].push(job);
+        return acc;
+    }, {});
+
+    const sortedDomains = Object.keys(groups).sort((a, b) => {
+        if (a === 'IT') return -1;
+        if (b === 'IT') return 1;
+        return a.localeCompare(b);
+    });
 
     useEffect(() => {
         if (open && triggerRef.current) {
@@ -106,27 +121,35 @@ const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {
                                 <Loader2 size={16} className="animate-spin" />
                                 <span className="text-xs font-bold font-black uppercase tracking-widest opacity-40">Polling...</span>
                             </div>
-                        ) : filtered.length === 0 ? (
+                        ) : sortedDomains.length === 0 ? (
                             <div className="py-8 text-center px-4">
                                 <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">No Mandates Found</p>
                             </div>
                         ) : (
-                            filtered.map(j => (
-                                <button
-                                    key={j._id}
-                                    type="button"
-                                    onClick={() => handleSelect(j)}
-                                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-primary/5 transition-colors text-left group ${value === j._id ? 'bg-primary/5' : ''}`}
-                                >
-                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${value === j._id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white'}`}>
-                                        <Briefcase size={12} />
+                            sortedDomains.map(domain => (
+                                <div key={domain} className="mb-2">
+                                    <div className="px-4 py-2 bg-secondary/10 border-y border-border/20 flex items-center justify-between">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">{domain}</span>
+                                        <Badge variant="outline" className="h-4 px-1.5 rounded-md border-primary/20 text-[8px] font-black bg-primary/5">{groups[domain].length}</Badge>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={`text-[11px] font-black truncate ${value === j._id ? 'text-primary' : 'text-foreground'}`}>{j.jobTitle}</p>
-                                        <p className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest truncate">{j.companyName} · {j.location || 'Remote'}</p>
-                                    </div>
-                                    {value === j._id && <Check size={14} className="text-primary shrink-0 mt-1" />}
-                                </button>
+                                    {groups[domain].map(j => (
+                                        <button
+                                            key={j._id}
+                                            type="button"
+                                            onClick={() => handleSelect(j)}
+                                            className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-primary/5 transition-colors text-left group ${value === j._id ? 'bg-primary/5' : ''}`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${value === j._id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-white'}`}>
+                                                <Briefcase size={12} />
+                                            </div>
+                                            <div className="flex-1 min-w-0 ml-1">
+                                                <p className={`text-[11px] font-black truncate ${value === j._id ? 'text-primary' : 'text-foreground'}`}>{j.jobTitle}</p>
+                                                <p className="text-[9px] text-muted-foreground/60 font-medium uppercase tracking-widest truncate">{j.companyName} · {j.location || 'Remote'}</p>
+                                            </div>
+                                            {value === j._id && <Check size={14} className="text-primary shrink-0 mt-1" />}
+                                        </button>
+                                    ))}
+                                </div>
                             ))
                         )}
                     </div>
