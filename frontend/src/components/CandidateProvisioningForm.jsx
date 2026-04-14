@@ -9,6 +9,7 @@ import { Loader2, User, Mail, Phone, Briefcase, FileText, Send, Zap, ChevronDown
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 // ── Portal-based Job Picker ────────────────────────────────────────────────────
 const JobPicker = ({ jobs, loadingJobs, value, onChange }) => {

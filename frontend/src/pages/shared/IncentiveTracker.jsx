@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
     Coins, TrendingUp, Trophy, Star, 
     ArrowUpRight, Clock, CheckCircle2,
-    Gift, Zap, Target, Loader2, User
+    Gift, Zap, Target, Loader2, User, History
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
