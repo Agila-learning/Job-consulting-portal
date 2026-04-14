@@ -249,9 +249,6 @@ const ReferralQueue = () => {
                     >
                         <FileText size={16} className="mr-2" /> Export Queue
                     </Button>
-                    <Button onClick={() => toast.info('Audit System: Distributed ledger review protocol initiated.')} variant="outline" className="h-12 px-6 rounded-2xl border-border/40 font-black text-[10px] uppercase tracking-widest gap-2">
-                        <Calendar size={16} /> Audit Calendar
-                    </Button>
                 </div>
             </div>
 

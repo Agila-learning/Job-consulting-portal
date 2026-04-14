@@ -147,7 +147,7 @@ exports.deleteUser = async (req, res) => {
 
         // Check if hard delete requested (Optional for super admin)
         if (req.query.hard === 'true' && req.user.role === 'admin') {
-            await user.deleteOne();
+            await User.deleteOne({ _id: user._id });
             return res.status(200).json({ success: true, message: 'User permanently purged', data: {} });
         }
 
