@@ -14,7 +14,7 @@ const upload = multer({
 
 // All ATS routes are protected and restricted to Admin & Team Leader
 router.use(protect);
-router.use(authorize('admin', 'team_leader'));
+router.use(authorize('admin', 'team_leader', 'employee'));
 
 // In-memory analysis route
 router.post('/analyze', upload.single('resume'), analyzeResume);

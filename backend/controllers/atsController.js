@@ -102,9 +102,20 @@ exports.analyzeResume = async (req, res) => {
 
     } catch (err) {
         console.error('ATS System Error:', err);
+        
+        // Handle specific parser failures with descriptive feedback
+        if (err.message.includes('PDF structure')) {
+            return res.status(422).json({
+                success: false,
+                message: 'Document Integrity Failure: The PDF structure is either corrupted or non-searchable (image-only scan).',
+                recommendation: 'Please upload a searchable PDF or a standard DOCX file.'
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
-            message: 'Ecosystem Analysis Protocol Failure: ' + (err.message || 'Unknown parsing error')
+            message: 'Ecosystem Analysis Protocol Failure: ' + (err.message || 'Unknown parsing error'),
+            recommendation: 'Ensure the document is a standard recruitment asset (PDF/DOCX).'
         });
     }
 };

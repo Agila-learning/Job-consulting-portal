@@ -245,28 +245,19 @@ const IncentiveTracker = ({ type = 'employee' }) => {
                         </div>
                     </div>
 
-                    {/* Recognition Wall / Top Performers */}
                     <div className="bg-card/40 backdrop-blur-xl border border-border/40 rounded-[2.5rem] p-8 space-y-6">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-none">Top Conversion Leaders</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground leading-none">Global Performance Index</h4>
                             <Star size={14} className="text-amber-500 fill-amber-500" />
                         </div>
-                        <div className="space-y-5">
-                             {[
-                                { name: 'Sarah Wilson', roles: 12 },
-                                { name: 'Michael Chen', roles: 9 },
-                                { name: 'Alex Rivera', roles: 7 }
-                             ].map((leader, idx) => (
-                                <div key={idx} className="flex items-center justify-between group cursor-default">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-[10px] font-black text-muted-foreground group-hover:bg-primary group-hover:text-white transition-colors">
-                                            {idx + 1}
-                                        </div>
-                                        <span className="text-xs font-black text-slate-800 dark:text-slate-200 tracking-tight">{leader.name}</span>
-                                    </div>
-                                    <Badge variant="ghost" className="text-[9px] font-black text-primary uppercase tracking-widest">{leader.roles} Hires</Badge>
-                                </div>
-                            ))}
+                        <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-primary">
+                                <History size={20} className="animate-pulse" />
+                            </div>
+                            <div>
+                                <p className="text-[11px] font-black text-foreground uppercase tracking-wider mb-1">Live Tracking Active</p>
+                                <p className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest leading-relaxed">Referral leaderboards refresh <br /> every 24 hours.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
